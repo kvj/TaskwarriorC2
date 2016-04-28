@@ -1,0 +1,19 @@
+{
+  "name": "taskw2",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "electron-prebuilt": "latest",
+    "gulp": "latest",
+    "gulp-babel": "latest",
+    "gulp-rename": "latest",
+    "babel-preset-react": "latest",
+    "babel-preset-es2015": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "scripts": {
+    "desktop": "node _desktop.js",
+    "dev": "node_modules/.bin/gulp"
+  }
+}
