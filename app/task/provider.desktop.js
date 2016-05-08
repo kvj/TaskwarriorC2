@@ -12,18 +12,20 @@ export class TaskProvider {
 
     call(args, out, err) {
         // Return promise
+        const stream2out = (stream, outp) => {
+            stream.setEncoding('utf8');
+            stream.on('data', (data) => {
+                if (out) { // Write
+                    data.split('\n').forEach((line) => {
+                        out.eat(line);
+                    });
+                };
+            });
+        };
         return new Promise((resp, rej) => {
             const task = spawn(this.config.task || 'task', args);
-            task.stdout.on('data', (data) => {
-                if (out) { // Write
-                    out.eat(data);
-                };
-            });
-            task.stderr.on('data', (data) => {
-                if (err) { // Write
-                    err.eat(data);
-                };
-            });
+            stream2out(task.stdout, out);
+            stream2out(task.stderr, err);
             task.on('close', (code) => {
                 resp(code);
             });
@@ -33,4 +35,3 @@ export class TaskProvider {
         });
     }
 }
-
