@@ -18,7 +18,7 @@ export class ToolbarCmp extends React.Component {
     render() {
         return (
             <div style={_l([styles.flex0, styles.toolbar])}>
-                {this.props.children}
+                <i className="fa fa-square-o"></i>
             </div>
         );
     }

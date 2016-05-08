@@ -5,26 +5,26 @@ var path = require('path');
 var util = require('util');
 // var stream = require('stream');
 
+var babelPresets = ['es2015', 'react'];
+var babelPlugins = ['syntax-async-functions', 'transform-regenerator'];
+
 gulp.task('js-common', function() { //
-    return gulp.src('app/**/[^_]*!(.android|.desktop).js').pipe(gulpBabel({
-        presets: ['es2015', 'react'],
-        plugins: ["syntax-async-functions", "transform-regenerator"]
+    return gulp.src('app/**/*!(.android|.desktop).js').pipe(gulpBabel({
+        presets: babelPresets,
+        plugins: babelPlugins
     })).pipe(gulp.dest('.desktop/'));
 });
 gulp.task('js-desktop', function() { //
     return gulp.src('app/**/*.desktop.js').pipe(gulpBabel({
-        presets: ['es2015', 'react'],
-        plugins: ["syntax-async-functions", "transform-regenerator"]
+        presets: babelPresets,
+        plugins: babelPlugins
     })).pipe(gulpRename(function (path) {
         path.basename = path.basename.substr(0, path.basename.length-8);
     })).pipe(gulp.dest('.desktop/'));
 });
-gulp.task('html', function() { //
-    return gulp.src('app/**/*.html').pipe(gulp.dest('.desktop/'));
-});
 
-gulp.task('js', ['js-common', 'js-desktop', 'html']);
+gulp.task('js', ['js-common', 'js-desktop']);
 gulp.task('dist', ['js']);
 gulp.task('default', ['js'], function() {
-    gulp.watch(['app/**/*.js', 'app/**/*.html'], ['js']);
+    gulp.watch('app/**/*.js', ['js']);
 });
