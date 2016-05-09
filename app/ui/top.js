@@ -15,7 +15,9 @@ export class AppPane extends React.Component {
     }
 
     componentDidMount() {
-        this.state.pages.push(<TasksPagePane report="next" />);
+        this.state.pages.push(
+            <TasksPagePane report="next" controller={this.props.controller} />
+        );
         this.setState({
             pages: this.state.pages,
         });
@@ -26,7 +28,12 @@ export class AppPane extends React.Component {
             <cmp.AppCmp>
                 <ToolbarPane />
                 <CenterPane>
-                    <MainPane pages={this.state.pages} page={this.state.page} />
+                    <MainPane
+                        controller={this.props.controller}
+                        pages={this.state.pages}
+                        page={this.state.page}
+                        ref="main"
+                    />
                     <NavigationPane mode='dock' />
                     <ReportsPane mode='dock'/>
                 </CenterPane>
@@ -51,14 +58,28 @@ class TasksPagePane extends PagePane {
 
     render() {
         return (
-            <cmp.TaskPageCmp {...this.props} />
+            <cmp.TaskPageCmp {...this.props} ref="cmp" />
         );
+    }
+
+    componentDidMount() {
+        this.refresh();
+    }
+
+    async refresh() {
+        let data = this.refs.cmp.input();
+        console.log('Refresh:', this.refs, data);
+        let info = await this.props.controller.filter(data.report, data.filter);
+        if (info) {
+            // Load data
+        }
     }
 }
 
 
 
 class MainPane extends React.Component {
+
     render() {
         return (
             <cmp.MainCmp {...this.props} />
@@ -68,7 +89,7 @@ class MainPane extends React.Component {
 
 class NavigationPane extends React.Component {
     render() {
-        return (<cmp.NavigationCmp mode={this.props.mode}/>);
+        return (<cmp.NavigationCmp mode={this.props.mode} />);
     }
 }
 

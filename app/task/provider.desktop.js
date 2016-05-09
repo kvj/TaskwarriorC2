@@ -23,7 +23,11 @@ export class TaskProvider {
             });
         };
         return new Promise((resp, rej) => {
-            const task = spawn(this.config.task || 'task', args);
+            let arr = [];
+            for (let s of args) {
+                arr.push.apply(arr, s.split(' '));
+            }
+            const task = spawn(this.config.task || 'task', arr);
             stream2out(task.stdout, out);
             stream2out(task.stderr, err);
             task.on('close', (code) => {

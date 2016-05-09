@@ -12,7 +12,6 @@ const IconBtn = (props) => {
 export class AppCmp extends React.Component {
 
     render() {
-        console.log('AppCmp');
         return (
             <div style={_l([styles.vproxy, styles.max, styles.app])}>
                 {this.props.children}
@@ -99,7 +98,6 @@ export class MainCmp extends React.Component {
     render() {
         const {pages, page} = this.props;
         const pageCmp = pages[page];
-        console.log('Main:', pages, page, pageCmp);
         if (!pageCmp) { // Not found
             return null;
         };
@@ -131,6 +129,13 @@ export class TaskPageCmp extends React.Component {
             report: props.report,
             filter: props.filter,
             tasks: [], // Fill me
+        };
+    }
+
+    input() {
+        return {
+            report: this.state.report,
+            filter: this.state.filter,
         };
     }
 

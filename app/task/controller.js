@@ -1,5 +1,5 @@
 import {TaskProvider} from './provider';
-
+import {formatters, parseDate} from './format';
 class StreamEater {
     eat(line) {
         // Implement me
@@ -62,8 +62,102 @@ export class TaskController {
         return false;
     }
 
-    async filter(report, filter) {
+    async reportInfo(report) {
+        let result = {
+            sort: [],
+            cols: [],
+        };
+        let desc = [];
         const config = await this.config(`report.${report}.`);
+        const from = `report.${report}.`.length;
+        for (let key in config) {
+            const k = key.substr(from); // Cut last part
+            if (k == 'sort') {
+                for (let s of config[key].split(',')) {
+                    let item = {
+                        field: s,
+                        asc: true,
+                    };
+                    if (item.field[item.field.length-1] == '/') {
+                        // Add blank
+                        item.sep = true;
+                        item.field = item.field.substr(0, item.field.length-1);
+                    };
+                    item.asc = item.field[item.field.length-1] == '+';
+                    item.field = item.field.substr(0, item.field.length-1);
+                    result.sort.push(item);
+                };
+            };
+            if (k == 'columns') {
+                for (let s of config[key].split(',')) {
+                    let cm = s.indexOf('.');
+                    if (cm == -1) {
+                        result.cols.push({
+                            field: s,
+                        });
+                    } else {
+                        result.cols.push({
+                            field: s.substr(0, cm),
+                            display: s.substr(cm+1),
+                        });
+                    }
+                }
+            }
+            if (k == 'labels') {
+                desc = config[key].split(',');
+            }
+            if (k == 'description') {
+                result.description = config[key];
+            }
+            if (k == 'filter') {
+                result.filter = config[key];
+            }
+        }
+        if (desc.length == result.cols.length) {
+            // Same side -> add label
+            for (var i = 0; i < desc.length; i++) {
+                result.cols[i].label = desc[i];
+            }
+        } else { // Failsafe
+            for (col of result.cols) {
+                col.label = col.field;
+            }
+        }
+        return result;
+    }
+
+    async filter(report, filter, info) {
+        if (!info) {
+            info = await this.reportInfo(report);
+        }
+        if (!info || !info.filter) {
+            return undefined;
+        }
+        info.tasks = []; // Reset
+        let cmd = ['rc.json.array=off', 'export', info.filter];
+        if (filter) {
+            cmd.push(filter);
+        }
+        const code = await this.call(cmd, {
+            eat(line) {
+                if (!line) {
+                    return;
+                }
+                // Parse and save
+                try {
+                    let json = JSON.parse(line);
+                    info.tasks.push(json);
+                    // console.log('Date:', json.entry, parseDate(json.entry));
+                } catch (e) {
+                    console.log('JSON error:', line);
+                }
+            }
+        }, errSimple);
+        if (code != 0) {
+            return undefined;
+        }
+        // console.log('Filter:', info, cmd, code);
+        return info;
     }
 
     async version() {
