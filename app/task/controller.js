@@ -14,7 +14,7 @@ class ToArrayEater extends StreamEater {
     }
 
     eat(line) {
-        console.log('Array:', line);
+        // console.log('Array:', line);
         this.data.push(line);
     }
 }
@@ -43,6 +43,15 @@ export class TaskController {
         return this.provider.call(this.fixParams.concat(args), out, err);
     }
 
+    async callStr(args) {
+        const out = new ToStringEater();
+        const code = await this.call(out, errSimple, args);
+        if (code != 0) { // Invalid
+            return undefined;
+        };
+        return out.str();
+    }
+
     init(config) {
         delete this.provider;
         const provider = new TaskProvider(config);
@@ -53,11 +62,14 @@ export class TaskController {
         return false;
     }
 
-    version() {
+    async filter(report, filter) {
+        const config = await this.config(`report.${report}.`);
+    }
+
+    async version() {
         const out = new ToStringEater();
-        return this.provider.call(['--version'], out, errSimple).then((code) => {
-            return out.str();
-        });
+        const code = await this.provider.call(['--version'], out, errSimple);
+        return out.str();
     }
 
     async config(prefix) {

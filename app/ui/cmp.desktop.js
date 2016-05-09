@@ -1,6 +1,14 @@
 import React from 'react';
 import {styles, _l} from '../styles/main';
 
+const IconBtn = (props) => {
+    return (
+        <button style={_l([styles.btn])}>
+            <i className={`fa fa-fw fa-${props.icon}`}></i>
+        </button>
+    );
+}
+
 export class AppCmp extends React.Component {
 
     render() {
@@ -17,8 +25,17 @@ export class ToolbarCmp extends React.Component {
 
     render() {
         return (
-            <div style={_l([styles.flex0, styles.toolbar])}>
-                <i className="fa fa-square-o"></i>
+            <div style={_l([styles.flex0, styles.toolbar, styles.hflex])}>
+                <div style={_l([styles.flex0, styles.hbar])}>
+                    <IconBtn icon="navicon"/>
+                </div>
+                <div style={_l([styles.flex1, styles.hbar])}>
+                </div>
+                <div style={_l([styles.flex0, styles.hbar])}>
+                    <IconBtn icon="undo"/>
+                    <IconBtn icon="cloud"/>
+                    <IconBtn icon="navicon"/>
+                </div>
             </div>
         );
     }
@@ -77,13 +94,83 @@ export class ReportsCmp extends React.Component {
     }
 };
 
-export class TasksCmp extends React.Component {
+export class MainCmp extends React.Component {
 
     render() {
+        const {pages, page} = this.props;
+        const pageCmp = pages[page];
+        console.log('Main:', pages, page, pageCmp);
+        if (!pageCmp) { // Not found
+            return null;
+        };
         return (
-            <div style={_l([styles.vproxy, styles.tasks])}>
-                {this.props.children}
+            <div style={_l(styles.vproxy, styles.tasks)}>
+                <div style={_l(styles.vproxy)}>
+                    {pageCmp}
+                </div>
+                <div style={_l(styles.flex0, styles.hflex)}>
+                    <div style={_l(styles.flex0, styles.hbar)}>
+                        <IconBtn icon="chevron-left"/>
+                    </div>
+                    <div style={_l(styles.flex1, styles.hbar)}>
+                    </div>
+                    <div style={_l(styles.flex0, styles.hbar)}>
+                        <IconBtn icon="chevron-right"/>
+                    </div>
+                </div>
             </div>
         );
     }
 };
+
+export class TaskPageCmp extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            report: props.report,
+            filter: props.filter,
+            tasks: [], // Fill me
+        };
+    }
+
+    onReportChange (evt) {
+        this.setState({
+            report: evt.target.value,
+        });
+    }
+
+    render() {
+        const line1 = (
+            <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
+                <input
+                    style={_l(styles.inp, styles.flex1)}
+                    type="text"
+                    value={this.state.report}
+                    onChange={this.onReportChange.bind(this)}
+                    placeholder="Report"
+                />
+                <IconBtn icon="plus"/>
+                <IconBtn icon="refresh"/>
+                <IconBtn icon="close"/>
+            </div>
+        );
+        const line2 = (
+            <div style={_l(styles.flex0, styles.hflex)}>
+                <input
+                    style={_l(styles.inp, styles.flex1)}
+                    type="text"
+                    placeholder="Filter"
+                />
+            </div>
+        );
+        return (
+            <div style={_l(styles.vproxy)}>
+                {line1}
+                {line2}
+                <div style={_l(styles.flex1)}>
+                </div>
+            </div>
+        );
+    }
+}
