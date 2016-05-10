@@ -15,8 +15,15 @@ export const styles = {
     "flex1": {
         flex: '1 1 auto',
     },
+    "flex1s": {
+        flex: '1 1 0',
+        overflow: 'auto',
+    },
     "flex0": {
         flex: '0 0 auto',
+    },
+    "spacer": {
+        flex: '1 1 0',
     },
     "vproxy": {
         flex: '1',
@@ -64,6 +71,10 @@ export const styles = {
         minWidth: 150,
         borderLeft: "4px solid #ddd",
     },
+    "oneLine": {
+        whiteSpace: "nowrap",
+        textOverflow: "ellipsis",
+    },
 
     app: {
     },
@@ -106,6 +117,24 @@ export const styles = {
 
     tasks: {
         order: 1,
+    },
+
+    text: {
+        fontSize: "1em",
+        verticalAlign: "middle",
+        fontFamily: fontFamily,
+        padding: 2,
+        border: "2px solid transparent",
+        whiteSpace: 'pre-wrap',
+    },
+
+    one_task: {
+        backgroundColor: "#fafafa",
+        marginBottom: 5,
+    },
+
+    description: {
+        alignSelf: 'center',
     },
 
 };

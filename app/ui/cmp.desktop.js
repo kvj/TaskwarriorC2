@@ -3,10 +3,66 @@ import {styles, _l} from '../styles/main';
 
 const IconBtn = (props) => {
     return (
-        <button style={_l([styles.btn])}>
+        <button style={_l([styles.btn])} onClick={(evt) => {
+            if (props.onClick) props.onClick(evt);
+        }}>
             <i className={`fa fa-fw fa-${props.icon}`}></i>
         </button>
     );
+}
+
+const Text = (props) => {
+    let _st = [styles.flex0, styles.text];
+    if (props.style && props.style.length) {
+        _st = _st.concat(props.style);
+    }
+    let val = props.children || '';
+    while (props.width > val.length) {
+        val += ' ';
+    }
+    return (<div style={_l(_st)}>{val}</div>);
+}
+
+class Task extends React.Component {
+
+    render() {
+        const {cols, task} = this.props;
+        const fields = cols.map((item) => {
+            if (item.field == 'description') { // Separator
+                return (<div key='desc' style={_l(styles.spacer)}></div>);
+            }
+            const val = task[`${item.field}_`] || '';
+            return (<Text width={item.width} key={item.field}>{val}</Text>);
+        });
+        let descSt = [styles.description, styles.flex1];
+        if (task.description_truncate) {
+            descSt.push(styles.oneLine);
+        }
+        let desc_count = null;
+        if (task.description_count) {
+            desc_count = (<Text style={[styles.description]}>{task.description_count}</Text>)
+        }
+        let check_icon = 'square-o';
+        if (task.status == 'completed') {
+            check_icon = 'check-square-o';
+        }
+        if (task.status == 'deleted') {
+            check_icon = 'close';
+        }
+        return (
+            <div style={_l(styles.one_task)}>
+                <div style={_l(styles.hflex)}>
+                    <IconBtn icon={check_icon}/>
+                    <Text style={descSt}>{task.description_}</Text>
+                    {desc_count}
+                    <IconBtn icon="caret-down"/>
+                </div>
+                <div style={_l(styles.hflex, styles.wflex)}>
+                    {fields}
+                </div>
+            </div>
+        );
+    }
 }
 
 export class AppCmp extends React.Component {
@@ -126,9 +182,8 @@ export class TaskPageCmp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            report: props.report,
-            filter: props.filter,
-            tasks: [], // Fill me
+            report: props.report || '',
+            filter: props.filter || '',
         };
     }
 
@@ -145,7 +200,21 @@ export class TaskPageCmp extends React.Component {
         });
     }
 
+    onFilterChange (evt) {
+        this.setState({
+            filter: evt.target.value,
+        });
+    }
+
+    onKey(evt) {
+        if (evt.charCode == '13') {
+            // Refresh
+            this.props.onRefresh();
+        }
+    }
+
     render() {
+        const {info, onRefresh} = this.props;
         const line1 = (
             <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
                 <input
@@ -153,10 +222,11 @@ export class TaskPageCmp extends React.Component {
                     type="text"
                     value={this.state.report}
                     onChange={this.onReportChange.bind(this)}
+                    onKeyPress={this.onKey.bind(this)}
                     placeholder="Report"
                 />
                 <IconBtn icon="plus"/>
-                <IconBtn icon="refresh"/>
+                <IconBtn icon="refresh" onClick={onRefresh}/>
                 <IconBtn icon="close"/>
             </div>
         );
@@ -165,15 +235,43 @@ export class TaskPageCmp extends React.Component {
                 <input
                     style={_l(styles.inp, styles.flex1)}
                     type="text"
+                    value={this.state.filter}
+                    onChange={this.onFilterChange.bind(this)}
+                    onKeyPress={this.onKey.bind(this)}
                     placeholder="Filter"
                 />
             </div>
         );
+        let body = null;
+        if (info) {
+            // Render header
+            const cols = info.cols.filter((item) => {
+                return item.visible;
+            });
+            const header_items = cols.map((item) => {
+                if (item.field == 'description') {
+                    // Insert spacer
+                    return (<div key='desc' style={_l(styles.spacer)}></div>);
+                }
+                return (<Text width={item.width} key={item.field}>{item.label}</Text>);
+            });
+            const tasks = info.tasks.map((item, idx) => {
+                return (<Task task={item} key={idx} cols={cols} />);
+            });
+            // Render tasks
+            body = (
+                <div style={_l(styles.vproxy)}>
+                    <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>{header_items}</div>
+                    <div style={_l(styles.flex1s)}>{tasks}</div>
+                </div>
+            );
+        }
         return (
             <div style={_l(styles.vproxy)}>
                 {line1}
                 {line2}
-                <div style={_l(styles.flex1)}>
+                <div style={_l(styles.vproxy)}>
+                    {body}
                 </div>
             </div>
         );

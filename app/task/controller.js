@@ -1,5 +1,5 @@
 import {TaskProvider} from './provider';
-import {formatters, parseDate} from './format';
+import {formatters, parseDate, sortTasks} from './format';
 class StreamEater {
     eat(line) {
         // Implement me
@@ -162,13 +162,13 @@ export class TaskController {
             const handler = formatters[item.field];
             if (!handler) { // Not supported
                 console.log('Not supported:', item.field);
-                return;
+                // return;
             };
             // Colled max size
             let max = 0;
             // console.log('Col:', item.field);
             info.tasks.forEach((task) => {
-                const val = handler(task, item.display);
+                const val = handler? handler(task, item.display): (task[item.field] || '');
                 if (val.length > max) {
                     max = val.length;
                 };
@@ -178,8 +178,10 @@ export class TaskController {
             if (max > 0) { // Visible
                 item.visible = true;
                 item.width = Math.max(max, item.label.length);
+                console.log('Will display:', item.label, item.width);
             };
         });
+        info.tasks = sortTasks(info);
         console.log('Filter:', info, cmd, code);
         return info;
     }

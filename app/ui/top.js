@@ -56,9 +56,19 @@ class PagePane extends React.Component {
 
 class TasksPagePane extends PagePane {
 
+    constructor(props) {
+        super(props);
+        this.state = {};
+    }
+
     render() {
         return (
-            <cmp.TaskPageCmp {...this.props} ref="cmp" />
+            <cmp.TaskPageCmp
+                {...this.props}
+                info={this.state.info}
+                ref="cmp"
+                onRefresh={this.refresh.bind(this)}
+            />
         );
     }
 
@@ -72,6 +82,9 @@ class TasksPagePane extends PagePane {
         let info = await this.props.controller.filter(data.report, data.filter);
         if (info) {
             // Load data
+            this.setState({
+                info: info,
+            });
         }
     }
 }

@@ -14,10 +14,10 @@ const dateRelative = (dt, now=new Date()) => {
         return [sec, 's'];
     };
     if (asec < 60*60) { // Minutes
-        return [mul*Math.round(asec/60), 'm']; 
+        return [mul*Math.round(asec/60), 'm'];
     };
     if (asec < 60*60*24) { // Within day
-        return [mul*Math.ceil(asec/60/60), 'h']; 
+        return [mul*Math.ceil(asec/60/60), 'h'];
     };
     const days = Math.ceil(asec/60/60/24);
     if (days < 10) { // Days
@@ -51,7 +51,7 @@ const formatDate = (obj, format, name) => {
 
 export const formatters = {
     id(obj) {
-        return obj.id || '';
+        return ''+(obj.id || '');
     },
     due(obj, format) {
         return formatDate(obj, format, 'due');
@@ -66,6 +66,9 @@ export const formatters = {
         };
         return val;
     },
+    end(obj, format) {
+        return formatDate(obj, format, 'end');
+    },
     wait(obj, format) {
         return formatDate(obj, format, 'wait');
     },
@@ -78,6 +81,7 @@ export const formatters = {
     description(obj, format) {
         const ann = obj.annotations || [];
         let desc = obj.description || '';
+        obj.description_truncate = ['truncated', 'truncated_count'].includes(format);
         if (format == 'desc' || format == 'truncated') {
             return desc;
         }
@@ -127,10 +131,66 @@ export const formatters = {
         if (format == 'parent') { // All except last
             return parts.slice(0, parts.length-1).join('.');
         };
-        if (format == 'indented') { // 
+        if (format == 'indented') { //
             return Array(parts.length-1).fill('  ').join('')+parts[parts.length-1];
         };
         return val;
     },
+    uuid(obj, format) {
+        const val = obj.uuid || '';
+        const minus = val.indexOf('-');
+        if (!val || minus == -1) {
+            // Not uuid
+            return '';
+        }
+        if (format == 'short') {
+            return val.substr(0, minus);
+        }
+        return val;
+    },
+    urgency(obj, format) {
+        const val = obj.urgency || 0;
+        if (format == 'integer') {
+            return ''+Math.ceil(val);
+        }
+        return ''+Math.round(10*val)/10;
+    },
+    recur(obj, format) {
+        const val = obj.recur || '';
+        if (format == 'indicator' && val) {
+            return 'R';
+        }
+        return val;
+    },
+    depends(obj, format) {
+        const arr = obj.depends || [];
+        if (Array.isArray(arr) && arr.length) {
+            obj.depends_sort = arr.length;
+            return `[${arr.length}]`;
+        }
+        obj.depends_sort = 0;
+        return '';
+    },
 
+};
+
+export const sortTasks = (info) => {
+    return info.tasks.sort((a, b) => {
+        for (let item of info.sort) {
+            const mul = item.asc? 1: -1;
+            const _a = a[`${item.field}_sort`] || a[item.field];
+            const _b = b[`${item.field}_sort`] || b[item.field];
+            if (_a === _b) {
+                continue; // Next field
+            }
+            if (_a === undefined) {
+                return 1*mul; // _b
+            }
+            if (_b === undefined) {
+                return -1*mul; // _b
+            }
+            return _a > _b? mul: -1*mul;
+        }
+        return 0;
+    });
 };
