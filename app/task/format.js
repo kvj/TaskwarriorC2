@@ -6,10 +6,78 @@ export const parseDate = (s) => {
     return new Date(msec);
 }
 
+const dateRelative = (dt, now=new Date()) => {
+    const sec = Math.round((dt.getTime() - now.getTime()) / 1000);
+    const mul = sec > 0? 1: -1;
+    const asec = Math.abs(sec);
+    if (asec < 60) { // Seconds
+        return [sec, 's'];
+    };
+    if (asec < 60*60) { // Minutes
+        return [mul*Math.round(asec/60), 'm']; 
+    };
+    if (asec < 60*60*24) { // Within day
+        return [mul*Math.ceil(asec/60/60), 'h']; 
+    };
+    const days = Math.ceil(asec/60/60/24);
+    if (days < 10) { // Days
+        return [mul*days, 'd'];
+    };
+    if (days < 30) { // Months
+        return [mul*Math.ceil(days/7), 'w'];
+    };
+    if (days < 360) { // Years
+        return [mul*Math.ceil(days/30), 'mo'];
+    };
+    return [mul*Math.ceil(days/36)/10, 'y'];
+};
+
+const formatDate = (obj, format, name) => {
+    const dt = parseDate(obj[name]);
+    if (!dt) { // Invalid
+        return '';
+    };
+    obj[`${name}_date`] = dt;
+    if (format == 'iso') { // as is
+        return obj[name];
+    };
+    if (['age', 'relative', 'remaining'].includes(format)) { // relative
+        const [val, sfx] = dateRelative(dt);
+        const mul = format == 'remaining'? 1: -1;
+        return `${mul*val}${sfx}`;
+    };
+    return dt.toLocaleDateString(); // Formatted
+}
+
 export const formatters = {
+    id(obj) {
+        return obj.id || '';
+    },
+    due(obj, format) {
+        return formatDate(obj, format, 'due');
+    },
+    entry(obj, format) {
+        return formatDate(obj, format, 'entry');
+    },
+    start(obj, format) {
+        const val = formatDate(obj, format, 'start');
+        if (val && format=='active') { // Star
+            return '*';
+        };
+        return val;
+    },
+    wait(obj, format) {
+        return formatDate(obj, format, 'wait');
+    },
+    scheduled(obj, format) {
+        return formatDate(obj, format, 'scheduled');
+    },
+    until(obj, format) {
+        return formatDate(obj, format, 'until');
+    },
     description(obj, format) {
         const ann = obj.annotations || [];
-        const desc = obj.description || '';
+        let desc = obj.description || '';
         if (format == 'desc' || format == 'truncated') {
             return desc;
         }
@@ -19,6 +87,50 @@ export const formatters = {
             }
             return desc;
         }
-
+        const lines = ann.map((line) => {
+            const dt = parseDate(line.entry);
+            let outp = '';
+            if (dt) {
+                outp += `${dt.toLocaleDateString()} `;
+            };
+            outp += line.description;
+            return outp;
+        });
+        if (format == 'oneline') { // Combine to all
+            lines.forEach((line) => {
+                desc += ` ${line}`;
+            });
+            return desc;
+        };
+        obj.description_ann = lines;
+        return desc;
     },
+    tags(obj, format) {
+        const tags = obj.tags || [];
+        if (!tags.length) { // Empty
+            return '';
+        };
+        if (format == 'indicator') { // Plus
+            return '+';
+        };
+        if (format == 'count') { // [3]
+            return `[${tags.length}]`;
+        };
+        return tags.join(' ')+' ';
+    },
+    project(obj, format) {
+        const val = obj.project || '';
+        if (!val) {
+            return val;
+        };
+        const parts = val.split('.');
+        if (format == 'parent') { // All except last
+            return parts.slice(0, parts.length-1).join('.');
+        };
+        if (format == 'indented') { // 
+            return Array(parts.length-1).fill('  ').join('')+parts[parts.length-1];
+        };
+        return val;
+    },
+
 };

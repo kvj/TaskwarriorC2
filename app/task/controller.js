@@ -156,7 +156,31 @@ export class TaskController {
         if (code != 0) {
             return undefined;
         }
-        // console.log('Filter:', info, cmd, code);
+        // Calculate sizes
+        info.cols.forEach((item) => {
+            item.visible = false;
+            const handler = formatters[item.field];
+            if (!handler) { // Not supported
+                console.log('Not supported:', item.field);
+                return;
+            };
+            // Colled max size
+            let max = 0;
+            // console.log('Col:', item.field);
+            info.tasks.forEach((task) => {
+                const val = handler(task, item.display);
+                if (val.length > max) {
+                    max = val.length;
+                };
+                task[`${item.field}_`] = val;
+                // console.log('Format:', item.field, val, item.display);
+            });
+            if (max > 0) { // Visible
+                item.visible = true;
+                item.width = Math.max(max, item.label.length);
+            };
+        });
+        console.log('Filter:', info, cmd, code);
         return info;
     }
 
