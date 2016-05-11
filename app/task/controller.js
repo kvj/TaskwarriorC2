@@ -63,15 +63,20 @@ export class TaskController {
 
     async callStr(args) {
         const out = new ToStringEater();
-        const code = await this.call(out, this.streamNotify(), args);
+        const code = await this.call(args, out, this.streamNotify());
         if (code != 0) { // Invalid
             return undefined;
         };
         return out.str();
     }
 
-    init(config) {
+    init(config={}) {
         delete this.provider;
+        config.onQuestion = (text) => {
+            return new Promise((resp, rej) => {
+                this.events.emit('question', text, resp, rej);
+            });
+        };
         const provider = new TaskProvider(config);
         if (provider.init()) { // OK
             this.provider = provider;
@@ -84,6 +89,7 @@ export class TaskController {
         let result = {
             sort: [],
             cols: [],
+            filter: '',
         };
         let desc = [];
         const config = await this.config(`report.${report}.`);
@@ -148,12 +154,15 @@ export class TaskController {
         if (!info) {
             info = await this.reportInfo(report);
         }
-        if (!info || !info.filter) {
+        if (!info) {
             this.err('Invalid input');
             return undefined;
         }
         info.tasks = []; // Reset
-        let cmd = ['rc.json.array=off', 'export', info.filter];
+        let cmd = ['rc.json.array=off', 'export'];
+        if (info.filter) {
+            cmd.push(info.filter);
+        }
         if (filter) {
             cmd.push(filter);
         }
@@ -179,6 +188,9 @@ export class TaskController {
         // Calculate sizes
         info.cols.forEach((item) => {
             item.visible = false;
+            if (['status'].includes(item.field)) {
+                return;
+            }
             const handler = formatters[item.field];
             if (!handler) { // Not supported
                 // TODO: console.log('Not supported:', item.field);
@@ -207,11 +219,12 @@ export class TaskController {
     }
 
     async undo() {
-        const code = await this.call(['undo'], this.streamNotify('notify:info'), this.streamNotify());
-        if (code == 0) { // Success
+        const outp = await this.callStr(['undo'], null, this.streamNotify());
+        console.log('Undo:', outp);
+        if (outp) { // Success
             this.notifyChange();
         };
-        return code;
+        return outp;
     }
 
     async sync() {

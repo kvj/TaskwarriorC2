@@ -56,6 +56,9 @@ export const formatters = {
     due(obj, format) {
         return formatDate(obj, format, 'due');
     },
+    modified(obj, format) {
+        return formatDate(obj, format, 'modified');
+    },
     entry(obj, format) {
         return formatDate(obj, format, 'entry');
     },

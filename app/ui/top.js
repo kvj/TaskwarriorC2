@@ -119,6 +119,9 @@ class StatusbarPane extends React.Component {
         this.props.controller.events.on('notify:info', (msg) => {
             this.refs.cmp.showMessage('info', msg);
         });
+        this.props.controller.events.on('question', (msg, resp) => {
+            this.refs.cmp.showMessage('question', msg, resp);
+        });
         this.props.controller.events.on('sync:start', () => {
             this.setState({
                 spin: true,
@@ -225,7 +228,7 @@ class NavigationPane extends React.Component {
 }
 
 class ReportsPane extends React.Component {
-    
+
     constructor(props) {
         super(props);
         this.state = {

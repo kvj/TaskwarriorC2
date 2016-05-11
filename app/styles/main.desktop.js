@@ -1,4 +1,4 @@
-const fontFamily = 'Monospace';
+const fontFamily = 'Monaco Regular, Monospace';
 
 export const styles = {
     "vflex": {
@@ -94,7 +94,7 @@ export const styles = {
         position: "absolute",
         right: 5,
         bottom: 20,
-        width: 250,
+        width: 350,
     },
 
     app: {
@@ -175,7 +175,7 @@ export const styles = {
         padding: 5,
         marginBottom: 10,
         cursor: "pointer",
-        border: "1px solid #eee",
+        border: "2px solid #f0f0f0",
     }
 
 };

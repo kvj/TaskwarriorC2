@@ -361,7 +361,19 @@ export class StatusbarCmp extends React.Component {
         });
     }
 
-    showMessage(type, message) {
+    showMessage(type, message, resp) {
+        if (type == 'question') {
+            const fl = {
+                type: type,
+                message: message,
+                resp: resp,
+            };
+            this.state.floats.push(fl);
+            this.setState({
+                floats: this.state.floats,
+            });
+            return;
+        }
         this.setState({
             type: type,
             message: message,
@@ -386,6 +398,24 @@ export class StatusbarCmp extends React.Component {
         let spinCls = 'fa fa-fw fa-cloud';
         if (spin) spinCls += ' fa-spin';
         const floats = this.state.floats.map((item, idx) => {
+            if (item.type == 'question') {
+                return (
+                    <div key={idx} style={_l(styles.floatBlock)}>
+                        <Text>{item.message}</Text>
+                        <div style={_l(styles.hflex)}>
+                            <div style={_l(styles.spacer)}></div>
+                            <IconBtn icon="check" onClick={() => {
+                                this.hideFloat(item);
+                                item.resp(true);
+                            }}/>
+                            <IconBtn icon="close" onClick={() => {
+                                this.hideFloat(item);
+                                item.resp(false);
+                            }}/>
+                        </div>
+                    </div>
+                );
+            }
             return (
                 <div key={idx} style={_l(styles.floatBlock)} onClick={() => {
                     this.hideFloat(item);
@@ -411,4 +441,3 @@ export class StatusbarCmp extends React.Component {
         );
     }
 }
-
