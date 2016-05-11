@@ -1,8 +1,12 @@
 import {TaskProvider} from './provider';
 import {formatters, parseDate, sortTasks} from './format';
+import {EventEmitter} from '../tool/events';
 class StreamEater {
     eat(line) {
         // Implement me
+    }
+
+    end() {
     }
 }
 
@@ -14,7 +18,6 @@ class ToArrayEater extends StreamEater {
     }
 
     eat(line) {
-        // console.log('Array:', line);
         this.data.push(line);
     }
 }
@@ -25,27 +28,42 @@ class ToStringEater extends ToArrayEater {
     }
 }
 
-class ErrEater extends StreamEater {
-    eat(line) {
-        console.log('ERR:', line);
-    }
-}
-
-const errSimple = new ErrEater();
-
 export class TaskController {
 
     constructor() {
         this.fixParams = ['rc.confirmation=off', 'rc.color=off', 'rc.verbose=nothing'];
+        this.events = new EventEmitter();
     }
 
-    call(args, out, err) {
-        return this.provider.call(this.fixParams.concat(args), out, err);
+    async call(args, out, err) {
+        const result = await this.provider.call(this.fixParams.concat(args), out, err);
+        if (out && out.end) out.end(result);
+        if (err && err.end) err.end(result);
+        return result;
+    }
+
+    err(message) {
+        this.events.emit('notify:error', message);
+    }
+
+    streamNotify(evt='notify:error') {
+        const stream = new ToStringEater();
+        stream.end = () => {
+            const message = stream.str();
+            if (message) { // Not empty
+                this.events.emit(evt, message);
+            };
+        };
+        return stream;
+    }
+
+    notifyChange() {
+        this.events.emit('change');
     }
 
     async callStr(args) {
         const out = new ToStringEater();
-        const code = await this.call(out, errSimple, args);
+        const code = await this.call(out, this.streamNotify(), args);
         if (code != 0) { // Invalid
             return undefined;
         };
@@ -131,6 +149,7 @@ export class TaskController {
             info = await this.reportInfo(report);
         }
         if (!info || !info.filter) {
+            this.err('Invalid input');
             return undefined;
         }
         info.tasks = []; // Reset
@@ -152,8 +171,9 @@ export class TaskController {
                     console.log('JSON error:', line);
                 }
             }
-        }, errSimple);
+        }, this.streamNotify());
         if (code != 0) {
+            console.log('Failure:', cmd);
             return undefined;
         }
         // Calculate sizes
@@ -161,7 +181,7 @@ export class TaskController {
             item.visible = false;
             const handler = formatters[item.field];
             if (!handler) { // Not supported
-                console.log('Not supported:', item.field);
+                // TODO: console.log('Not supported:', item.field);
                 // return;
             };
             // Colled max size
@@ -178,17 +198,41 @@ export class TaskController {
             if (max > 0) { // Visible
                 item.visible = true;
                 item.width = Math.max(max, item.label.length);
-                console.log('Will display:', item.label, item.width);
+                // console.log('Will display:', item.label, item.width);
             };
         });
         info.tasks = sortTasks(info);
-        console.log('Filter:', info, cmd, code);
+        // console.log('Filter:', info, cmd, code);
         return info;
+    }
+
+    async undo() {
+        const code = await this.call(['undo'], this.streamNotify('notify:info'), this.streamNotify());
+        if (code == 0) { // Success
+            this.notifyChange();
+        };
+        return code;
+    }
+
+    async sync() {
+        this.events.emit('sync:start');
+        const code = await this.call(['sync'], this.streamNotify('notify:info'), this.streamNotify());
+        this.events.emit('sync:finish');
+        this.notifyChange();
+        return code;
+    }
+
+    async done(...uids) {
+        const code = await this.call([uids.join(','), 'done'], null, this.streamNotify());
+        if (code == 0) { // OK
+            this.notifyChange();
+        };
+        return code;
     }
 
     async version() {
         const out = new ToStringEater();
-        const code = await this.provider.call(['--version'], out, errSimple);
+        const code = await this.provider.call(['--version'], out, this.streamNotify());
         return out.str();
     }
 
@@ -205,7 +249,7 @@ export class TaskController {
                     }
                 }
             }
-        }, errSimple);
+        }, this.streamNotify());
         return result;
     }
 
@@ -222,10 +266,27 @@ export class TaskController {
                     });
                 }
             }
-        }, errSimple);
+        }, this.streamNotify());
         return result.sort((a, b) => {
             return b.count - a.count;
         });
+    }
+
+    async reports() {
+        const reg = /^(\S+)\s(.+)$/;
+        let result = []; // List
+        await this.call(['reports'], {
+            eat(line) {
+                const m = line.match(reg);
+                if (m) {
+                    result.push({
+                        name: m[1].trim(),
+                        title: m[2].trim(),
+                    });
+                }
+            }
+        }, this.streamNotify());
+        return result;
     }
 
     async projects() {
@@ -243,7 +304,7 @@ export class TaskController {
                     });
                 }
             }
-        }, errSimple);
+        }, this.streamNotify());
         const processOne = (from, arr, indent, prefix) => {
             for (var i = from; i < result.length; i++) {
                 let item = result[i];

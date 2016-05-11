@@ -43,7 +43,7 @@ const formatDate = (obj, format, name) => {
     };
     if (['age', 'relative', 'remaining'].includes(format)) { // relative
         const [val, sfx] = dateRelative(dt);
-        const mul = format == 'remaining'? 1: -1;
+        const mul = format == 'age'? -1: 1;
         return `${mul*val}${sfx}`;
     };
     return dt.toLocaleDateString(); // Formatted

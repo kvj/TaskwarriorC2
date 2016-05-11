@@ -12,12 +12,12 @@ export class TaskProvider {
 
     call(args, out, err) {
         // Return promise
-        const stream2out = (stream, outp) => {
+        const stream2out = (stream, outp, label) => {
             stream.setEncoding('utf8');
             stream.on('data', (data) => {
                 if (out) { // Write
                     data.split('\n').forEach((line) => {
-                        out.eat(line);
+                        outp.eat(line);
                     });
                 };
             });
@@ -28,8 +28,8 @@ export class TaskProvider {
                 arr.push.apply(arr, s.split(' '));
             }
             const task = spawn(this.config.task || 'task', arr);
-            stream2out(task.stdout, out);
-            stream2out(task.stderr, err);
+            stream2out(task.stdout, out, 'OUT');
+            stream2out(task.stderr, err, 'ERR');
             task.on('close', (code) => {
                 resp(code);
             });

@@ -1,0 +1,15 @@
+button {
+	opacity: 0.8;
+}
+
+button:hover {
+	opacity: 1;
+}
+
+button:active {
+	opacity: 0.5;
+}
+
+.text:hover {
+	cursor: pointer;
+}

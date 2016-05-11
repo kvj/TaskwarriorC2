@@ -17,7 +17,8 @@ export const styles = {
     },
     "flex1s": {
         flex: '1 1 0',
-        overflow: 'auto',
+        overflowY: 'auto',
+        overflowX: 'hidden',
     },
     "flex0": {
         flex: '0 0 auto',
@@ -38,6 +39,9 @@ export const styles = {
     "hbar": {
         alignItems: "center",
     },
+    "eflex": {
+        justifyContent: "flex-end",
+    },
     "max": {
         width: '100%',
         height: '100%',
@@ -56,6 +60,7 @@ export const styles = {
         fontSize: "1em",
         backgroundColor: "#ddd",
         color: "#333",
+        outline: "none",
     },
 
     "inp": {
@@ -74,6 +79,22 @@ export const styles = {
     "oneLine": {
         whiteSpace: "nowrap",
         textOverflow: "ellipsis",
+        overflow: 'hidden',
+    },
+
+    "textSmall": {
+        fontSize: "0.8em",
+    },
+
+    "textRight": {
+        textAlign: "right",
+    },
+
+    "floatBR": {
+        position: "absolute",
+        right: 5,
+        bottom: 20,
+        width: 250,
     },
 
     app: {
@@ -85,6 +106,12 @@ export const styles = {
 
     toolbar: {
         borderBottom: '1px solid #ddd',
+    },
+
+    statusbar: {
+        borderTop: '1px solid #ddd',
+        padding: 3,
+        justifyContent: 'space-between',
     },
 
     navigation: {
@@ -131,11 +158,25 @@ export const styles = {
     one_task: {
         backgroundColor: "#fafafa",
         marginBottom: 5,
+        width: "100%",
+    },
+
+    one_report: {
+        backgroundColor: "#fafafa",
+        marginBottom: 5,
     },
 
     description: {
         alignSelf: 'center',
     },
+
+    floatBlock: {
+        backgroundColor: "#fff",
+        padding: 5,
+        marginBottom: 10,
+        cursor: "pointer",
+        border: "1px solid #eee",
+    }
 
 };
 
