@@ -30,18 +30,25 @@ export class TaskProvider {
             }
             const stream2out = (stream, outp, has_question) => {
                 stream.setEncoding('utf8');
-                stream.on('data', (data) => {
-                    data.split('\n').forEach((line) => {
-                        const m = line.match(yesno);
+                let head = '';
+                stream.on('data', (line) => {
+                    const eat_all = line && line[line.length-1] == '\n';
+                    const lines = (head+line).split('\n');
+                    head = '';
+                    lines.forEach((l, idx) => {
+                        const last = idx == lines.length-1;
+                        if (!last || eat_all) { // Eat
+                            outp && outp.eat(l);
+                            return;
+                        };
                         if (has_question) {
+                            const m = l.match(yesno);
                             if (m) {
                                 handleQuestion(m[1]);
                                 return;
                             }
                         }
-                        if (out) { // Write
-                            outp.eat(line);
-                        };
+                        head = l; // Save as head
                     });
                 });
             };
