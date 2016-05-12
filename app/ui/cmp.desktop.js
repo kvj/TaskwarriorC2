@@ -17,11 +17,17 @@ const Text = (props) => {
     if (props.style && props.style.length) {
         _st = _st.concat(props.style);
     }
-    let val = props.children || '';
-    while (props.width > val.length) {
-        val += ' ';
+    const val = props.children || '';
+    let sfx = ''
+    while (props.width > val.length+sfx.length) {
+        sfx += ' ';
     }
-    return (<div style={_l(_st)} className="text" title={props.title || val}>{val}</div>);
+    return (
+        <div style={_l(_st)} title={props.title || val}>
+            <span className="text">{val}</span>
+            <span>{sfx}</span>
+        </div>
+    );
 }
 
 class Task extends React.Component {
@@ -147,7 +153,6 @@ export class NavigationCmp extends React.Component {
         }
         return (
             <div style={_l(st)}>
-                {this.props.children}
             </div>
         );
     }
@@ -199,15 +204,17 @@ export class MainCmp extends React.Component {
 
     render() {
         const {pages, page, onNavigation} = this.props;
-        const pageCmp = pages[page];
-        // console.log('Show:', page, pages.length, pageCmp);
-        if (!pageCmp) { // Not found
-            return null;
-        };
+        const pageCmps = pages.map((pageCmp, idx) => {
+            if (pageCmp.key == page) { // Visible
+                return (<div key={pageCmp.key} style={_l(styles.vproxy)}>{pageCmp.cmp}</div>);
+            } else { // Hidden
+                return (<div key={pageCmp.key} style={_l(styles.none)}>{pageCmp.cmp}</div>);
+            };
+        });
         return (
             <div style={_l(styles.vproxy, styles.tasks)}>
-                <div style={_l(styles.vproxy)} ref="div">
-                    {pageCmp}
+                <div style={_l(styles.vproxy)}>
+                    {pageCmps}
                 </div>
                 <div style={_l(styles.flex0, styles.hflex)}>
                     <div style={_l(styles.flex0, styles.hbar)}>
@@ -232,53 +239,38 @@ export class TaskPageCmp extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            report: props.report || '',
-            filter: props.filter || '',
-        };
-    }
-
-    input() {
-        return {
-            report: this.state.report,
-            filter: this.state.filter,
-        };
-    }
-
-    onReportChange (evt) {
-        this.setState({
-            report: evt.target.value,
-        });
-    }
-
-    onFilterChange (evt) {
-        this.setState({
-            filter: evt.target.value,
-        });
+        this.state = {};
     }
 
     onKey(evt) {
-        if (evt.charCode == '13') {
+        if (evt.charCode == 13) {
             // Refresh
             this.props.onRefresh();
         }
     }
 
     render() {
-        const {info, onRefresh, controller} = this.props;
+        const {
+            info,
+            onRefresh,
+            controller,
+            onReportChange,
+            onFilterChange,
+            onClose,
+        } = this.props;
         const line1 = (
             <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
                 <input
                     style={_l(styles.inp, styles.flex1)}
                     type="text"
-                    value={this.state.report}
-                    onChange={this.onReportChange.bind(this)}
+                    value={this.props.report}
+                    onChange={onReportChange}
                     onKeyPress={this.onKey.bind(this)}
                     placeholder="Report"
                 />
                 <IconBtn icon="plus"/>
                 <IconBtn icon="refresh" onClick={onRefresh}/>
-                <IconBtn icon="close"/>
+                <IconBtn icon="close" onClick={onClose}/>
             </div>
         );
         const line2 = (
@@ -286,8 +278,8 @@ export class TaskPageCmp extends React.Component {
                 <input
                     style={_l(styles.inp, styles.flex1)}
                     type="text"
-                    value={this.state.filter}
-                    onChange={this.onFilterChange.bind(this)}
+                    value={this.props.filter}
+                    onChange={onFilterChange}
                     onKeyPress={this.onKey.bind(this)}
                     placeholder="Filter"
                 />

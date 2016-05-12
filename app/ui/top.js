@@ -10,7 +10,6 @@ export class AppPane extends React.Component {
         super(props);
         this.state = {
             pages: [],
-            page: 0,
         };
     }
 
@@ -21,45 +20,78 @@ export class AppPane extends React.Component {
         });
     }
 
-    showPage(page) {
+    checkActive(key) {
+        return this.state.page == key;
+    }
+
+    onClose(key) {
         let {pages} = this.state;
-        const idx = pages.findIndex((item) => {
-            console.log('Index:', item, page);
-            return false;
+        let idx = pages.findIndex((item) => {
+            return item.key == key;
         });
-        if (idx == -1) { // Add new
-            pages.push(
-                <TasksPagePane
-                    key={new Date().getTime()}
-                    report={page.report}
-                    filter={page.filter}
-                    controller={this.props.controller}
-                />
-            );
+        if (idx != -1) { // Not last
+            pages.splice(idx, 1);
+            if (idx > 0) idx--;
             this.setState({
                 pages: pages,
-                page: pages.length-1,
+                page: (pages[idx] || {}).key,
+            });
+        };
+    }
+
+    showPage(page) {
+        let {pages} = this.state;
+        let item = pages.find((item) => {
+            return item.ref.same(page);
+        });
+        if (!item) { // Add new
+            const key = Date.now();
+            let item = {
+                key: key,
+                cmp: (
+                    <TasksPagePane
+                        id={key}
+                        key={key}
+                        ref={(ref) => {
+                            item.ref = ref;
+                        }}
+                        report={page.report}
+                        filter={page.filter}
+                        controller={this.props.controller}
+                        onClose={this.onClose.bind(this)}
+                        checkActive={this.checkActive.bind(this)}
+                    />
+                ),
+            };
+            pages.push(item);
+            this.setState({
+                pages: pages,
+                page: key,
             });
         } else {
             this.setState({
-                page: idx,
+                page: item.key,
             });
         }
     }
 
     onNavigation(dir) {
-        let {page, pages} = this.state;
+        let {pages, page} = this.state;
+        let idx = pages.findIndex((item) => {
+            return item.key == page;
+        });
         switch(dir) {
             case -1:
-                if (page > 0) page -= 1;
+                if (idx > 0) idx -= 1;
                 break;
             case 1:
-                if (page < pages.length-1) page += 1;
+                if (idx < pages.length-1) idx += 1;
                 break;
         }
         this.setState({
-            page: page,
+            page: pages[idx].key,
         });
+        pages[idx].ref.refresh();
     }
 
     onReportClick(report) {
@@ -67,6 +99,12 @@ export class AppPane extends React.Component {
             report: report.name,
             filter: '',
         });
+    }
+    
+    onTagClick(tag) {
+    }
+
+    onProjectClick(project) {
     }
 
     render() {
@@ -83,7 +121,12 @@ export class AppPane extends React.Component {
                         ref="main"
                         onNavigation={this.onNavigation.bind(this)}
                     />
-                    <NavigationPane mode='dock' />
+                    <NavigationPane
+                        controller={this.props.controller}
+                        onTagClick={this.onTagClick.bind(this)}
+                        onProjectClick={this.onProjectClick.bind(this)}
+                        mode='dock'
+                    />
                     <ReportsPane
                         controller={this.props.controller}
                         onClick={this.onReportClick.bind(this)}
@@ -149,14 +192,41 @@ class StatusbarPane extends React.Component {
 // Member of pages
 class PagePane extends React.Component {
 
+    onClose() {
+        this.props.onClose(this.props.id);
+    }
+
+    onChanged() {
+        if (this.props.checkActive(this.props.id)) {
+            this.refresh();
+        };
+    }
+
+    componentDidMount() {
+        this.props.controller.events.on('change', this.refreshHandler);
+        this.refresh();
+    }
+
+    componentWillUnmount() {
+        this.props.controller.events.removeListener('change', this.refreshHandler);
+    }
+
 }
 
 class TasksPagePane extends PagePane {
 
     constructor(props) {
         super(props);
+        // console.log('TaskPagePane');
         this.refreshHandler = this.onChanged.bind(this);
-        this.state = {};
+        this.state = {
+            report: props.report || '',
+            filter: props.filter || '',
+        };
+    }
+
+    same(page) {
+        return page.filter === this.state.filter && page.report === this.state.report;
     }
 
     async onDone(task) {
@@ -172,31 +242,33 @@ class TasksPagePane extends PagePane {
         return (
             <cmp.TaskPageCmp
                 {...this.props}
+                report={this.state.report}
+                filter={this.state.filter}
+                onReportChange={this.onReportChange.bind(this)}
+                onFilterChange={this.onFilterChange.bind(this)}
                 info={this.state.info}
-                ref="cmp"
                 onRefresh={this.refresh.bind(this)}
                 onDone={this.onDone.bind(this)}
+                onClose={this.onClose.bind(this)}
             />
         );
     }
-
-    onChanged() {
-        this.refresh();
+    
+    onReportChange (evt) {
+        this.setState({
+            report: evt.target.value,
+        });
     }
 
-    componentDidMount() {
-        this.props.controller.events.on('change', this.refreshHandler);
-        this.refresh();
+    onFilterChange (evt) {
+        this.setState({
+            filter: evt.target.value,
+        });
     }
 
-    componentWillUnmount() {
-        this.props.controller.events.removeListener('change', this.refreshHandler);
-    }
 
     async refresh() {
-        let data = this.refs.cmp.input();
-        // console.log('Refresh:', this.refs, data);
-        let info = await this.props.controller.filter(data.report, data.filter);
+        let info = await this.props.controller.filter(this.state.report, this.state.filter);
         if (info) {
             // Load data
             this.setState({
@@ -222,8 +294,41 @@ class MainPane extends React.Component {
 }
 
 class NavigationPane extends React.Component {
+    
+    constructor(props) {
+        super(props);
+        this.state = {
+            tags: [],
+            projects: [],
+        }
+    }
+
+    componentDidMount() {
+        this.props.controller.events.on('change', this.refresh);
+        this.refresh();
+    }
+
+    refresh() {
+        this.props.controller.tags().then((tags) => {
+            this.setState({
+                tags: tags,
+            });
+        });
+        this.props.controller.reports().then((reports) => {
+            this.setState({
+                reports: reports,
+            });
+        });
+    }
+
     render() {
-        return (<cmp.NavigationCmp mode={this.props.mode} />);
+        return (
+            <cmp.NavigationCmp
+                {...this.props}
+                tags={this.state.tags}
+                reports={this.state.reports}
+            />
+        );
     }
 }
 
