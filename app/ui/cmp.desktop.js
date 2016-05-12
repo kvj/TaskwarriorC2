@@ -138,6 +138,75 @@ export class CenterCmp extends React.Component {
     }
 };
 
+class ProjectsNavigation extends React.Component {
+
+    render() {
+        const renderProjects = (arr) => {
+            return arr.map((item, idx) => {
+                let prefix = '';
+                for (var i = 0; i < item.indent; i++) {
+                    prefix += ' ';
+                }
+                const jsx = (
+                    <div
+                        key={item.project}
+                        style={_l(styles.one_nav, styles.hflex, styles.hbar)}
+                        onClick={(e) => {
+                            this.props.onClick(item, e);
+                        }}
+                    >
+                        <Text style={[styles.flex1]}>{prefix+item.name}</Text>
+                        <Text style={[styles.flex0]}>{item.count}</Text>
+                    </div>
+                );
+                return [jsx, renderProjects(item.children)];
+            });
+        };
+        return (
+            <div style={_l(styles.vproxy)}>
+                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+                    <Text style={[styles.flex1]}>Projects</Text>
+                    <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
+                </div>
+                <div style={_l(styles.flex1s)}>
+                    {renderProjects(this.props.projects)}
+                </div>
+            </div>
+        );
+    }
+}
+
+class TagsNavigation extends React.Component {
+
+    render() {
+        const tags = this.props.tags.map((item, idx) => {
+            return (
+                <div
+                    key={item.name}
+                    style={_l(styles.one_nav, styles.hflex, styles.hbar)}
+                    onClick={(e) => {
+                        this.props.onClick(item, e);
+                    }}
+                >
+                    <Text style={[styles.flex1]}>{item.name}</Text>
+                    <Text style={[styles.flex0]}>{item.count}</Text>
+                </div>
+            );
+        });
+        return (
+            <div style={_l(styles.vproxy)}>
+                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+                    <Text style={[styles.flex1]}>Tags</Text>
+                    <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
+                </div>
+                <div style={_l(styles.flex1s)}>
+                    {tags}
+                </div>
+            </div>
+        );
+    }
+}
+
 export class NavigationCmp extends React.Component {
 
     render() {
@@ -153,6 +222,16 @@ export class NavigationCmp extends React.Component {
         }
         return (
             <div style={_l(st)}>
+                <ProjectsNavigation
+                    onRefresh={this.props.onRefreshProjects}
+                    onClick={this.props.onProjectClick}
+                    projects={this.props.projects || []}
+                />
+                <TagsNavigation
+                    onRefresh={this.props.onRefreshTags}
+                    onClick={this.props.onTagClick}
+                    tags={this.props.tags || []}
+                />
             </div>
         );
     }
@@ -177,7 +256,7 @@ export class ReportsCmp extends React.Component {
             };
             return (
                 <div
-                    style={_l(styles.one_report)}
+                    style={_l(styles.one_nav)}
                     key={idx}
                     onClick={onClick}
                 >
@@ -337,7 +416,7 @@ export class StatusbarCmp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            message: ' ',
+            message: '',
             floats: [],
         };
     }
@@ -354,6 +433,9 @@ export class StatusbarCmp extends React.Component {
     }
 
     showMessage(type, message, resp) {
+        if (!message) {
+            return false;
+        }
         if (type == 'question') {
             const fl = {
                 type: type,
@@ -369,6 +451,7 @@ export class StatusbarCmp extends React.Component {
         this.setState({
             type: type,
             message: message,
+            time: new Date(),
         });
         if (type == 'error') { // Add float
             const fl = {
@@ -416,6 +499,14 @@ export class StatusbarCmp extends React.Component {
                 </div>
             );
         });
+        let time = null;
+        if (this.state.time) {
+            time = (
+                <Text style={[styles.oneLine, styles.flex0, styles.textSmall]}>
+                    {this.state.time.toLocaleTimeString()}:
+                </Text>
+            );
+        }
         return (
             <div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.statusbar)}>
                 <div style={_l(styles.floatBR)}>
@@ -424,8 +515,9 @@ export class StatusbarCmp extends React.Component {
                 <div style={_l(styles.flex0)}>
                     <i className={spinCls}></i>
                 </div>
+                {time}
                 <Text
-                    style={[styles.oneLine, styles.flex1, styles.textRight, styles.textSmall]}
+                    style={[styles.oneLine, styles.flex1, styles.textSmall]}
                 >
                     {this.state.message}
                 </Text>

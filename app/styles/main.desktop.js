@@ -1,5 +1,23 @@
 const fontFamily = 'Monaco Regular, Monospace';
 
+let layers = {
+    bg: {
+        bg: '#fff',
+        fg: '#555',
+        br: '#eee',
+    },
+    l1: {
+        bg: '#fafafa',
+        fg: '#444',
+        br: '#ddd',
+    },
+    l2: {
+        bg: '#eee',
+        fg: '#333',
+        br: '#ccc',
+    },
+};
+
 export const styles = {
     "vflex": {
         display: 'flex',
@@ -58,8 +76,8 @@ export const styles = {
         padding: 5,
         textAlign: "center",
         fontSize: "1em",
-        backgroundColor: "#ddd",
-        color: "#333",
+        backgroundColor: layers.l1.bg,
+        color: layers.l1.fg,
         outline: "none",
     },
 
@@ -70,11 +88,11 @@ export const styles = {
         padding: 5,
         fontSize: "1em",
         verticalAlign: "middle",
-        backgroundColor: "#eee",
-        color: "#555",
+        backgroundColor: layers.l2.bg,
+        color: layers.l2.fg,
         fontFamily: fontFamily,
         minWidth: 150,
-        borderLeft: "4px solid #ddd",
+        borderLeft: `4px solid ${layers.l2.br}`,
     },
     "oneLine": {
         whiteSpace: "nowrap",
@@ -98,6 +116,8 @@ export const styles = {
     },
 
     app: {
+        backgroundColor: layers.bg.bg,
+        color: layers.bg.fg,
     },
 
     center: {
@@ -105,19 +125,19 @@ export const styles = {
     },
 
     toolbar: {
-        borderBottom: '1px solid #ddd',
+        borderBottom: `1px solid ${layers.bg.br}`,
     },
 
     statusbar: {
-        borderTop: '1px solid #ddd',
+        borderTop: `1px solid ${layers.bg.br}`,
         padding: 3,
-        justifyContent: 'space-between',
+        minHeight: 25,
     },
 
     navigation: {
         width: 150,
-        borderRight: '1px solid #ddd',
-        backgroundColor: '#fff',
+        borderRight: `1px solid ${layers.bg.br}`,
+        backgroundColor: layers.bg.bg,
         order: 0,
     },
 
@@ -130,8 +150,8 @@ export const styles = {
 
     reports: {
         width: 150,
-        borderLeft: '1px solid #ddd',
-        backgroundColor: '#fff',
+        borderLeft: `1px solid ${layers.bg.br}`,
+        backgroundColor: layers.bg.bg,
         order: 2,
     },
 
@@ -156,14 +176,16 @@ export const styles = {
     },
 
     one_task: {
-        backgroundColor: "#fafafa",
+        backgroundColor: layers.l1.bg,
+        color: layers.l1.fg,
         marginBottom: 5,
-        width: "100%",
     },
 
-    one_report: {
-        backgroundColor: "#fafafa",
+    one_nav: {
+        backgroundColor: layers.l1.bg,
+        color: layers.l1.fg,
         marginBottom: 5,
+        cursor: "pointer",
     },
 
     description: {

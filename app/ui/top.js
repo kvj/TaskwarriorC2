@@ -100,11 +100,25 @@ export class AppPane extends React.Component {
             filter: '',
         });
     }
-    
+
+    current(page=this.state.page) {
+        return this.state.pages.find((item) => {
+            return item.key == page;
+        });
+    }
+
     onTagClick(tag) {
+        const page = this.current();
+        if (page && page.ref) {
+            page.ref.filter(`+${tag.name}`);
+        }
     }
 
     onProjectClick(project) {
+        const page = this.current();
+        if (page && page.ref) {
+            page.ref.filter(`pro:${project.project}`);
+        }
     }
 
     render() {
@@ -225,6 +239,14 @@ class TasksPagePane extends PagePane {
         };
     }
 
+    filter(filter) {
+        this.state.filter = filter || '';
+        this.setState({
+            filter: this.state.filter,
+        });
+        this.refresh();
+    }
+
     same(page) {
         return page.filter === this.state.filter && page.report === this.state.report;
     }
@@ -253,7 +275,7 @@ class TasksPagePane extends PagePane {
             />
         );
     }
-    
+
     onReportChange (evt) {
         this.setState({
             report: evt.target.value,
@@ -294,7 +316,7 @@ class MainPane extends React.Component {
 }
 
 class NavigationPane extends React.Component {
-    
+
     constructor(props) {
         super(props);
         this.state = {
@@ -309,14 +331,22 @@ class NavigationPane extends React.Component {
     }
 
     refresh() {
+        this.refreshProjects();
+        this.refreshTags();
+    }
+
+    refreshProjects() {
         this.props.controller.tags().then((tags) => {
             this.setState({
                 tags: tags,
             });
         });
-        this.props.controller.reports().then((reports) => {
+    }
+
+    refreshTags() {
+        this.props.controller.projects().then((projects) => {
             this.setState({
-                reports: reports,
+                projects: projects,
             });
         });
     }
@@ -326,7 +356,9 @@ class NavigationPane extends React.Component {
             <cmp.NavigationCmp
                 {...this.props}
                 tags={this.state.tags}
-                reports={this.state.reports}
+                projects={this.state.projects}
+                onRefreshProjects={this.refreshProjects.bind(this)}
+                onRefreshTags={this.refreshTags.bind(this)}
             />
         );
     }

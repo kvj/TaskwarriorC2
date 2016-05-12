@@ -323,6 +323,9 @@ export class TaskController {
                 let item = result[i];
                 if (item.indent == indent) { // Same level
                     item.project = prefix+item.name;
+                    if (item.name == '(none)') {
+                        item.project='';
+                    }
                     arr.push(item);
                 }
                 if (item.indent > indent) {
