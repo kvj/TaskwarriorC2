@@ -32,12 +32,14 @@ const dateRelative = (dt, now=new Date()) => {
     return [mul*Math.ceil(days/36)/10, 'y'];
 };
 
-const formatDate = (obj, format, name) => {
+const formatDate = (obj, format, name, editable) => {
     const dt = parseDate(obj[name]);
     if (!dt) { // Invalid
         return '';
     };
     obj[`${name}_date`] = dt;
+    if (editable)
+        obj[`${name}_edit`] = `${name}:${dt.toISOString().substr(0, 10)}`;
     if (format == 'iso') { // as is
         return obj[name];
     };
@@ -54,7 +56,7 @@ export const formatters = {
         return ''+(obj.id || '');
     },
     due(obj, format) {
-        return formatDate(obj, format, 'due');
+        return formatDate(obj, format, 'due', true);
     },
     modified(obj, format) {
         return formatDate(obj, format, 'modified');
@@ -73,13 +75,13 @@ export const formatters = {
         return formatDate(obj, format, 'end');
     },
     wait(obj, format) {
-        return formatDate(obj, format, 'wait');
+        return formatDate(obj, format, 'wait', true);
     },
     scheduled(obj, format) {
-        return formatDate(obj, format, 'scheduled');
+        return formatDate(obj, format, 'scheduled', true);
     },
     until(obj, format) {
-        return formatDate(obj, format, 'until');
+        return formatDate(obj, format, 'until', true);
     },
     description(obj, format) {
         const ann = obj.annotations || [];
@@ -101,11 +103,15 @@ export const formatters = {
                 outp += `${dt.toLocaleDateString()} `;
             };
             outp += line.description;
-            return outp;
+            return {
+                text: outp,
+                origin: line.description,
+                date: dt,
+            };
         });
         if (format == 'oneline') { // Combine to all
             lines.forEach((line) => {
-                desc += ` ${line}`;
+                desc += ` ${line.text}`;
             });
             return desc;
         };
@@ -123,10 +129,12 @@ export const formatters = {
         if (format == 'count') { // [3]
             return `[${tags.length}]`;
         };
+        obj.tags_edit = '+'+tags.join(' +');
         return tags.join(' ')+' ';
     },
     project(obj, format) {
         const val = obj.project || '';
+        obj.project_edit = `pro:${val}`;
         if (!val) {
             return val;
         };
@@ -160,6 +168,7 @@ export const formatters = {
     },
     recur(obj, format) {
         const val = obj.recur || '';
+        obj.recur_edit = `recur:${val}`;
         if (format == 'indicator' && val) {
             return 'R';
         }

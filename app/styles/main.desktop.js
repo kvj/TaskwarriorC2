@@ -108,11 +108,21 @@ export const styles = {
         textAlign: "right",
     },
 
+    "textCenter": {
+        textAlign: "center",
+    },
+
     "floatBR": {
         position: "absolute",
         right: 5,
         bottom: 20,
         width: 350,
+    },
+    "floatCenter": {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        top: 0,
     },
 
     app: {
@@ -192,13 +202,25 @@ export const styles = {
         alignSelf: 'center',
     },
 
+    annotation_line: {
+    },
+
     floatBlock: {
-        backgroundColor: "#fff",
+        backgroundColor: layers.bg.bg,
         padding: 5,
         marginBottom: 10,
         cursor: "pointer",
-        border: "2px solid #f0f0f0",
-    }
+        border: `2px solid ${layers.bg.br}`,
+    },
+    input_box: {
+        margin: "0 auto",
+        marginTop: 150,
+        width: "100%",
+        maxWidth: 700,
+        backgroundColor: layers.bg.bg,
+        color: layers.bg.fg,
+        border: `2px solid ${layers.bg.br}`,
+    },
 
 };
 

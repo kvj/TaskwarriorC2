@@ -219,19 +219,40 @@ export class TaskController {
     }
 
     async undo() {
-        const outp = await this.callStr(['undo'], null, this.streamNotify());
-        console.log('Undo:', outp);
-        if (outp) { // Success
+        const code = await this.call(['undo'], null, this.streamNotify());
+        console.log('Undo:', code);
+        if (code == 0) { // Success
             this.notifyChange();
         };
-        return outp;
+        return code;
+    }
+
+    async cmd(cmd, input, tasks=[]) {
+        let cmds = [];
+        const ids = tasks.map((task) => {
+            return task.id || task.uuid_ || task.uuid;
+        });
+        if (ids.length) {
+            cmds.push(ids.join(','));
+        };
+        cmds.push(cmd);
+        cmds.push(input);
+        console.log('cmd', cmds);
+        const code = await this.call(cmds, this.streamNotify('notify:info'), this.streamNotify());
+        if (code === 0) {
+            this.notifyChange();
+            return true;
+        };
+        return false;
     }
 
     async sync() {
         this.events.emit('sync:start');
         const code = await this.call(['sync'], this.streamNotify('notify:info'), this.streamNotify());
         this.events.emit('sync:finish');
-        this.notifyChange();
+        if (code == 0) {
+            this.notifyChange();
+        };
         return code;
     }
 

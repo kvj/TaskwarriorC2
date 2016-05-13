@@ -17,6 +17,7 @@
   },
   "scripts": {
     "desktop": "node_modules/.bin/electron _desktop.js",
-    "dev": "node_modules/.bin/gulp"
+    "dev": "node_modules/.bin/gulp",
+    "dist": "node_modules/.bin/gulp dist"
   }
 }

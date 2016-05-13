@@ -24,6 +24,35 @@ export class AppPane extends React.Component {
         return this.state.page == key;
     }
 
+    onAdd(key, filter) {
+        let input = '';
+        if (filter) input = `${filter} `;
+        this.refs.main.showInput('add', input, {
+            cmd: 'add',
+        });
+    }
+
+    onEdit(key, cmd, tasks, input, unint) {
+        if (unint) { // Uninitended - run
+            return this.processInput(input, {
+                cmd: cmd,
+                tasks: tasks,
+            });
+        };
+        let title = cmd;
+        if (tasks.length) { // Prepend number of tasks
+            title = `{${tasks.length}} ${cmd}`;
+        };
+        this.refs.main.showInput(title, input, {
+            cmd: cmd,
+            tasks: tasks,
+        });
+    }
+
+    async processInput(input, ctx) {
+        return await this.props.controller.cmd(ctx.cmd, input, ctx.tasks);
+    }
+
     onClose(key) {
         let {pages} = this.state;
         let idx = pages.findIndex((item) => {
@@ -59,6 +88,8 @@ export class AppPane extends React.Component {
                         filter={page.filter}
                         controller={this.props.controller}
                         onClose={this.onClose.bind(this)}
+                        onAdd={this.onAdd.bind(this)}
+                        onEdit={this.onEdit.bind(this)}
                         checkActive={this.checkActive.bind(this)}
                     />
                 ),
@@ -134,6 +165,7 @@ export class AppPane extends React.Component {
                         page={this.state.page}
                         ref="main"
                         onNavigation={this.onNavigation.bind(this)}
+                        onInput={this.processInput.bind(this)}
                     />
                     <NavigationPane
                         controller={this.props.controller}
@@ -206,6 +238,11 @@ class StatusbarPane extends React.Component {
 // Member of pages
 class PagePane extends React.Component {
 
+    constructor(props) {
+        super(props);
+        this.refreshHandler = this.onChanged.bind(this);
+    }
+
     onClose() {
         this.props.onClose(this.props.id);
     }
@@ -231,32 +268,37 @@ class TasksPagePane extends PagePane {
 
     constructor(props) {
         super(props);
-        // console.log('TaskPagePane');
-        this.refreshHandler = this.onChanged.bind(this);
-        this.state = {
-            report: props.report || '',
-            filter: props.filter || '',
-        };
+        this.state = {};
+    }
+
+    onAdd() {
+        this.props.onAdd(this.props.id, this.input().filter);
+    }
+
+    onEdit(task, cmd, input, unint=false) {
+        this.props.onEdit(this.props.id, cmd, [task], input, unint);
     }
 
     filter(filter) {
-        this.state.filter = filter || '';
-        this.setState({
-            filter: this.state.filter,
-        });
+        this.refs.cmp.filter(filter);
         this.refresh();
     }
 
+    input() {
+        return this.refs.cmp.input();
+    }
+
     same(page) {
-        return page.filter === this.state.filter && page.report === this.state.report;
+        let data = this.input();
+        return page.filter === data.filter && page.report === data.report;
     }
 
     async onDone(task) {
         const {uuid, status} = task;
         if (['waiting', 'pending'].includes(status)) { // OK to done
-            await this.props.controller.done(uuid);
+            return this.onEdit(task, 'done', '', true);
         } else { // Show error
-            this.props.controller.err('Invalid task');
+            return this.props.controller.err('Invalid task');
         };
     };
 
@@ -264,33 +306,21 @@ class TasksPagePane extends PagePane {
         return (
             <cmp.TaskPageCmp
                 {...this.props}
-                report={this.state.report}
                 filter={this.state.filter}
-                onReportChange={this.onReportChange.bind(this)}
-                onFilterChange={this.onFilterChange.bind(this)}
+                ref="cmp"
                 info={this.state.info}
                 onRefresh={this.refresh.bind(this)}
                 onDone={this.onDone.bind(this)}
                 onClose={this.onClose.bind(this)}
+                onAdd={this.onAdd.bind(this)}
+                onEdit={this.onEdit.bind(this)}
             />
         );
     }
 
-    onReportChange (evt) {
-        this.setState({
-            report: evt.target.value,
-        });
-    }
-
-    onFilterChange (evt) {
-        this.setState({
-            filter: evt.target.value,
-        });
-    }
-
-
     async refresh() {
-        let info = await this.props.controller.filter(this.state.report, this.state.filter);
+        let data = this.input();
+        let info = await this.props.controller.filter(data.report, data.filter);
         if (info) {
             // Load data
             this.setState({
@@ -304,10 +334,15 @@ class TasksPagePane extends PagePane {
 
 class MainPane extends React.Component {
 
+    showInput(...args) {
+        return this.refs.cmp.showInput.apply(this.refs.cmp, args);
+    }
+
     render() {
         return (
             <cmp.MainCmp
                 {...this.props}
+                ref="cmp"
                 onNavigation={this.props.onNavigation}
             />
         );
@@ -326,7 +361,7 @@ class NavigationPane extends React.Component {
     }
 
     componentDidMount() {
-        this.props.controller.events.on('change', this.refresh);
+        this.props.controller.events.on('change', this.refresh.bind(this));
         this.refresh();
     }
 

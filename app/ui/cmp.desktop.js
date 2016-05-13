@@ -2,10 +2,21 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {styles, _l} from '../styles/main';
 
+const eventInfo = (e) => {
+    if (!e) return undefined;
+    return {
+        shift: e.shiftKey || false,
+        ctrl: e.ctrlKey || false,
+        alt: e.altKey || false,
+        meta: e.metaKey || false,
+        key: e.charCode || e.keyCode,
+    }
+};
+
 const IconBtn = (props) => {
     return (
         <button style={_l([styles.btn])} onClick={(evt) => {
-            if (props.onClick) props.onClick(evt);
+            if (props.onClick) props.onClick(eventInfo(evt));
         }}>
             <i className={`fa fa-fw fa-${props.icon}`}></i>
         </button>
@@ -23,7 +34,9 @@ const Text = (props) => {
         sfx += ' ';
     }
     return (
-        <div style={_l(_st)} title={props.title || val}>
+        <div style={_l(_st)} title={props.title || val} onClick={(evt) => {
+            if (props.onClick) props.onClick(eventInfo(evt));
+        }}>
             <span className="text">{val}</span>
             <span>{sfx}</span>
         </div>
@@ -33,13 +46,23 @@ const Text = (props) => {
 class Task extends React.Component {
 
     render() {
-        const {cols, task, onDone} = this.props;
+        const {
+            cols,
+            task,
+            onDone,
+            onClick,
+            onDelete,
+            onAnnDelete,
+        } = this.props;
         const fields = cols.map((item, idx) => {
             if (item.field == 'description') { // Separator
                 return (<div key={idx} style={_l(styles.spacer)}></div>);
             }
             const val = task[`${item.field}_`] || '';
-            return (<Text width={item.width} key={idx}>{val}</Text>);
+            return (<Text width={item.width} key={idx} onClick={(e) => {
+                const edit_val = task[`${item.field}_edit`] || '';
+                onClick(e, edit_val);
+            }}>{val}</Text>);
         });
         let descSt = [styles.description, styles.flex1];
         if (task.description_truncate) {
@@ -49,6 +72,21 @@ class Task extends React.Component {
         if (task.description_count) {
             desc_count = (<Text style={[styles.description]}>{task.description_count}</Text>)
         }
+        let annotations = null;
+        if (task.description_ann) { // Have list
+            annotations = task.description_ann.map((item, idx) => {
+                return (
+                    <div style={_l(styles.hflex, styles.annotation_line)} key={idx}>
+                        <IconBtn icon="close" onClick={(e) => {
+                            onAnnDelete(item.origin, e);
+                        }}/>
+                        <Text style={[styles.flex1, styles.description, styles.textSmall]}>
+                            {item.text}
+                        </Text>
+                    </div>
+                );
+            });
+        };
         let check_icon = 'square-o';
         if (task.status == 'completed') {
             check_icon = 'check-square-o';
@@ -69,13 +107,18 @@ class Task extends React.Component {
                         icon={check_icon}
                         onClick={onDone}
                     />
-                    <Text style={descSt}>{task.description_}</Text>
+                    <Text style={descSt} onClick={(e) => {
+                        onClick(e, task.description);
+                    }}>{task.description_}</Text>
                     {desc_count}
-                    <IconBtn icon="caret-down"/>
+                    <IconBtn icon="close" onClick={(e) => {
+                        onDelete(e);
+                    }}/>
                 </div>
                 <div style={_l(styles.hflex, styles.wflex)}>
                     {fields}
                 </div>
+                {annotations}
             </div>
         );
     }
@@ -279,10 +322,109 @@ export class ReportsCmp extends React.Component {
     }
 };
 
+class PopupEditor extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            input: props.input || '',
+        };
+    }
+
+    onChange(evt) {
+        this.setState({
+            input: evt.target.value,
+        });
+    }
+
+    finish(success, e) {
+        const input = this.state.input.trim();
+        if (success)
+            this.props.onDone(input, e);
+        else
+            this.props.onCancel(input, e);
+    }
+    
+    onKey(evt) {
+        const e = eventInfo(evt);
+        if (e.key == 13) { // Enter
+            this.finish(true, e);
+        }
+        if (e.key == 27) { // Escape
+            this.finish(false, e);
+        }
+    }
+
+    componentDidMount() {
+        this.refs.input.focus();
+    }
+
+    render() {
+        return (
+            <div style={_l(styles.floatCenter)}>
+                <div style={_l(styles.input_box)}>
+                    <div style={_l(styles.hflex, styles.hbar, styles.wflex)}>
+                        <Text>{this.props.title}</Text>
+                        <input
+                            style={_l(styles.inp, styles.flex1)}
+                            type="text"
+                            value={this.state.input}
+                            onChange={this.onChange.bind(this)}
+                            onKeyDown={this.onKey.bind(this)}
+                            ref="input"
+                        />
+                    </div>
+                    <div style={_l(styles.hflex)}>
+                        <div style={_l(styles.spacer)}></div>
+                        <IconBtn icon="check" onClick={(e) => {
+                            this.finish(true, e);
+                        }}/>
+                        <IconBtn icon="close" onClick={(e) => {
+                            this.finish(false, e);
+                        }}/>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+}
+
 export class MainCmp extends React.Component {
+    
+    constructor(props) {
+        super(props);
+        this.state = {
+        };
+    }
+
+    showInput(title, input, context) {
+        this.setState({
+            input: {
+                title, input, context,
+            },
+        });
+    }
+
+    onInputCancel() {
+        this.setState({
+            input: undefined,
+        });
+    }
+
+    async onInputDone(input, e) {
+        const keepOpen = e.ctrl;
+        const success = await this.props.onInput(input, this.state.input.context);
+        if (success && !keepOpen) { // Close
+            this.setState({
+                input: undefined,
+            });
+        };
+    }
 
     render() {
         const {pages, page, onNavigation} = this.props;
+        const {input} = this.state;
         const pageCmps = pages.map((pageCmp, idx) => {
             if (pageCmp.key == page) { // Visible
                 return (<div key={pageCmp.key} style={_l(styles.vproxy)}>{pageCmp.cmp}</div>);
@@ -290,18 +432,34 @@ export class MainCmp extends React.Component {
                 return (<div key={pageCmp.key} style={_l(styles.none)}>{pageCmp.cmp}</div>);
             };
         });
+        const pageIndicators = pages.map((pageCmp, idx) => {
+            const icn = pageCmp.key == page? 'circle': 'circle-o';
+            return (<i key={idx} className={`fa fa-fw fa-${icn}`}></i>);
+        });
+        let inputCmp = null;
+        if (input) { // Render
+            inputCmp = (
+                <PopupEditor
+                    input={input.input}
+                    title={input.title}
+                    onDone={this.onInputDone.bind(this)}
+                    onCancel={this.onInputCancel.bind(this)}
+                />
+            );
+        };
         return (
             <div style={_l(styles.vproxy, styles.tasks)}>
                 <div style={_l(styles.vproxy)}>
                     {pageCmps}
                 </div>
-                <div style={_l(styles.flex0, styles.hflex)}>
+                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <div style={_l(styles.flex0, styles.hbar)}>
                         <IconBtn icon="chevron-left" onClick={() => {
                             onNavigation(-1);
                         }}/>
                     </div>
-                    <div style={_l(styles.flex1, styles.hbar)}>
+                    <div style={_l(styles.flex1, styles.textCenter, styles.textSmall)}>
+                        {pageIndicators}
                     </div>
                     <div style={_l(styles.flex0, styles.hbar)}>
                         <IconBtn icon="chevron-right" onClick={() => {
@@ -309,16 +467,73 @@ export class MainCmp extends React.Component {
                         }}/>
                     </div>
                 </div>
+                {inputCmp}
             </div>
         );
     }
 };
 
-export class TaskPageCmp extends React.Component {
+class TaskPageInput extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            report: props.report || '',
+            filter: props.filter || '',
+        };
+    }
+    
+    onReportChange (evt) {
+        this.setState({
+            report: evt.target.value,
+        });
+    }
+
+    onFilterChange (evt) {
+        this.setState({
+            filter: evt.target.value,
+        });
+    }
+
+    render() {
+        const line1 = (
+            <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
+                <input
+                    style={_l(styles.inp, styles.flex1)}
+                    type="text"
+                    value={this.state.report}
+                    onChange={this.onReportChange.bind(this)}
+                    onKeyPress={this.onKey.bind(this)}
+                    placeholder="Report"
+                />
+                <IconBtn icon="plus" onClick={this.props.onAdd}/>
+                <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
+                <IconBtn icon="close" onClick={this.props.onClose}/>
+            </div>
+        );
+        const line2 = (
+            <div style={_l(styles.flex0, styles.hflex)}>
+                <input
+                    style={_l(styles.inp, styles.flex1)}
+                    type="text"
+                    value={this.state.filter}
+                    onChange={this.onFilterChange.bind(this)}
+                    onKeyPress={this.onKey.bind(this)}
+                    placeholder="Filter"
+                />
+            </div>
+        );
+
+        return (
+            <div style={_l(styles.flex0)}>
+                {line1}
+                {line2}
+            </div>
+        );
+    }
+
+    input() {
+        return this.state;
     }
 
     onKey(evt) {
@@ -328,42 +543,37 @@ export class TaskPageCmp extends React.Component {
         }
     }
 
+    filter(filter) {
+        this.state.filter = filter;
+        this.setState({
+            filter: filter,
+        });
+    }
+
+}
+
+export class TaskPageCmp extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+        };
+    }
+    
+
+    input() {
+        return this.refs.input.input();
+    }
+
+    filter(filter) {
+        this.refs.input.filter(filter);
+    }
+
     render() {
         const {
             info,
-            onRefresh,
-            controller,
-            onReportChange,
-            onFilterChange,
-            onClose,
+            onEdit,
         } = this.props;
-        const line1 = (
-            <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
-                <input
-                    style={_l(styles.inp, styles.flex1)}
-                    type="text"
-                    value={this.props.report}
-                    onChange={onReportChange}
-                    onKeyPress={this.onKey.bind(this)}
-                    placeholder="Report"
-                />
-                <IconBtn icon="plus"/>
-                <IconBtn icon="refresh" onClick={onRefresh}/>
-                <IconBtn icon="close" onClick={onClose}/>
-            </div>
-        );
-        const line2 = (
-            <div style={_l(styles.flex0, styles.hflex)}>
-                <input
-                    style={_l(styles.inp, styles.flex1)}
-                    type="text"
-                    value={this.props.filter}
-                    onChange={onFilterChange}
-                    onKeyPress={this.onKey.bind(this)}
-                    placeholder="Filter"
-                />
-            </div>
-        );
         let body = null;
         if (info) {
             // Render header
@@ -378,8 +588,21 @@ export class TaskPageCmp extends React.Component {
                 return (<Text width={item.width} key={idx}>{item.label}</Text>);
             });
             const tasks = info.tasks.map((item, idx) => {
-                const onDone = () => {
+                const onDone = (e) => {
+                    if (e.ctrl) { // Add annotation
+                        return onEdit(item, 'annotate', '');
+                    };
                     this.props.onDone(item);
+                };
+                const onDelete = (e) => {
+                    onEdit(item, 'delete', '', true);
+                };
+                const onAnnDelete = (text, e) => {
+                    onEdit(item, 'denotate', text, true);
+                };
+                const onClick = (e, data, cmd='modify') => {
+                    if (e.ctrl)
+                        onEdit(item, cmd, data);
                 };
 
                 return (
@@ -388,6 +611,9 @@ export class TaskPageCmp extends React.Component {
                         key={idx}
                         cols={cols}
                         onDone={onDone}
+                        onClick={onClick}
+                        onDelete={onDelete}
+                        onAnnDelete={onAnnDelete}
                     />
                 );
             });
@@ -401,8 +627,10 @@ export class TaskPageCmp extends React.Component {
         }
         return (
             <div style={_l(styles.vproxy)}>
-                {line1}
-                {line2}
+                <TaskPageInput
+                    {...this.props}
+                    ref="input"
+                />
                 <div style={_l(styles.vproxy)}>
                     {body}
                 </div>
