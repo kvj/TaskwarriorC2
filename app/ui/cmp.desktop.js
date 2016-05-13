@@ -367,7 +367,7 @@ class PopupEditor extends React.Component {
                         <Text>{this.props.title}</Text>
                         <input
                             style={_l(styles.inp, styles.flex1)}
-                            type="text"
+                            type="search"
                             value={this.state.input}
                             onChange={this.onChange.bind(this)}
                             onKeyDown={this.onKey.bind(this)}
@@ -515,7 +515,7 @@ class TaskPageInput extends React.Component {
             <div style={_l(styles.flex0, styles.hflex)}>
                 <input
                     style={_l(styles.inp, styles.flex1)}
-                    type="text"
+                    type="search"
                     value={this.state.filter}
                     onChange={this.onFilterChange.bind(this)}
                     onKeyPress={this.onKey.bind(this)}
