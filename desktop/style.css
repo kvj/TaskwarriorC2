@@ -10,6 +10,10 @@ button:active {
 	opacity: 0.5;
 }
 
-.text:hover {
+.text {
 	cursor: pointer;
+}
+
+.text-wrap:hover > .text-edit {
+	visibility: visible !important;
 }

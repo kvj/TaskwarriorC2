@@ -33,11 +33,29 @@ const Text = (props) => {
     while (props.width > val.length+sfx.length) {
         sfx += ' ';
     }
+    let editIcn = null;
+    if (props.editable === true) {
+        editIcn = (
+            <i
+                className="fa fa-fw fa-pencil text-edit"
+                style={styles.text_edit}
+                onClick={(evt) => {
+                    props.onEdit && props.onEdit(eventInfo(evt));
+                }}
+            >
+            </i>
+        )
+    } else if (props.editable === false) {
+        editIcn = (
+            <i className="fa fa-fw" style={styles.text_edit}></i>
+        )
+    }
     return (
-        <div style={_l(_st)} title={props.title || val} onClick={(evt) => {
+        <div style={_l(_st)} title={props.title || val} className="text-wrap" onClick={(evt) => {
             if (props.onClick) props.onClick(eventInfo(evt));
         }}>
             <span className="text">{val}</span>
+            {editIcn}
             <span>{sfx}</span>
         </div>
     );
@@ -59,8 +77,10 @@ class Task extends React.Component {
                 return (<div key={idx} style={_l(styles.spacer)}></div>);
             }
             const val = task[`${item.field}_`] || '';
-            return (<Text width={item.width} key={idx} onClick={(e) => {
+            const editable = task[`${item.field}_ro`]? false: true;
+            return (<Text editable={editable} width={item.width} key={idx} onEdit={(e) => {
                 const edit_val = task[`${item.field}_edit`] || '';
+                console.log('Click:', e);
                 onClick(e, edit_val);
             }}>{val}</Text>);
         });
@@ -107,7 +127,7 @@ class Task extends React.Component {
                         icon={check_icon}
                         onClick={onDone}
                     />
-                    <Text style={descSt} onClick={(e) => {
+                    <Text editable style={descSt} onEdit={(e) => {
                         onClick(e, task.description);
                     }}>{task.description_}</Text>
                     {desc_count}
@@ -344,7 +364,7 @@ class PopupEditor extends React.Component {
         else
             this.props.onCancel(input, e);
     }
-    
+
     onKey(evt) {
         const e = eventInfo(evt);
         if (e.key == 13) { // Enter
@@ -391,7 +411,7 @@ class PopupEditor extends React.Component {
 }
 
 export class MainCmp extends React.Component {
-    
+
     constructor(props) {
         super(props);
         this.state = {
@@ -482,7 +502,7 @@ class TaskPageInput extends React.Component {
             filter: props.filter || '',
         };
     }
-    
+
     onReportChange (evt) {
         this.setState({
             report: evt.target.value,
@@ -559,7 +579,7 @@ export class TaskPageCmp extends React.Component {
         this.state = {
         };
     }
-    
+
 
     input() {
         return this.refs.input.input();
@@ -585,7 +605,7 @@ export class TaskPageCmp extends React.Component {
                     // Insert spacer
                     return (<div key={idx} style={_l(styles.spacer)}></div>);
                 }
-                return (<Text width={item.width} key={idx}>{item.label}</Text>);
+                return (<Text editable={false} width={item.width} key={idx}>{item.label}</Text>);
             });
             const tasks = info.tasks.map((item, idx) => {
                 const onDone = (e) => {
@@ -601,8 +621,7 @@ export class TaskPageCmp extends React.Component {
                     onEdit(item, 'denotate', text, true);
                 };
                 const onClick = (e, data, cmd='modify') => {
-                    if (e.ctrl)
-                        onEdit(item, cmd, data);
+                    onEdit(item, cmd, data);
                 };
 
                 return (

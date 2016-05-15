@@ -180,21 +180,26 @@ export const styles = {
         fontSize: "1em",
         verticalAlign: "middle",
         fontFamily: fontFamily,
-        padding: 2,
-        border: "2px solid transparent",
         whiteSpace: 'pre-wrap',
+    },
+
+    text_edit: {
+        verticalAlign: "middle",
+        fontSize: "0.7em",
+        visibility: "hidden",
+        cursor: "pointer",
     },
 
     one_task: {
         backgroundColor: layers.l1.bg,
         color: layers.l1.fg,
-        marginBottom: 5,
+        margin: "0 3px 5px 3px",
     },
 
     one_nav: {
         backgroundColor: layers.l1.bg,
         color: layers.l1.fg,
-        marginBottom: 5,
+        margin: "0 3px 5px 3px",
         cursor: "pointer",
     },
 
