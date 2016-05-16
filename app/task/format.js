@@ -34,12 +34,20 @@ const dateRelative = (dt, now=new Date()) => {
 
 const formatDate = (obj, format, name, editable) => {
     const dt = parseDate(obj[name]);
+    const pad = (number) => {
+        if (number < 10) {
+            return '0'+number;
+        }
+        return number;
+    };
     if (!dt) { // Invalid
         return '';
     };
     obj[`${name}_date`] = dt;
-    if (editable)
-        obj[`${name}_edit`] = `${name}:${dt.toISOString().substr(0, 10)}`;
+    if (editable) {
+        const dt_iso = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+        obj[`${name}_edit`] = `${name}:${dt_iso}`;
+    }
     if (format == 'iso') { // as is
         return obj[name];
     };
@@ -53,18 +61,22 @@ const formatDate = (obj, format, name, editable) => {
 
 export const formatters = {
     id(obj) {
+        // obj.id_ro = true;
         return ''+(obj.id || '');
     },
     due(obj, format) {
         return formatDate(obj, format, 'due', true);
     },
     modified(obj, format) {
+        obj.modified_ro = true;
         return formatDate(obj, format, 'modified');
     },
     entry(obj, format) {
+        obj.entry_ro = true;
         return formatDate(obj, format, 'entry');
     },
     start(obj, format) {
+        obj.start_ro = true;
         const val = formatDate(obj, format, 'start');
         if (val && format=='active') { // Star
             return '*';
@@ -72,6 +84,7 @@ export const formatters = {
         return val;
     },
     end(obj, format) {
+        obj.end_ro = true;
         return formatDate(obj, format, 'end');
     },
     wait(obj, format) {
@@ -148,6 +161,7 @@ export const formatters = {
         return val;
     },
     uuid(obj, format) {
+        // obj.uuid_ro = true;
         const val = obj.uuid || '';
         const minus = val.indexOf('-');
         if (!val || minus == -1) {
@@ -160,6 +174,7 @@ export const formatters = {
         return val;
     },
     urgency(obj, format) {
+        obj.urgency_ro = true;
         const val = obj.urgency || 0;
         if (format == 'integer') {
             return ''+Math.ceil(val);
@@ -175,6 +190,7 @@ export const formatters = {
         return val;
     },
     depends(obj, format) {
+        obj.depends_ro = true;
         const arr = obj.depends || [];
         if (Array.isArray(arr) && arr.length) {
             obj.depends_sort = arr.length;

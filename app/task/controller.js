@@ -35,8 +35,8 @@ export class TaskController {
         this.events = new EventEmitter();
     }
 
-    async call(args, out, err) {
-        const result = await this.provider.call(this.fixParams.concat(args), out, err);
+    async call(args, out, err, options) {
+        const result = await this.provider.call(this.fixParams.concat(args), out, err, options);
         if (out && out.end) out.end(result);
         if (err && err.end) err.end(result);
         return result;
@@ -219,7 +219,7 @@ export class TaskController {
     }
 
     async undo() {
-        const code = await this.call(['undo'], null, this.streamNotify());
+        const code = await this.call(['undo'], null, this.streamNotify(), {slow: true});
         console.log('Undo:', code);
         if (code == 0) { // Success
             this.notifyChange();
@@ -238,7 +238,7 @@ export class TaskController {
         cmds.push(cmd);
         cmds.push(input);
         console.log('cmd', cmds);
-        const code = await this.call(cmds, this.streamNotify('notify:info'), this.streamNotify());
+        const code = await this.call(cmds, this.streamNotify('notify:info'), this.streamNotify(), {slow: true});
         if (code === 0) {
             this.notifyChange();
             return true;
@@ -248,7 +248,7 @@ export class TaskController {
 
     async sync() {
         this.events.emit('sync:start');
-        const code = await this.call(['sync'], this.streamNotify('notify:info'), this.streamNotify());
+        const code = await this.call(['sync'], this.streamNotify('notify:info'), this.streamNotify(), {slow: true});
         this.events.emit('sync:finish');
         if (code == 0) {
             this.notifyChange();
@@ -320,7 +320,9 @@ export class TaskController {
                 }
             }
         }, this.streamNotify());
-        return result;
+        return result.filter((item, idx) => {
+            return idx < result.length-1;
+        });
     }
 
     async projects() {

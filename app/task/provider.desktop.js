@@ -11,7 +11,7 @@ export class TaskProvider {
         return true;
     }
 
-    call(args, out, err) {
+    call(args, out, err, options={}) {
         // Return promise
         const yesno = /^(.+)\s*\(yes\/no\)\s*$/;
         return new Promise((resp, rej) => {
@@ -60,7 +60,13 @@ export class TaskProvider {
             stream2out(task.stdout, out, true);
             stream2out(task.stderr, err, false);
             task.on('close', (code) => {
-                resp(code);
+                if (options.slow) {
+                    setTimeout(() => {
+                        resp(code);
+                    }, 10);
+                } else {
+                    resp(code);
+                }
             });
             task.on('err', (err) => {
                 rej(err);
