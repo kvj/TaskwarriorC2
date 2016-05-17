@@ -10,6 +10,23 @@ class StreamEater {
     }
 }
 
+const specialReports = [
+    "burndown.daily",
+    "burndown.monthly",
+    "burndown.weekly",
+    "calendar",
+    "colors",
+    "export",
+    "ghistory.annual",
+    "ghistory.monthly",
+    "history.annual",
+    "history.monthly",
+    "information",
+    "summary",
+    "timesheet",
+    "projects",
+];
+
 class ToArrayEater extends StreamEater {
 
     constructor() {
@@ -246,6 +263,30 @@ export class TaskController {
         return false;
     }
 
+    async cmdRaw(cmd) {
+        const out = new ToArrayEater();
+        const err = new ToArrayEater();
+        const code = await this.provider.call([cmd], out, err, {slow: true});
+        let result = [].concat(out.data.map((line) => {
+            return {
+                type: 'out',
+                line: line,
+            };
+        })).concat(err.data.map((line) => {
+            return {
+                type: 'error',
+                line: line,
+            };
+        }));
+        result.push({
+            type: 'info',
+            line: `Exit code: ${code}`,
+        });
+        return {
+            lines: result,
+        };
+    }
+
     async sync() {
         this.events.emit('sync:start');
         const code = await this.call(['sync'], this.streamNotify('notify:info'), this.streamNotify(), {slow: true});
@@ -273,7 +314,7 @@ export class TaskController {
     async config(prefix) {
         const reg = /^([a-z0-9_\.]+)\s(.+)$/;
         let result = {}; // Hash
-        await this.call(['show', prefix], {
+        await this.call(['rc.defaultwidth=1000', 'show', prefix], {
             eat(line) {
                 if (line) {
                     // Our case
@@ -313,9 +354,11 @@ export class TaskController {
             eat(line) {
                 const m = line.match(reg);
                 if (m) {
+                    const report = m[1].trim();
                     result.push({
-                        name: m[1].trim(),
+                        name: report,
                         title: m[2].trim(),
+                        special: specialReports.includes(report),
                     });
                 }
             }

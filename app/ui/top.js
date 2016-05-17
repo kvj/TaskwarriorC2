@@ -15,6 +15,7 @@ export class AppPane extends React.Component {
 
     componentDidMount() {
         this.showPage({
+            type: 'list',
             report: 'next',
             filter: '',
         });
@@ -22,6 +23,13 @@ export class AppPane extends React.Component {
 
     checkActive(key) {
         return this.state.page == key;
+    }
+
+    onCommand() {
+        this.showPage({
+            cmd: '',
+            type: 'cmd',
+        });
     }
 
     onAdd(key, filter) {
@@ -77,29 +85,49 @@ export class AppPane extends React.Component {
     showPage(page) {
         let {pages} = this.state;
         let item = pages.find((item) => {
-            return item.ref.same(page);
+            return item.type == page.type && item.ref.same(page);
         });
         if (!item) { // Add new
+            let paneCmp = null;
             const key = Date.now();
-            let item = {
+            let props = {
+                id: key,
                 key: key,
-                cmp: (
+                ref: (ref) => {
+                    item.ref = ref;
+                },
+                controller: this.props.controller,
+                onClose: this.onClose.bind(this),
+                checkActive: this.checkActive.bind(this),
+                onRefreshed: this.onRefreshed.bind(this),
+            };
+            if (page.type == 'list') { // Create list
+                paneCmp = (
                     <TasksPagePane
-                        id={key}
-                        key={key}
-                        ref={(ref) => {
-                            item.ref = ref;
-                        }}
+                        {...props}
                         report={page.report}
                         filter={page.filter}
-                        controller={this.props.controller}
-                        onClose={this.onClose.bind(this)}
                         onAdd={this.onAdd.bind(this)}
                         onEdit={this.onEdit.bind(this)}
-                        checkActive={this.checkActive.bind(this)}
-                        onRefreshed={this.onRefreshed.bind(this)}
                     />
-                ),
+                );
+            };
+            if (page.type == 'cmd') { // Create cmd pane
+                paneCmp = (
+                    <CmdPagePane
+                        {...props}
+                        cmd={page.cmd}
+                    />
+                );
+            }
+            if (!paneCmp) { // Invalid
+                console.log('Invalid');
+                return;
+            };
+            let item = {
+                key: key,
+                type: page.type,
+                cmp: paneCmp,
             };
             pages.push(item);
             this.setState({
@@ -133,10 +161,18 @@ export class AppPane extends React.Component {
     }
 
     onReportClick(report) {
-        this.showPage({
-            report: report.name,
-            filter: '',
-        });
+        if (report.special) { // 
+            this.showPage({
+                cmd: report.name,
+                type: 'cmd',
+            });
+        } else {
+            this.showPage({
+                report: report.name,
+                filter: '',
+                type: 'list',
+            });
+        }
     }
 
     current(page=this.state.page) {
@@ -164,6 +200,7 @@ export class AppPane extends React.Component {
             <cmp.AppCmp>
                 <ToolbarPane
                     controller={this.props.controller}
+                    onCommand={this.onCommand.bind(this)}
                 />
                 <CenterPane>
                     <MainPane
@@ -270,6 +307,53 @@ class PagePane extends React.Component {
         this.props.controller.events.removeListener('change', this.refreshHandler);
     }
 
+}
+
+class CmdPagePane extends PagePane {
+
+    constructor(props) {
+        super(props);
+        this.state = {};
+    }
+
+    input() {
+        return this.refs.cmp.input();
+    }
+
+    same(page) {
+        let data = this.input();
+        return page.cmd === data.cmd;
+    }
+
+    filter(filter) {
+        // this.refs.cmp.filter(filter);
+        this.refresh();
+    }
+
+    render() {
+        return (
+            <cmp.CmdPageCmp
+                {...this.props}
+                ref="cmp"
+                info={this.state.info}
+                onRefresh={this.refresh.bind(this)}
+                onClose={this.onClose.bind(this)}
+            />
+        );
+    }
+
+    async refresh() {
+        const {controller, onRefreshed, id} = this.props;
+        let data = this.input();
+        let info = await controller.cmdRaw(data.cmd);
+        if (info) {
+            // Load data
+            this.setState({
+                info: info,
+            });
+            onRefreshed(id, info);
+        }
+    }
 }
 
 class TasksPagePane extends PagePane {

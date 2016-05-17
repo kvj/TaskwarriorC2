@@ -54,7 +54,9 @@ export class TaskProvider {
             };
             let arr = [];
             for (let s of args) {
-                arr.push.apply(arr, s.split(' '));
+                if (s) {
+                    arr.push.apply(arr, s.split(' '));
+                };
             }
             const task = spawn(this.config.task || 'task', arr);
             stream2out(task.stdout, out, true);

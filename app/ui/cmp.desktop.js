@@ -225,6 +225,7 @@ export class ToolbarCmp extends React.Component {
     }
 
     render() {
+        const {onCommand} = this.props;
         return (
             <div style={_l([styles.flex0, styles.toolbar, styles.hflex])}>
                 <div style={_l([styles.flex0, styles.hbar])}>
@@ -233,6 +234,10 @@ export class ToolbarCmp extends React.Component {
                 <div style={_l([styles.flex1, styles.hbar])}>
                 </div>
                 <div style={_l([styles.flex0, styles.hbar])}>
+                    <IconBtn
+                        icon="terminal"
+                        onClick={onCommand}
+                    />
                     <IconBtn
                         icon="undo"
                         onClick={this.onUndo.bind(this)}
@@ -264,7 +269,7 @@ class ProjectsNavigation extends React.Component {
     render() {
         const {projects, info} = this.props;
         let hilites = {};
-        if (info) { // Have something
+        if (info && info.tasks) { // Have something
             info.tasks.forEach((item) => {
                 if (item.project) {
                     const val = hilites[item.project] || 0;
@@ -322,7 +327,7 @@ class TagsNavigation extends React.Component {
     render() {
         const {info} = this.props;
         let hilites = {};
-        if (info) { // Have something
+        if (info && info.tasks) { // Have something
             info.tasks.forEach((item) => {
                 if (item.tags) {
                     item.tags.forEach((tag) => {
@@ -691,6 +696,56 @@ class TaskPageInput extends React.Component {
 
 }
 
+class CmdPageInput extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            cmd: props.cmd || '',
+        };
+    }
+
+    onChange (evt) {
+        this.setState({
+            cmd: evt.target.value,
+        });
+    }
+
+    render() {
+        const line1 = (
+            <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
+                <input
+                    style={_l(styles.inp, styles.flex1)}
+                    type="text"
+                    value={this.state.cmd}
+                    onChange={this.onChange.bind(this)}
+                    onKeyPress={this.onKey.bind(this)}
+                    placeholder="Command"
+                />
+                <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
+                <IconBtn icon="close" onClick={this.props.onClose}/>
+            </div>
+        );
+        return (
+            <div style={_l(styles.flex0)}>
+                {line1}
+            </div>
+        );
+    }
+
+    input() {
+        return this.state;
+    }
+
+    onKey(evt) {
+        if (evt.charCode == 13) {
+            // Refresh
+            this.props.onRefresh();
+        }
+    }
+
+}
+
 export class TaskPageCmp extends React.Component {
 
     constructor(props) {
@@ -772,6 +827,59 @@ export class TaskPageCmp extends React.Component {
         return (
             <div style={_l(styles.vproxy)}>
                 <TaskPageInput
+                    {...this.props}
+                    ref="input"
+                />
+                <div style={_l(styles.vproxy)}>
+                    {body}
+                </div>
+            </div>
+        );
+    }
+}
+
+export class CmdPageCmp extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+        };
+    }
+
+
+    input() {
+        return this.refs.input.input();
+    }
+
+    filter(filter) {
+        this.refs.input.filter(filter);
+    }
+
+    render() {
+        const {
+            info,
+        } = this.props;
+        let body = null;
+        if (info) {
+            const lines = info.lines.map((line, idx) => {
+                return (
+                    <Text
+                        key={idx}
+                        style={[styles.pre, styles[`cmdLine_${line.type}`]]}
+                    >
+                        {line.line}
+                    </Text>
+                );
+            })
+            body = (
+                <div style={_l(styles.vproxy, styles.relative)}>
+                    <div style={_l(styles.cmdPane)}>{lines}</div>
+                </div>
+            );
+        }
+        return (
+            <div style={_l(styles.vproxy)}>
+                <CmdPageInput
                     {...this.props}
                     ref="input"
                 />

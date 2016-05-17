@@ -100,6 +100,10 @@ export const styles = {
         overflow: 'hidden',
     },
 
+    "pre": {
+        whiteSpace: "pre",
+    },
+
     "textSmall": {
         fontSize: "0.8em",
     },
@@ -134,6 +138,10 @@ export const styles = {
         position: 'relative',
     },
 
+    relative: {
+        position: 'relative',
+    },
+
     toolbar: {
         borderBottom: `1px solid ${layers.bg.br}`,
     },
@@ -149,6 +157,15 @@ export const styles = {
         borderRight: `1px solid ${layers.bg.br}`,
         backgroundColor: layers.bg.bg,
         order: 0,
+    },
+
+    cmdPane: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: 'auto',
     },
 
     navigationFloat: {
@@ -215,6 +232,10 @@ export const styles = {
     annotation_line: {
         marginLeft: 15,
         alignSelf: 'center',
+    },
+
+    cmdLine_error: {
+        fontWeight: 'bold',
     },
 
     floatBlock: {

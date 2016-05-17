@@ -212,10 +212,10 @@ export const sortTasks = (info) => {
                 continue; // Next field
             }
             if (_a === undefined) {
-                return 1*mul; // _b
+                return -1*mul; // _b
             }
             if (_b === undefined) {
-                return -1*mul; // _b
+                return 1*mul; // _b
             }
             return _a > _b? mul: -1*mul;
         }
