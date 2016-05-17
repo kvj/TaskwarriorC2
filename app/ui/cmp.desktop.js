@@ -603,6 +603,7 @@ class TaskPageInput extends React.Component {
             report: props.report || '',
             filter: props.filter || '',
         };
+        this.onSearch = this.onSearch.bind(this);
     }
 
     onReportChange (evt) {
@@ -618,11 +619,11 @@ class TaskPageInput extends React.Component {
     }
 
     componentDidMount() {
-        this.refs.filter.addEventListener('search', this.onSearch.bind(this));
+        this.refs.filter.addEventListener('search', this.onSearch);
     }
 
     componentWillUnmount() {
-        this.refs.filter.removeEventListener('search');
+        this.refs.filter.removeEventListener('search', this.onSearch);
     }
 
     render() {
