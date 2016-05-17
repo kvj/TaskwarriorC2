@@ -76,7 +76,7 @@ export const styles = {
         padding: 5,
         textAlign: "center",
         fontSize: "1em",
-        backgroundColor: layers.l1.bg,
+        backgroundColor: 'transparent',
         color: layers.l1.fg,
         outline: "none",
     },
@@ -213,6 +213,8 @@ export const styles = {
     },
 
     annotation_line: {
+        marginLeft: 15,
+        alignSelf: 'center',
     },
 
     floatBlock: {
@@ -230,6 +232,20 @@ export const styles = {
         backgroundColor: layers.bg.bg,
         color: layers.bg.fg,
         border: `2px solid ${layers.bg.br}`,
+    },
+
+    menu: {
+    },
+
+    menu_wrap: {
+        position: "relative",
+        width: 0,
+    },
+
+    menu_popup: {
+        position: "absolute",
+        top: 0,
+        right: 0,
     },
 
 };

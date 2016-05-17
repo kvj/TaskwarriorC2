@@ -23,6 +23,51 @@ const IconBtn = (props) => {
     );
 }
 
+class IconMenu extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {expanded: false};
+    }
+    
+    render() {
+        const {children, dir} = this.props;
+        const {expanded} = this.state;
+        let menu = null;
+        if (expanded) { // Render
+            menu = (
+                <div style={_l(styles.flex0, styles.menu_wrap)}>
+                    <div
+                        onMouseLeave={this.onMenuHide.bind(this)}
+                        onClick={this.onMenuHide.bind(this)}
+                        style={_l(styles.hflex, styles.menu_popup)}
+                    >
+                        {children}
+                    </div>
+                </div>
+            );
+        };
+        return (
+            <div style={_l(styles.hflex, styles.menu)}>
+                {menu}
+                <IconBtn icon="caret-left" onClick={this.onMenu.bind(this)}/>
+            </div>
+        );
+    }
+
+    onMenu() {
+        this.setState({
+            expanded: !this.state.expanded,
+        });
+    }
+
+    onMenuHide() {
+        this.setState({
+            expanded: false,
+        });
+    }
+}
+
 const Text = (props) => {
     let _st = [styles.flex0, styles.text];
     if (props.style && props.style.length) {
@@ -71,6 +116,7 @@ class Task extends React.Component {
             onClick,
             onDelete,
             onAnnDelete,
+            onAnnAdd,
         } = this.props;
         const fields = cols.map((item, idx) => {
             if (item.field == 'description') { // Separator
@@ -97,12 +143,14 @@ class Task extends React.Component {
             annotations = task.description_ann.map((item, idx) => {
                 return (
                     <div style={_l(styles.hflex, styles.annotation_line)} key={idx}>
-                        <IconBtn icon="close" onClick={(e) => {
-                            onAnnDelete(item.origin, e);
-                        }}/>
                         <Text style={[styles.flex1, styles.description, styles.textSmall]}>
                             {item.text}
                         </Text>
+                        <IconMenu>
+                            <IconBtn icon="close" onClick={(e) => {
+                                onAnnDelete(item.origin, e);
+                            }}/>
+                        </IconMenu>
                     </div>
                 );
             });
@@ -131,9 +179,16 @@ class Task extends React.Component {
                         onClick(e, task.description);
                     }}>{task.description_}</Text>
                     {desc_count}
-                    <IconBtn icon="close" onClick={(e) => {
-                        onDelete(e);
-                    }}/>
+                    <IconMenu>
+                        <IconBtn icon="close" onClick={(e) => {
+                            onDelete(e);
+                        }}/>
+                        <IconBtn icon="plus" onClick={(e) => {
+                            onAnnAdd(e);
+                        }}/>
+                        <IconBtn icon="play" onClick={(e) => {
+                        }}/>
+                    </IconMenu>
                 </div>
                 <div style={_l(styles.hflex, styles.wflex)}>
                     {fields}
@@ -669,10 +724,10 @@ export class TaskPageCmp extends React.Component {
             });
             const tasks = info.tasks.map((item, idx) => {
                 const onDone = (e) => {
-                    if (e.ctrl) { // Add annotation
-                        return onEdit(item, 'annotate', '');
-                    };
                     this.props.onDone(item);
+                };
+                const onAnnAdd = (e) => {
+                    onEdit(item, 'annotate', '');
                 };
                 const onDelete = (e) => {
                     onEdit(item, 'delete', '', true);
@@ -693,6 +748,7 @@ export class TaskPageCmp extends React.Component {
                         onClick={onClick}
                         onDelete={onDelete}
                         onAnnDelete={onAnnDelete}
+                        onAnnAdd={onAnnAdd}
                     />
                 );
             });
