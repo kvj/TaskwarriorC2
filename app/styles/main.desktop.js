@@ -203,6 +203,11 @@ export const styles = {
         cursor: "pointer",
     },
 
+    hilite: {
+        backgroundColor: layers.l2.bg,
+        color: layers.l2.fg,
+    },
+
     description: {
         alignSelf: 'center',
     },

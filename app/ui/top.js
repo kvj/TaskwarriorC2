@@ -68,6 +68,12 @@ export class AppPane extends React.Component {
         };
     }
 
+    onRefreshed(key, info) {
+        if (this.checkActive(key)) { // Refresh navigation
+            this.refs.navigation.hilite(info);
+        };
+    }
+
     showPage(page) {
         let {pages} = this.state;
         let item = pages.find((item) => {
@@ -91,6 +97,7 @@ export class AppPane extends React.Component {
                         onAdd={this.onAdd.bind(this)}
                         onEdit={this.onEdit.bind(this)}
                         checkActive={this.checkActive.bind(this)}
+                        onRefreshed={this.onRefreshed.bind(this)}
                     />
                 ),
             };
@@ -171,6 +178,7 @@ export class AppPane extends React.Component {
                         controller={this.props.controller}
                         onTagClick={this.onTagClick.bind(this)}
                         onProjectClick={this.onProjectClick.bind(this)}
+                        ref="navigation"
                         mode='dock'
                     />
                     <ReportsPane
@@ -319,13 +327,15 @@ class TasksPagePane extends PagePane {
     }
 
     async refresh() {
+        const {controller, onRefreshed, id} = this.props;
         let data = this.input();
-        let info = await this.props.controller.filter(data.report, data.filter);
+        let info = await controller.filter(data.report, data.filter);
         if (info) {
             // Load data
             this.setState({
                 info: info,
             });
+            onRefreshed(id, info);
         }
     }
 }
@@ -386,12 +396,19 @@ class NavigationPane extends React.Component {
         });
     }
 
+    hilite(info) {
+        this.setState({
+            info: info,
+        });
+    }
+
     render() {
         return (
             <cmp.NavigationCmp
                 {...this.props}
                 tags={this.state.tags}
                 projects={this.state.projects}
+                info={this.state.info}
                 onRefreshProjects={this.refreshProjects.bind(this)}
                 onRefreshTags={this.refreshTags.bind(this)}
             />

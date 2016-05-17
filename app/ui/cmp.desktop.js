@@ -204,16 +204,36 @@ export class CenterCmp extends React.Component {
 class ProjectsNavigation extends React.Component {
 
     render() {
+        const {projects, info} = this.props;
+        let hilites = {};
+        if (info) { // Have something
+            info.tasks.forEach((item) => {
+                if (item.project) {
+                    const val = hilites[item.project] || 0;
+                    hilites[item.project] = val+1;
+                }
+            });
+        };
         const renderProjects = (arr) => {
             return arr.map((item, idx) => {
+                item.hilite = hilites[item.project];
+                item.index = idx;
+                return item;
+            }).sort((a, b) => {
+                if (a.hilite && !b.hilite) return -1;
+                if (!a.hilite && b.hilite) return 1;
+                return a.index-b.index;
+            }).map((item, idx) => {
                 let prefix = '';
                 for (var i = 0; i < item.indent; i++) {
                     prefix += ' ';
                 }
+                let st = [styles.one_nav, styles.hflex, styles.hbar];
+                if (item.hilite) st.push(styles.hilite);
                 const jsx = (
                     <div
                         key={item.project}
-                        style={_l(styles.one_nav, styles.hflex, styles.hbar)}
+                        style={_l(st)}
                         onClick={(e) => {
                             this.props.onClick(item, e);
                         }}
@@ -232,7 +252,7 @@ class ProjectsNavigation extends React.Component {
                     <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
                 </div>
                 <div style={_l(styles.flex1s)}>
-                    {renderProjects(this.props.projects)}
+                    {renderProjects(projects)}
                 </div>
             </div>
         );
@@ -242,11 +262,33 @@ class ProjectsNavigation extends React.Component {
 class TagsNavigation extends React.Component {
 
     render() {
+        const {info} = this.props;
+        let hilites = {};
+        if (info) { // Have something
+            info.tasks.forEach((item) => {
+                if (item.tags) {
+                    item.tags.forEach((tag) => {
+                        const val = hilites[tag] || 0;
+                        hilites[tag] = val+1;
+                    })
+                }
+            });
+        };
         const tags = this.props.tags.map((item, idx) => {
+            item.hilite = hilites[item.name];
+            item.index = idx;
+            return item;
+        }).sort((a, b) => {
+            if (a.hilite && !b.hilite) return -1;
+            if (!a.hilite && b.hilite) return 1;
+            return a.index-b.index;
+        }).map((item, idx) => {
+            let st = [styles.one_nav, styles.hflex, styles.hbar];
+            if (item.hilite) st.push(styles.hilite);
             return (
                 <div
                     key={item.name}
-                    style={_l(styles.one_nav, styles.hflex, styles.hbar)}
+                    style={_l(st)}
                     onClick={(e) => {
                         this.props.onClick(item, e);
                     }}
@@ -289,11 +331,13 @@ export class NavigationCmp extends React.Component {
                     onRefresh={this.props.onRefreshProjects}
                     onClick={this.props.onProjectClick}
                     projects={this.props.projects || []}
+                    info={this.props.info}
                 />
                 <TagsNavigation
                     onRefresh={this.props.onRefreshTags}
                     onClick={this.props.onTagClick}
                     tags={this.props.tags || []}
+                    info={this.props.info}
                 />
             </div>
         );
