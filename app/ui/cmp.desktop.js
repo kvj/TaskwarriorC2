@@ -112,11 +112,13 @@ class Task extends React.Component {
         const {
             cols,
             task,
+            running,
             onDone,
             onClick,
             onDelete,
             onAnnDelete,
             onAnnAdd,
+            onStartStop,
         } = this.props;
         const fields = cols.map((item, idx) => {
             if (item.field == 'description') { // Separator
@@ -186,7 +188,8 @@ class Task extends React.Component {
                         <IconBtn icon="plus" onClick={(e) => {
                             onAnnAdd(e);
                         }}/>
-                        <IconBtn icon="play" onClick={(e) => {
+                        <IconBtn icon={running? 'stop': 'play'} onClick={(e) => {
+                            onStartStop(e);
                         }}/>
                     </IconMenu>
                 </div>
@@ -723,6 +726,7 @@ export class TaskPageCmp extends React.Component {
                 return (<Text editable={false} width={item.width} key={idx}>{item.label}</Text>);
             });
             const tasks = info.tasks.map((item, idx) => {
+                const running = item.start? true: false;
                 const onDone = (e) => {
                     this.props.onDone(item);
                 };
@@ -742,6 +746,7 @@ export class TaskPageCmp extends React.Component {
                 return (
                     <Task
                         task={item}
+                        running={running}
                         key={idx}
                         cols={cols}
                         onDone={onDone}
@@ -749,6 +754,9 @@ export class TaskPageCmp extends React.Component {
                         onDelete={onDelete}
                         onAnnDelete={onAnnDelete}
                         onAnnAdd={onAnnAdd}
+                        onStartStop={(e) => {
+                            onEdit(item, running? 'stop': 'start', '', true);
+                        }}
                     />
                 );
             });
