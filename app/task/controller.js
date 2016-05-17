@@ -25,6 +25,7 @@ const specialReports = [
     "summary",
     "timesheet",
     "projects",
+    "tags",
 ];
 
 class ToArrayEater extends StreamEater {
