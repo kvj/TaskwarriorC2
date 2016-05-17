@@ -559,6 +559,14 @@ class TaskPageInput extends React.Component {
         });
     }
 
+    componentDidMount() {
+        this.refs.filter.addEventListener('search', this.onSearch.bind(this));
+    }
+
+    componentWillUnmount() {
+        this.refs.filter.removeEventListener('search');
+    }
+
     render() {
         const line1 = (
             <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
@@ -580,9 +588,11 @@ class TaskPageInput extends React.Component {
                 <input
                     style={_l(styles.inp, styles.flex1)}
                     type="search"
+                    ref="filter"
                     value={this.state.filter}
                     onChange={this.onFilterChange.bind(this)}
                     onKeyPress={this.onKey.bind(this)}
+                    onSearch={this.onSearch.bind(this)}
                     placeholder="Filter"
                 />
             </div>
@@ -598,6 +608,12 @@ class TaskPageInput extends React.Component {
 
     input() {
         return this.state;
+    }
+
+    onSearch(evt) {
+        if (!this.state.filter) { // Empty
+            this.props.onRefresh();
+        };
     }
 
     onKey(evt) {
