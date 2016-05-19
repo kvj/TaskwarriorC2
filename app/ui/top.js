@@ -69,10 +69,15 @@ export class AppPane extends React.Component {
         if (idx != -1) { // Not last
             pages.splice(idx, 1);
             if (idx > 0) idx--;
+            const page = pages[idx];
+            this.state.page = (page || {}).key;
             this.setState({
                 pages: pages,
-                page: (pages[idx] || {}).key,
+                page: this.state.page,
             });
+            if (page && page.ref) { // Refresh currently visible
+                page.ref.refresh();
+            };
         };
     }
 
