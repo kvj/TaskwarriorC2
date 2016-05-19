@@ -5,6 +5,7 @@ export class TaskProvider {
 
     constructor(config) {
         this.config = config;
+        this.timerIDs = {};
     }
 
     init() {
@@ -78,5 +79,20 @@ export class TaskProvider {
         }, (err) => {
             console.log('Error:', err);
         });
+    }
+
+    schedule(seconds, type, interval) {
+        // console.log('Schedule:', seconds, type);
+        if (this.timerIDs[type]) { // Clear first
+            const clrFn = interval? clearInterval: clearTimeout;
+            clrFn(this.timerIDs[type]);
+            delete this.timerIDs[type];
+        };
+        if (seconds > 0) { // Schedule
+            const setFn = interval? setInterval: setTimeout;
+            this.timerIDs[type] = setFn(() => {
+                this.config.onTimer(type);
+            }, seconds * 1000);
+        };
     }
 }

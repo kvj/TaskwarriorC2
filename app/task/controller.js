@@ -1,6 +1,8 @@
 import {TaskProvider} from './provider';
 import {formatters, parseDate, sortTasks} from './format';
 import {EventEmitter} from '../tool/events';
+import {init as styleInit} from '../styles/style';
+import {init as stylesInit} from '../styles/main';
 class StreamEater {
     eat(line) {
         // Implement me
@@ -51,6 +53,7 @@ export class TaskController {
     constructor() {
         this.fixParams = ['rc.confirmation=off', 'rc.color=off', 'rc.verbose=nothing'];
         this.events = new EventEmitter();
+        this.timers = {};
     }
 
     async call(args, out, err, options) {
@@ -62,6 +65,10 @@ export class TaskController {
 
     err(message) {
         this.events.emit('notify:error', message);
+    }
+
+    info(message) {
+        this.events.emit('notify:info', message);
     }
 
     streamNotify(evt='notify:error') {
@@ -88,19 +95,49 @@ export class TaskController {
         return out.str();
     }
 
-    init(config={}) {
+    async init(config={}) {
         delete this.provider;
         config.onQuestion = (text) => {
             return new Promise((resp, rej) => {
                 this.events.emit('question', text, resp, rej);
             });
         };
-        const provider = new TaskProvider(config);
-        if (provider.init()) { // OK
-            this.provider = provider;
-            return true;
+        config.onTimer = async (type) => {
+            if (type == 'sync') {
+                const success = await this.sync();
+                if (success) { // Show info
+                    this.info('Automatically synchronized')
+                };
+            };
         };
-        return false;
+        const provider = new TaskProvider(config);
+        if (!await provider.init()) { // OK
+            return false;
+        };
+        this.provider = provider;
+        const css = await this.config('ui.style.', true);
+        styleInit(css);
+        stylesInit();
+        await this.setupSync();
+        this.scheduleSync();
+        return true;
+    }
+
+    async setupSync() {
+        const timers = await this.config('ui.sync.', true);
+        this.timers = {
+            normal: parseInt(timers['periodical'], 10) || 0,
+            error: parseInt(timers['error'], 10) || 0,
+            commit: parseInt(timers['commit'], 10) || 0,
+        };
+        console.log('setupSync:', this.timers);
+    }
+
+    scheduleSync(type='normal') {
+        const timeout = this.timers[type] || this.timers.normal || 0;
+        if (timeout > 0 && this.provider) { // Have timeout
+            this.provider.schedule(timeout*60, 'sync', true);
+        };
     }
 
     async reportInfo(report) {
@@ -241,6 +278,7 @@ export class TaskController {
         console.log('Undo:', code);
         if (code == 0) { // Success
             this.notifyChange();
+            this.scheduleSync('commit');
         };
         return code;
     }
@@ -259,6 +297,7 @@ export class TaskController {
         const code = await this.call(cmds, this.streamNotify('notify:info'), this.streamNotify(), {slow: true});
         if (code === 0) {
             this.notifyChange();
+            this.scheduleSync('commit');
             return true;
         };
         return false;
@@ -294,16 +333,11 @@ export class TaskController {
         this.events.emit('sync:finish');
         if (code == 0) {
             this.notifyChange();
-        };
-        return code;
-    }
-
-    async done(...uids) {
-        const code = await this.call([uids.join(','), 'done'], null, this.streamNotify());
-        if (code == 0) { // OK
-            this.notifyChange();
-        };
-        return code;
+            this.scheduleSync();
+        } else {
+            this.scheduleSync('error');
+        }
+        return code == 0;
     }
 
     async version() {
@@ -312,7 +346,7 @@ export class TaskController {
         return out.str();
     }
 
-    async config(prefix) {
+    async config(prefix, strip_prefix) {
         const reg = /^([a-z0-9_\.]+)\s(.+)$/;
         let result = {}; // Hash
         await this.call(['rc.defaultwidth=1000', 'show', prefix], {
@@ -321,7 +355,12 @@ export class TaskController {
                     // Our case
                     const m = line.match(reg);
                     if (m) {
-                        result[m[1].trim()] = m[2].trim();
+                        let key = m[1].trim();
+                        if (strip_prefix && key.indexOf(prefix) == 0) {
+                            // Remove prefix
+                            key = key.substr(prefix.length);
+                        };
+                        result[key] = m[2].trim();
                     }
                 }
             }

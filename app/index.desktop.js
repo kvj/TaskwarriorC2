@@ -19,12 +19,7 @@ class DesktopMain extends React.Component {
 export const start = async () => {
     const domNode = document.getElementById('app');
     const controller = new TaskController();
-    if (controller.init({})) { // OK
+    if (await controller.init({})) { // OK
         ReactDOM.render(React.createElement(DesktopMain, {controller}), domNode);
-        // const conf = await controller.config('taskd.');
-        // console.log('Config:', conf);
-        // const tags = await controller.tags();
-        // const projects = await controller.projects();
-        // console.log('Tags:', tags, 'projects:', projects);
     };
 };
