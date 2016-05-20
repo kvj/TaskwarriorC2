@@ -434,7 +434,7 @@ class CmdPagePane extends PagePane {
 
     filter(filter) {
         // this.refs.cmp.filter(filter);
-        this.refresh();
+        this.run();
     }
 
     render() {
@@ -443,17 +443,24 @@ class CmdPagePane extends PagePane {
                 {...this.props}
                 ref="cmp"
                 info={this.state.info}
-                onRefresh={this.refresh.bind(this)}
+                onRefresh={this.run.bind(this)}
                 onClose={this.onClose.bind(this)}
                 onPin={this.onPin.bind(this)}
             />
         );
     }
 
-    async refresh() {
+    refresh() {
+    }
+
+    async run() {
         const {controller, onRefreshed, id} = this.props;
         let data = this.input();
-        let info = await controller.cmdRaw(data.cmd);
+        let info = await controller.cmdRaw(data.cmd, (outp) => {
+            this.setState({
+                info: outp,
+            });
+        });
         if (info) {
             // Load data
             this.setState({

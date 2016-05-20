@@ -45,6 +45,7 @@ export class TaskProvider {
                         if (has_question) {
                             const m = l.match(yesno);
                             if (m) {
+                                options.flush && options.flush();
                                 handleQuestion(m[1]);
                                 return;
                             }

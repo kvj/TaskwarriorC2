@@ -305,21 +305,23 @@ export class TaskController {
         return false;
     }
 
-    async cmdRaw(cmd) {
+    async cmdRaw(cmd, handler) {
         const out = new ToArrayEater();
         const err = new ToArrayEater();
-        const code = await this.provider.call([cmd], out, err, {slow: true});
-        let result = [].concat(out.data.map((line) => {
-            return {
-                type: 'out',
-                line: line,
-            };
-        })).concat(err.data.map((line) => {
-            return {
-                type: 'error',
-                line: line,
-            };
-        }));
+        const stream2result = (stream, type) => {
+            return stream.data.map((line) => {
+                return {
+                    line, type,
+                };
+            });
+        };
+        const code = await this.provider.call([cmd], out, err, {
+            slow: true,
+            flush: () => {
+                handler && handler({lines: stream2result(out, 'out')});
+            },
+        });
+        let result = stream2result(out, 'out').concat(stream2result(err, 'error'));
         result.push({
             type: 'info',
             line: `Exit code: ${code}`,
