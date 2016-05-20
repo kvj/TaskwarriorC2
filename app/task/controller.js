@@ -173,11 +173,13 @@ export class TaskController {
                     if (cm == -1) {
                         result.cols.push({
                             field: s,
+                            full: s,
                         });
                     } else {
                         result.cols.push({
                             field: s.substr(0, cm),
                             display: s.substr(cm+1),
+                            full: s,
                         });
                     }
                 }
@@ -259,7 +261,7 @@ export class TaskController {
                 if (val.length > max) {
                     max = val.length;
                 };
-                task[`${item.field}_`] = val;
+                task[`${item.full}_`] = val;
                 // console.log('Format:', item.field, val, item.display);
             });
             if (max > 0) { // Visible

@@ -124,11 +124,11 @@ class Task extends React.Component {
             if (item.field == 'description') { // Separator
                 return (<div key={idx} style={_l(styles.spacer)}></div>);
             }
-            const val = task[`${item.field}_`] || '';
+            const val = task[`${item.full}_`] || '';
             const editable = task[`${item.field}_ro`]? false: true;
             return (<Text editable={editable} width={item.width} key={idx} onEdit={(e) => {
                 const edit_val = task[`${item.field}_edit`] || '';
-                console.log('Click:', e);
+                // console.log('Click:', e);
                 onClick(e, edit_val);
             }}>{val}</Text>);
         });
