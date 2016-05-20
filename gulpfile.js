@@ -9,13 +9,13 @@ var babelPresets = ['es2015', 'react'];
 var babelPlugins = ['syntax-async-functions', 'transform-regenerator'];
 
 gulp.task('js-common', function() { //
-    return gulp.src('app/**/*!(.android|.desktop).js').pipe(gulpBabel({
+    return gulp.src(['app/**/*.js', '!app/**/*@(.android|.desktop).js']).pipe(gulpBabel({
         presets: babelPresets,
         plugins: babelPlugins
     })).pipe(gulp.dest('.desktop/'));
 });
 gulp.task('js-desktop', function() { //
-    return gulp.src('app/**/*.desktop.js').pipe(gulpBabel({
+    return gulp.src(['app/**/*.desktop.js']).pipe(gulpBabel({
         presets: babelPresets,
         plugins: babelPlugins
     })).pipe(gulpRename(function (path) {
