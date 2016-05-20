@@ -21,6 +21,7 @@ export class AppPane extends React.Component {
                 navigation: conf.navigation || 'dock',
                 reports: conf.reports || 'dock',
             },
+            pins: [],
         };
         this.showPage({
             type: 'list',
@@ -56,7 +57,11 @@ export class AppPane extends React.Component {
     }
 
     checkActive(key) {
-        return this.state.page == key;
+        const page = this.current(key);
+        if (page && (this.state.page == key || page.pin)) {
+            return page;
+        };
+        return undefined;
     }
 
     onCommand() {
@@ -96,8 +101,16 @@ export class AppPane extends React.Component {
     }
 
     onClose(key) {
-        let {pages} = this.state;
-        let idx = pages.findIndex((item) => {
+        let {pages, pins} = this.state;
+        let idx = pins.findIndex((item) => {
+            return item.key == key;
+        });
+        if (idx != -1) { // Easy - remove pin
+            pins.splice(idx, 1);
+            this.setState({pins});
+            return idx;
+        };
+        idx = pages.findIndex((item) => {
             return item.key == key;
         });
         if (idx != -1) { // Not last
@@ -111,12 +124,15 @@ export class AppPane extends React.Component {
             });
             if (page && page.ref) { // Refresh currently visible
                 page.ref.refresh();
+                return idx;
             };
         };
+        return -1;
     }
 
     onRefreshed(key, info) {
-        if (this.checkActive(key)) { // Refresh navigation
+        const page = this.checkActive(key);
+        if (page && !page.pin) { // Refresh navigation
             this.refs.navigation.hilite(info);
         };
     }
@@ -132,6 +148,7 @@ export class AppPane extends React.Component {
             let props = {
                 id: key,
                 key: key,
+                pin: false,
                 ref: (ref) => {
                     item.ref = ref;
                 },
@@ -139,6 +156,7 @@ export class AppPane extends React.Component {
                 onClose: this.onClose.bind(this),
                 checkActive: this.checkActive.bind(this),
                 onRefreshed: this.onRefreshed.bind(this),
+                onPin: this.togglePin.bind(this),
             };
             if (page.type == 'list') { // Create list
                 paneCmp = (
@@ -180,6 +198,31 @@ export class AppPane extends React.Component {
         }
     }
 
+    togglePin(key) {
+        let page = this.current(key);
+        let {pages, pins} = this.state;
+        if (!page) return;
+        page.pin = !page.pin;
+        // console.log('Pin:', key, page.pin);
+        if (page.pin) { // Remove from pages, add to pins
+            this.onClose(key);
+            pins.push(page);
+        } else {
+            pages.push(page);
+            const idx = pins.findIndex((item) => {
+                return item.key == key;
+            });
+            if (idx != -1) { // Splice
+                pins.splice(idx, 1);
+            };
+            this.setState({
+                pages,
+                page: key,
+            });
+        }
+        this.setState({pages, pins});
+    }
+
     onNavigation(dir) {
         let {pages, page} = this.state;
         let idx = pages.findIndex((item) => {
@@ -215,9 +258,13 @@ export class AppPane extends React.Component {
         this.hidePane('reports');
     }
 
-    current(page=this.state.page) {
-        return this.state.pages.find((item) => {
-            return item.key == page;
+    current(key=this.state.page) {
+        let page = this.state.pages.find((item) => {
+            return item.key == key;
+        });
+        if (page) return page;
+        return this.state.pins.find((item) => {
+            return item.key == key;
         });
     }
 
@@ -259,6 +306,7 @@ export class AppPane extends React.Component {
                     <MainPane
                         controller={this.props.controller}
                         pages={this.state.pages}
+                        pins={this.state.pins}
                         page={this.state.page}
                         ref="main"
                         onNavigation={this.onNavigation.bind(this)}
@@ -347,6 +395,10 @@ class PagePane extends React.Component {
         this.props.onClose(this.props.id);
     }
 
+    onPin() {
+        this.props.onPin(this.props.id);
+    }
+
     onChanged() {
         if (this.props.checkActive(this.props.id)) {
             this.refresh();
@@ -393,6 +445,7 @@ class CmdPagePane extends PagePane {
                 info={this.state.info}
                 onRefresh={this.refresh.bind(this)}
                 onClose={this.onClose.bind(this)}
+                onPin={this.onPin.bind(this)}
             />
         );
     }
@@ -461,6 +514,7 @@ class TasksPagePane extends PagePane {
                 onClose={this.onClose.bind(this)}
                 onAdd={this.onAdd.bind(this)}
                 onEdit={this.onEdit.bind(this)}
+                onPin={this.onPin.bind(this)}
             />
         );
     }

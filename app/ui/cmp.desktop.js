@@ -580,7 +580,7 @@ export class MainCmp extends React.Component {
     }
 
     render() {
-        const {pages, page, onNavigation} = this.props;
+        const {pages, pins, page, onNavigation} = this.props;
         const {input} = this.state;
         const pageCmps = pages.map((pageCmp, idx) => {
             if (pageCmp.key == page) { // Visible
@@ -588,6 +588,9 @@ export class MainCmp extends React.Component {
             } else { // Hidden
                 return (<div key={pageCmp.key} style={_l(styles.none)}>{pageCmp.cmp}</div>);
             };
+        });
+        const pinsCmps = pins.map((pageCmp, idx) => {
+            return (<div key={pageCmp.key} style={_l(styles.vproxy)}>{pageCmp.cmp}</div>);
         });
         const pageIndicators = pages.map((pageCmp, idx) => {
             const icn = pageCmp.key == page? 'circle': 'circle-o';
@@ -606,8 +609,11 @@ export class MainCmp extends React.Component {
         };
         return (
             <div style={_l(styles.vproxy, styles.tasks)}>
-                <div style={_l(styles.vproxy)}>
-                    {pageCmps}
+                <div style={_l(styles.flex1, styles.hflex)}>
+                    <div style={_l(styles.vproxy)}>
+                        {pageCmps}
+                    </div>
+                    {pinsCmps}
                 </div>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <div style={_l(styles.flex0, styles.hbar)}>
@@ -662,6 +668,7 @@ class TaskPageInput extends React.Component {
     }
 
     render() {
+        const {onPin} = this.props;
         const line1 = (
             <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
                 <input
@@ -674,6 +681,7 @@ class TaskPageInput extends React.Component {
                 />
                 <IconBtn icon="plus" onClick={this.props.onAdd}/>
                 <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
+                <IconBtn icon="thumb-tack" onClick={onPin}/>
                 <IconBtn icon="close" onClick={this.props.onClose}/>
             </div>
         );
@@ -742,6 +750,7 @@ class CmdPageInput extends React.Component {
     }
 
     render() {
+        const {onRefresh, onPin, onClose} = this.props;
         const line1 = (
             <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
                 <input
@@ -752,8 +761,9 @@ class CmdPageInput extends React.Component {
                     onKeyPress={this.onKey.bind(this)}
                     placeholder="Command"
                 />
-                <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
-                <IconBtn icon="close" onClick={this.props.onClose}/>
+                <IconBtn icon="refresh" onClick={onRefresh}/>
+                <IconBtn icon="thumb-tack" onClick={onPin}/>
+                <IconBtn icon="close" onClick={onClose}/>
             </div>
         );
         return (
