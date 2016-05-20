@@ -120,8 +120,10 @@ class Task extends React.Component {
             onAnnAdd,
             onStartStop,
         } = this.props;
+        let desc_field = 'description'
         const fields = cols.map((item, idx) => {
             if (item.field == 'description') { // Separator
+                desc_field = item.full;
                 return (<div key={idx} style={_l(styles.spacer)}></div>);
             }
             const val = task[`${item.full}_`] || '';
@@ -192,7 +194,7 @@ class Task extends React.Component {
                     />
                     <Text editable style={descSt} onEdit={(e) => {
                         onClick(e, task.description);
-                    }}>{task.description_}</Text>
+                    }}>{task[`${desc_field}_`]}</Text>
                     {desc_count}
                     <IconMenu>
                         <IconBtn icon="close" onClick={(e) => {
@@ -501,6 +503,12 @@ class PopupEditor extends React.Component {
         };
     }
 
+    reset() {
+        this.setState({
+            input: this.props.input,
+        });
+    }
+
     onChange(evt) {
         this.setState({
             input: evt.target.value,
@@ -585,7 +593,11 @@ export class MainCmp extends React.Component {
     async onInputDone(input, e) {
         const keepOpen = e.ctrl;
         const success = await this.props.onInput(input, this.state.input.context);
-        if (success && !keepOpen) { // Close
+        if (success) { // Close
+            if (keepOpen) { // Reset
+                this.refs.popup_input.reset();
+                return;
+            };
             this.setState({
                 input: undefined,
             });
@@ -617,6 +629,7 @@ export class MainCmp extends React.Component {
                     title={input.title}
                     onDone={this.onInputDone.bind(this)}
                     onCancel={this.onInputCancel.bind(this)}
+                    ref="popup_input"
                 />
             );
         };

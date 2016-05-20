@@ -242,6 +242,7 @@ export const init = () => {
             backgroundColor: _layers.bg.bg,
             color: _layers.bg.fg,
             border: `2px solid ${_layers.bg.br}`,
+            padding: 5,
         },
 
         menu: {
