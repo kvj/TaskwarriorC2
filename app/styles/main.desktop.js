@@ -202,6 +202,10 @@ export const init = () => {
             margin: "0 3px 5px 3px",
         },
 
+        task_selected: {
+            backgroundColor: _layers.i_sel.bg,
+        },
+
         one_nav: {
             backgroundColor: _layers.l1.bg,
             color: _layers.l1.fg,

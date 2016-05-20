@@ -243,7 +243,7 @@ export class AppPane extends React.Component {
     }
 
     onReportClick(report) {
-        if (report.special) { // 
+        if (report.special) { //
             this.showPage({
                 cmd: report.name,
                 type: 'cmd',
@@ -475,7 +475,26 @@ class TasksPagePane extends PagePane {
 
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            selection: {},
+        };
+    }
+
+    resetSelection() {
+        this.setState({
+            selection: {},
+        });
+    }
+
+    select(task) {
+        let {selection} = this.state;
+        if (selection[task.uuid]) {
+            // unselect
+            delete selection[task.uuid];
+        } else {
+            selection[task.uuid] = true;
+        }
+        this.setState({selection});
     }
 
     onAdd() {
@@ -483,12 +502,20 @@ class TasksPagePane extends PagePane {
     }
 
     onEdit(task, cmd, input, unint=false) {
-        this.props.onEdit(this.props.id, cmd, [task], input, unint);
+        const {selection, info} = this.state;
+        let tasks = [];
+        if (info && info.tasks) {
+            tasks = info.tasks.filter((item) => selection[item.uuid]);
+        }
+        if (!tasks.length || !tasks.includes(task)) {
+            tasks = [task]; // Current
+        }
+        this.props.onEdit(this.props.id, cmd, tasks, input, unint);
     }
 
     filter(filter) {
         this.refs.cmp.filter(filter);
-        this.refresh();
+        this.refresh(true);
     }
 
     input() {
@@ -516,17 +543,21 @@ class TasksPagePane extends PagePane {
                 filter={this.state.filter}
                 ref="cmp"
                 info={this.state.info}
-                onRefresh={this.refresh.bind(this)}
+                selection={this.state.selection}
+                onRefresh={() => {
+                    this.refresh(true);
+                }}
                 onDone={this.onDone.bind(this)}
                 onClose={this.onClose.bind(this)}
                 onAdd={this.onAdd.bind(this)}
                 onEdit={this.onEdit.bind(this)}
                 onPin={this.onPin.bind(this)}
+                onSelect={this.select.bind(this)}
             />
         );
     }
 
-    async refresh() {
+    async refresh(reset) {
         const {controller, onRefreshed, id} = this.props;
         let data = this.input();
         let info = await controller.filter(data.report, data.filter);
@@ -535,6 +566,9 @@ class TasksPagePane extends PagePane {
             this.setState({
                 info: info,
             });
+            if (reset) {
+                this.resetSelection();
+            }
             onRefreshed(id, info);
         }
     }

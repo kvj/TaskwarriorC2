@@ -46,6 +46,8 @@ export const layers = () => {
         fg: clr('l2.fg', '#333'),
         br: clr('l2.br', '#ccc'),
     };
+    result.i_sel = {
+        bg: clr('i_sel.bg', '#eef'),
+    }
     return result;
 };
-

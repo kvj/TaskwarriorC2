@@ -29,7 +29,7 @@ class IconMenu extends React.Component {
         super(props);
         this.state = {expanded: false};
     }
-    
+
     render() {
         const {children, dir} = this.props;
         const {expanded} = this.state;
@@ -112,6 +112,7 @@ class Task extends React.Component {
         const {
             cols,
             task,
+            style,
             running,
             onDone,
             onClick,
@@ -119,6 +120,7 @@ class Task extends React.Component {
             onAnnDelete,
             onAnnAdd,
             onStartStop,
+            onTap,
         } = this.props;
         let desc_field = 'description'
         const fields = cols.map((item, idx) => {
@@ -186,7 +188,9 @@ class Task extends React.Component {
             check_icon = 'refresh';
         }
         return (
-            <div style={_l(styles.one_task)}>
+            <div style={_l([styles.one_task].concat(style))} onClick={(e) => {
+                onTap(eventInfo(e));
+            }}>
                 <div style={_l(styles.hflex)}>
                     <IconBtn
                         icon={check_icon}
@@ -832,7 +836,9 @@ export class TaskPageCmp extends React.Component {
     render() {
         const {
             info,
+            selection,
             onEdit,
+            onSelect,
         } = this.props;
         let body = null;
         if (info) {
@@ -864,11 +870,20 @@ export class TaskPageCmp extends React.Component {
                 const onClick = (e, data, cmd='modify') => {
                     onEdit(item, cmd, data);
                 };
-
+                const onTap = (e) => {
+                    if (e.meta) {
+                        onSelect(item);
+                    }
+                };
+                let style = [];
+                if (selection[item.uuid]) {
+                    style.push(styles.task_selected);
+                }
                 return (
                     <Task
                         task={item}
                         running={running}
+                        style={style}
                         key={idx}
                         cols={cols}
                         onDone={onDone}
@@ -876,6 +891,7 @@ export class TaskPageCmp extends React.Component {
                         onDelete={onDelete}
                         onAnnDelete={onAnnDelete}
                         onAnnAdd={onAnnAdd}
+                        onTap={onTap}
                         onStartStop={(e) => {
                             onEdit(item, running? 'stop': 'start', '', true);
                         }}
