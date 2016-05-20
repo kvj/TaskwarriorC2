@@ -44,6 +44,7 @@ const formatDate = (obj, format, name, editable) => {
         return '';
     };
     obj[`${name}_date`] = dt;
+    obj[`${name}_title`] = dt.toLocaleString();
     if (editable) {
         const dt_iso = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
         obj[`${name}_edit`] = `${name}:${dt_iso}`;
@@ -120,6 +121,7 @@ export const formatters = {
                 text: outp,
                 origin: line.description,
                 date: dt,
+                title: dt? dt.toLocaleString(): line.description,
             };
         });
         if (format == 'oneline') { // Combine to all
@@ -133,6 +135,7 @@ export const formatters = {
     },
     tags(obj, format) {
         const tags = obj.tags || [];
+        obj.tags_title = tags.join(' ');
         if (!tags.length) { // Empty
             return '';
         };
@@ -163,6 +166,7 @@ export const formatters = {
     uuid(obj, format) {
         // obj.uuid_ro = true;
         const val = obj.uuid || '';
+        obj.uuid_title = val;
         const minus = val.indexOf('-');
         if (!val || minus == -1) {
             // Not uuid
@@ -183,6 +187,7 @@ export const formatters = {
     },
     recur(obj, format) {
         const val = obj.recur || '';
+        obj.recur_title = val;
         obj.recur_edit = `recur:${val}`;
         if (format == 'indicator' && val) {
             return 'R';

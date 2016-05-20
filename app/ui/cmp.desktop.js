@@ -126,11 +126,21 @@ class Task extends React.Component {
             }
             const val = task[`${item.full}_`] || '';
             const editable = task[`${item.field}_ro`]? false: true;
-            return (<Text editable={editable} width={item.width} key={idx} onEdit={(e) => {
-                const edit_val = task[`${item.field}_edit`] || '';
-                // console.log('Click:', e);
-                onClick(e, edit_val);
-            }}>{val}</Text>);
+            return (
+                <Text
+                    editable={editable}
+                    width={item.width}
+                    title={task[`${item.field}_title`]}
+                    key={idx}
+                    onEdit={(e) => {
+                        const edit_val = task[`${item.field}_edit`] || '';
+                        // console.log('Click:', e);
+                        onClick(e, edit_val);
+                    }}
+                >
+                    {val}
+                </Text>
+            );
         });
         let descSt = [styles.description, styles.flex1];
         if (task.description_truncate) {
@@ -145,7 +155,10 @@ class Task extends React.Component {
             annotations = task.description_ann.map((item, idx) => {
                 return (
                     <div style={_l(styles.hflex, styles.annotation_line)} key={idx}>
-                        <Text style={[styles.flex1, styles.description, styles.textSmall]}>
+                        <Text
+                            title={item.title}
+                            style={[styles.flex1, styles.description, styles.textSmall]}
+                            >
                             {item.text}
                         </Text>
                         <IconMenu>
