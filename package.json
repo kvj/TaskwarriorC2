@@ -2,18 +2,20 @@
   "name": "taskwc2",
   "version": "0.0.1",
   "private": true,
+  "dependencies": {
+    "electron-prebuilt": "^1.1.0",
+    "react": "^15.0.2",
+    "react-dom": "^15.0.2",
+    "babel-polyfill": "^6.9.0"
+  },
   "devDependencies": {
-    "electron-prebuilt": "latest",
-    "gulp": "latest",
-    "gulp-babel": "latest",
-    "gulp-rename": "latest",
-    "babel-preset-react": "latest",
-    "babel-preset-es2015": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "babel-plugin-syntax-async-functions": "latest",
-    "babel-plugin-transform-regenerator": "latest",
-    "babel-polyfill": "latest"
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-rename": "^1.2.2",
+    "babel-preset-react": "^6.5.0",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-plugin-syntax-async-functions": "^6.8.0",
+    "babel-plugin-transform-regenerator": "^6.9.0"
   },
   "scripts": {
     "desktop": "node_modules/.bin/electron _desktop.js",
