@@ -8,16 +8,50 @@ export class AppPane extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            pages: [],
-        };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+        let conf = await this.props.controller.config('default.command');
+        const defaultCmd = conf['default.command'] || 'next';
+        conf = await this.props.controller.config('ui.pane.', true);
+        this.state = {
+            pages: [],
+            defaultCmd: defaultCmd,
+            panes: {
+                navigation: conf.navigation || 'dock',
+                reports: conf.reports || 'dock',
+            },
+        };
         this.showPage({
             type: 'list',
-            report: 'next',
+            report: this.state.defaultCmd,
             filter: '',
+        });
+    }
+
+    hidePane(pane) {
+        let {panes} = this.state;
+        let state = panes[pane];
+        if (state != 'float') return;
+        panes[pane] = 'hidden';
+        this.setState({
+            panes,
+        });
+    }
+
+    togglePane(pane) {
+        let state = this.state.panes[pane];
+        if (!state) return;
+        if (state == 'dock') { // Hide
+            state = 'hidden';
+        } else if (state == 'hidden') {
+            state = 'float';
+        } else {
+            state = 'dock';
+        }
+        this.state.panes[pane] = state;
+        this.setState({
+            panes: this.state.panes,
         });
     }
 
@@ -178,6 +212,7 @@ export class AppPane extends React.Component {
                 type: 'list',
             });
         }
+        this.hidePane('reports');
     }
 
     current(page=this.state.page) {
@@ -191,6 +226,7 @@ export class AppPane extends React.Component {
         if (page && page.ref) {
             page.ref.filter(`+${tag.name}`);
         }
+        this.hidePane('navigation');
     }
 
     onProjectClick(project) {
@@ -198,14 +234,26 @@ export class AppPane extends React.Component {
         if (page && page.ref) {
             page.ref.filter(`pro:${project.project}`);
         }
+        this.hidePane('navigation');
+    }
+
+    async onUndo() {
+        return await this.props.controller.undo();
+    }
+
+    async onSync() {
+        return await this.props.controller.sync();
     }
 
     render() {
+        if (!this.state) return null;
         return (
             <cmp.AppCmp>
                 <ToolbarPane
-                    controller={this.props.controller}
                     onCommand={this.onCommand.bind(this)}
+                    onTogglePane={this.togglePane.bind(this)}
+                    onUndo={this.onUndo.bind(this)}
+                    onSync={this.onSync.bind(this)}
                 />
                 <CenterPane>
                     <MainPane
@@ -221,12 +269,14 @@ export class AppPane extends React.Component {
                         onTagClick={this.onTagClick.bind(this)}
                         onProjectClick={this.onProjectClick.bind(this)}
                         ref="navigation"
-                        mode='dock'
+                        mode={this.state.panes.navigation}
+                        onHide={this.hidePane.bind(this)}
                     />
                     <ReportsPane
                         controller={this.props.controller}
                         onClick={this.onReportClick.bind(this)}
-                        mode='dock'
+                        mode={this.state.panes.reports}
+                        onHide={this.hidePane.bind(this)}
                     />
                 </CenterPane>
                 <StatusbarPane
@@ -528,10 +578,9 @@ class ReportsPane extends React.Component {
     render() {
         return (
             <cmp.ReportsCmp
+                {...this.props}
                 reports={this.state.reports}
                 onRefresh={this.refresh.bind(this)}
-                onClick={this.props.onClick}
-                mode={this.props.mode}
                 ref="cmp"
             />
         );

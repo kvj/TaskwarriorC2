@@ -215,21 +215,22 @@ export class AppCmp extends React.Component {
 
 export class ToolbarCmp extends React.Component {
 
-    async onUndo() {
-        await this.props.controller.undo();
-    }
-
-    async onSync() {
-        const outp = await this.props.controller.sync();
-        console.log('Sync:', outp);
-    }
-
     render() {
-        const {onCommand} = this.props;
+        const {
+            onCommand,
+            onTogglePane,
+            onSync,
+            onUndo
+        } = this.props;
         return (
             <div style={_l([styles.flex0, styles.toolbar, styles.hflex])}>
                 <div style={_l([styles.flex0, styles.hbar])}>
-                    <IconBtn icon="navicon"/>
+                    <IconBtn
+                        icon="navicon"
+                        onClick={(e) => {
+                            onTogglePane('navigation', e);
+                        }}
+                    />
                 </div>
                 <div style={_l([styles.flex1, styles.hbar])}>
                 </div>
@@ -240,13 +241,18 @@ export class ToolbarCmp extends React.Component {
                     />
                     <IconBtn
                         icon="undo"
-                        onClick={this.onUndo.bind(this)}
+                        onClick={onUndo}
                     />
                     <IconBtn
                         icon="cloud"
-                        onClick={this.onSync.bind(this)}
+                        onClick={onSync}
                     />
-                    <IconBtn icon="navicon"/>
+                    <IconBtn
+                        icon="navicon"
+                        onClick={(e) => {
+                            onTogglePane('reports', e);
+                        }}
+                    />
                 </div>
             </div>
         );
@@ -375,7 +381,27 @@ class TagsNavigation extends React.Component {
     }
 }
 
-export class NavigationCmp extends React.Component {
+class PaneCmp extends React.Component {
+
+    constructor(props, name) {
+        super(props);
+        this.onMouseLeave = this.onMouseLeave.bind(this);
+        this.name = name;
+    }
+
+    onMouseLeave(e) {
+        const {mode, onHide} = this.props;
+        if (mode == 'float') {
+            onHide(this.name);
+        };
+    }
+}
+
+export class NavigationCmp extends PaneCmp {
+
+    constructor(props) {
+        super(props, 'navigation');
+    }
 
     render() {
         let st = [styles.navigation, styles.vflex];
@@ -389,7 +415,7 @@ export class NavigationCmp extends React.Component {
             st.push(styles.none);
         }
         return (
-            <div style={_l(st)}>
+            <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
                 <ProjectsNavigation
                     onRefresh={this.props.onRefreshProjects}
                     onClick={this.props.onProjectClick}
@@ -407,7 +433,11 @@ export class NavigationCmp extends React.Component {
     }
 };
 
-export class ReportsCmp extends React.Component {
+export class ReportsCmp extends PaneCmp {
+
+    constructor(props) {
+        super(props, 'reports');
+    }
 
     render() {
         let st = [styles.reports, styles.vflex];
@@ -436,7 +466,7 @@ export class ReportsCmp extends React.Component {
             )
         });
         return (
-            <div style={_l(st)}>
+            <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <Text style={[styles.flex1]}>Reports</Text>
                     <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
