@@ -147,11 +147,10 @@ export class TaskController {
             filter: '',
         };
         let desc = [];
-        const config = await this.config(`report.${report}.`);
-        const from = `report.${report}.`.length;
+        const ctxConf = await this.config('context');
+        const config = await this.config(`report.${report}.`, true);
         for (let key in config) {
-            const k = key.substr(from); // Cut last part
-            if (k == 'sort') {
+            if (key == 'sort') {
                 for (let s of config[key].split(',')) {
                     let item = {
                         field: s,
@@ -167,7 +166,7 @@ export class TaskController {
                     result.sort.push(item);
                 };
             };
-            if (k == 'columns') {
+            if (key == 'columns') {
                 for (let s of config[key].split(',')) {
                     let cm = s.indexOf('.');
                     if (cm == -1) {
@@ -184,14 +183,20 @@ export class TaskController {
                     }
                 }
             }
-            if (k == 'labels') {
+            if (key == 'labels') {
                 desc = config[key].split(',');
             }
-            if (k == 'description') {
+            if (key == 'description') {
                 result.description = config[key];
             }
-            if (k == 'filter') {
+            if (key == 'filter') {
                 result.filter = config[key];
+                if (ctxConf.context) {
+                    const ctxFilter = ctxConf[`context.${ctxConf.context}`];
+                    if (ctxFilter) {
+                        result.filter = `${ctxFilter} ${result.filter}`;
+                    }
+                }
             }
         }
         if (desc.length == result.cols.length) {
@@ -390,6 +395,45 @@ export class TaskController {
         return result.sort((a, b) => {
             return b.count - a.count;
         });
+    }
+
+    async setContext(context) {
+        const code = await this.cmd('context', context);
+        if (code == 0) {
+            this.notifyChange();
+            return true;
+        }
+        return false;
+    }
+
+    async contexts() {
+        const conf = await this.config('context');
+        let result = [];
+        let current = 'none';
+        for (let key in conf) {
+            if (key == 'context') {
+                current = conf.context;
+            } else {
+                // Save config
+                result.push({
+                    name: key.substr(8),
+                    context: key.substr(8),
+                    filter: conf[key],
+                });
+            }
+        }
+        if (!result.length) {
+            return undefined;
+        }
+        result.splice(0, 0, {
+            name: '(none)',
+            context: 'none',
+            filter: 'Context not set',
+        });
+        result.forEach((item) => {
+            item.selected = current == item.context;
+        });
+        return result;
     }
 
     async reports() {

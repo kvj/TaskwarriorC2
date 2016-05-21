@@ -452,23 +452,8 @@ export class NavigationCmp extends PaneCmp {
     }
 };
 
-export class ReportsCmp extends PaneCmp {
-
-    constructor(props) {
-        super(props, 'reports');
-    }
-
+const ReportsList = React.createClass({
     render() {
-        let st = [styles.reports, styles.vflex];
-        if (this.props.mode == 'dock') {
-            st.push(styles.flex0);
-        }
-        if (this.props.mode == 'float') {
-            st.push(styles.reportsFloat);
-        }
-        if (this.props.mode == 'hidden') {
-            st.push(styles.none);
-        }
         const reports = this.props.reports.map((item, idx) => {
             const onClick = () => {
                 this.props.onClick(item);
@@ -485,7 +470,7 @@ export class ReportsCmp extends PaneCmp {
             )
         });
         return (
-            <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
+            <div style={_l(styles.vproxy)}>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <Text style={[styles.flex1]}>Reports</Text>
                     <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
@@ -493,6 +478,75 @@ export class ReportsCmp extends PaneCmp {
                 <div style={_l(styles.flex1s)}>
                     {reports}
                 </div>
+            </div>
+        );
+    },
+});
+
+const ContextsList = React.createClass({
+    render() {
+        const {contexts, onRefresh, onClick} = this.props;
+        if (!contexts) {
+            return null; // Hide
+        }
+        const list = contexts.map((item, idx) => {
+            const click = () => {
+                onClick(item.context);
+            };
+            return (
+                <div
+                    style={_l(styles.one_nav, item.selected? styles.hilite: null)}
+                    key={idx}
+                    onClick={click}
+                >
+                    <Text style={[styles.oneLine]}>{item.name}</Text>
+                    <Text style={[styles.oneLine, styles.textSmall]}>{item.filter}</Text>
+                </div>
+            )
+        });
+        return (
+            <div style={_l(styles.flex0, styles.vflex)}>
+                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+                    <Text style={[styles.flex1]}>Contexts</Text>
+                    <IconBtn icon="refresh" onClick={onRefresh}/>
+                </div>
+                {list}
+            </div>
+        );
+    },
+});
+
+export class ReportsCmp extends PaneCmp {
+
+    constructor(props) {
+        super(props, 'reports');
+    }
+
+    render() {
+        const {reports, onReportsRefresh, onReportClick} = this.props;
+        const {contexts, onContextsRefresh, onContextClick} = this.props;
+        let st = [styles.reports, styles.vflex];
+        if (this.props.mode == 'dock') {
+            st.push(styles.flex0);
+        }
+        if (this.props.mode == 'float') {
+            st.push(styles.reportsFloat);
+        }
+        if (this.props.mode == 'hidden') {
+            st.push(styles.none);
+        }
+        return (
+            <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
+                <ReportsList
+                    reports={reports}
+                    onRefresh={onReportsRefresh}
+                    onClick={onReportClick}
+                />
+                <ContextsList
+                    contexts={contexts}
+                    onRefresh={onContextsRefresh}
+                    onClick={onContextClick}
+                />
             </div>
         );
     }

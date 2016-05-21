@@ -242,6 +242,11 @@ export class AppPane extends React.Component {
         pages[idx].ref.refresh();
     }
 
+    async onContextClick(context) {
+        await this.props.controller.setContext(context);
+        this.refs.reports.refreshContexts();
+    }
+
     onReportClick(report) {
         if (report.special) { //
             this.showPage({
@@ -321,8 +326,10 @@ export class AppPane extends React.Component {
                         onHide={this.hidePane.bind(this)}
                     />
                     <ReportsPane
+                        ref="reports"
                         controller={this.props.controller}
-                        onClick={this.onReportClick.bind(this)}
+                        onReportClick={this.onReportClick.bind(this)}
+                        onContextClick={this.onContextClick.bind(this)}
                         mode={this.state.panes.reports}
                         onHide={this.hidePane.bind(this)}
                     />
@@ -421,6 +428,12 @@ class CmdPagePane extends PagePane {
     constructor(props) {
         super(props);
         this.state = {};
+    }
+
+    componentDidMount() {
+        if (this.props.cmd) {
+            this.run();
+        }
     }
 
     input() {
@@ -660,13 +673,21 @@ class ReportsPane extends React.Component {
     }
 
     componentDidMount() {
-        this.refresh();
+        this.refreshReports();
+        this.refreshContexts();
     }
 
-    async refresh() {
+    async refreshReports() {
         const reports = await this.props.controller.reports();
         this.setState({
             reports: reports,
+        });
+    }
+
+    async refreshContexts() {
+        const data = await this.props.controller.contexts();
+        this.setState({
+            contexts: data,
         });
     }
 
@@ -675,7 +696,9 @@ class ReportsPane extends React.Component {
             <cmp.ReportsCmp
                 {...this.props}
                 reports={this.state.reports}
-                onRefresh={this.refresh.bind(this)}
+                contexts={this.state.contexts}
+                onReportsRefresh={this.refreshReports.bind(this)}
+                onContextsRefresh={this.refreshContexts.bind(this)}
                 ref="cmp"
             />
         );
