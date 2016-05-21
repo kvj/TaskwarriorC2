@@ -14,20 +14,15 @@ export class TaskProvider {
 
     call(args, out, err, options={}) {
         // Return promise
-        const yesno = /^(.+)\s*\(yes\/no\)\s*$/;
+        const yesno = /^(.+)\s\((\S+)\)\s*$/;
         return new Promise((resp, rej) => {
-            const handleQuestion = async (question) => {
-                const answer = await this.config.onQuestion(question);
+            const handleQuestion = async (question, choices) => {
+                const answer = await this.config.onQuestion(question, choices);
                 if (answer === undefined) {
                     task.kill();
                     return;
                 }
-                if (answer === true) {
-                    task.stdin.write('y\n');
-                }
-                if (answer === false) {
-                    task.stdin.write('n\n');
-                }
+                task.stdin.write(`${answer[0]}\n`);
             }
             const stream2out = (stream, outp, has_question) => {
                 stream.setEncoding('utf8');
@@ -44,9 +39,10 @@ export class TaskProvider {
                         };
                         if (has_question) {
                             const m = l.match(yesno);
+                            // console.log('Question:', m, options, l);
                             if (m) {
                                 options.flush && options.flush();
-                                handleQuestion(m[1]);
+                                handleQuestion(m[1], m[2].split('/'));
                                 return;
                             }
                         }

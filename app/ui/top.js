@@ -356,8 +356,8 @@ class StatusbarPane extends React.Component {
         this.props.controller.events.on('notify:info', (msg) => {
             this.refs.cmp.showMessage('info', msg);
         });
-        this.props.controller.events.on('question', (msg, resp) => {
-            this.refs.cmp.showMessage('question', msg, resp);
+        this.props.controller.events.on('question', (msg, choices, resp) => {
+            this.refs.cmp.showMessage('question', msg, choices, resp);
         });
         this.props.controller.events.on('sync:start', () => {
             this.setState({

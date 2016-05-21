@@ -994,7 +994,7 @@ export class StatusbarCmp extends React.Component {
         });
     }
 
-    showMessage(type, message, resp) {
+    showMessage(type, message, choices, resp) {
         if (!message) {
             return false;
         }
@@ -1002,6 +1002,7 @@ export class StatusbarCmp extends React.Component {
             const fl = {
                 type: type,
                 message: message,
+                choices: choices,
                 resp: resp,
             };
             this.state.floats.push(fl);
@@ -1036,19 +1037,27 @@ export class StatusbarCmp extends React.Component {
         if (spin) spinCls += ' fa-spin';
         const floats = this.state.floats.map((item, idx) => {
             if (item.type == 'question') {
+                const btns = item.choices.map((btn) => {
+                    return (
+                        <a
+                            key={btn}
+                            href="#"
+                            style={_l(styles.btn_a)}
+                            onClick={(e) => {
+                                this.hideFloat(item);
+                                item.resp(btn);
+                            }}
+                        >
+                            {btn}
+                        </a>
+                    );
+                });
                 return (
                     <div key={idx} style={_l(styles.floatBlock)}>
                         <Text>{item.message}</Text>
                         <div style={_l(styles.hflex)}>
                             <div style={_l(styles.spacer)}></div>
-                            <IconBtn icon="check" onClick={() => {
-                                this.hideFloat(item);
-                                item.resp(true);
-                            }}/>
-                            <IconBtn icon="close" onClick={() => {
-                                this.hideFloat(item);
-                                item.resp(false);
-                            }}/>
+                            {btns}
                         </div>
                     </div>
                 );

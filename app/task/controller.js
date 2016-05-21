@@ -97,9 +97,9 @@ export class TaskController {
 
     async init(config={}) {
         delete this.provider;
-        config.onQuestion = (text) => {
+        config.onQuestion = (text, choices) => {
             return new Promise((resp, rej) => {
-                this.events.emit('question', text, resp, rej);
+                this.events.emit('question', text, choices, resp, rej);
             });
         };
         config.onTimer = async (type) => {
@@ -295,8 +295,9 @@ export class TaskController {
         };
         cmds.push(cmd);
         cmds.push(input);
-        console.log('cmd', cmds);
+        // console.log('cmd', cmds);
         const code = await this.call(cmds, this.streamNotify('notify:info'), this.streamNotify(), {slow: true});
+        console.log('cmd result', cmds, code);
         if (code === 0) {
             this.notifyChange();
             this.scheduleSync('commit');

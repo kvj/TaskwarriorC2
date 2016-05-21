@@ -69,6 +69,12 @@ export const init = () => {
             outline: "none",
         },
 
+        "btn_a": {
+            padding: 5,
+            color: _layers.bg.fg,
+            fontFamily: _fontFamily,
+        },
+
         "inp": {
             border: 0,
             borderRadius: 0,
