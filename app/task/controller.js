@@ -192,10 +192,7 @@ export class TaskController {
             if (key == 'filter') {
                 result.filter = config[key];
                 if (ctxConf.context) {
-                    const ctxFilter = ctxConf[`context.${ctxConf.context}`];
-                    if (ctxFilter) {
-                        result.filter = `${ctxFilter} ${result.filter}`;
-                    }
+                    result.context = ctxConf[`context.${ctxConf.context}`];
                 }
             }
         }
@@ -222,8 +219,11 @@ export class TaskController {
         }
         info.tasks = []; // Reset
         let cmd = ['rc.json.array=off', 'export'];
+        if (info.context) {
+            cmd.push(`(${info.context})`)
+        }
         if (info.filter) {
-            cmd.push(info.filter);
+            cmd.push(`(${info.filter})`);
         }
         if (filter) {
             cmd.push(filter);

@@ -136,6 +136,7 @@ export const formatters = {
     tags(obj, format) {
         const tags = obj.tags || [];
         obj.tags_title = tags.join(' ');
+        obj.tags_edit = '+';
         if (!tags.length) { // Empty
             return '';
         };
@@ -145,7 +146,7 @@ export const formatters = {
         if (format == 'count') { // [3]
             return `[${tags.length}]`;
         };
-        obj.tags_edit = '+'+tags.join(' +');
+        obj.tags_edit += tags.join(' +');
         return tags.join(' ')+' ';
     },
     project(obj, format) {

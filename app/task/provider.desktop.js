@@ -52,10 +52,14 @@ export class TaskProvider {
             };
             let arr = [];
             for (let s of args) {
-                if (s) {
-                    arr.push.apply(arr, s.split(' '));
-                };
+                if (!s) continue;
+                if (s[0] == '(' && s[s.length-1] == ')') {
+                    arr.push(s);
+                    continue;
+                }
+                arr.push.apply(arr, s.split(' '));
             }
+            // console.log('Run:', arr, args);
             const task = spawn(this.config.task || 'task', arr);
             stream2out(task.stdout, out, true);
             stream2out(task.stderr, err, false);

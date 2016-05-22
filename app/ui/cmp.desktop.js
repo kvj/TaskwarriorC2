@@ -293,6 +293,10 @@ class ProjectsNavigation extends React.Component {
 
     render() {
         const {projects, info} = this.props;
+        if (!projects.length || (projects.length == 1 && projects[0].project == '')) {
+            // No projects
+            return null;
+        }
         let hilites = {};
         if (info && info.tasks) { // Have something
             info.tasks.forEach((item) => {
@@ -350,7 +354,10 @@ class ProjectsNavigation extends React.Component {
 class TagsNavigation extends React.Component {
 
     render() {
-        const {info} = this.props;
+        const {info, tags} = this.props;
+        if (!tags.length) {
+            return null; // Hide
+        }
         let hilites = {};
         if (info && info.tasks) { // Have something
             info.tasks.forEach((item) => {
@@ -362,7 +369,7 @@ class TagsNavigation extends React.Component {
                 }
             });
         };
-        const tags = this.props.tags.map((item, idx) => {
+        const list = tags.map((item, idx) => {
             item.hilite = hilites[item.name];
             item.index = idx;
             return item;
@@ -393,7 +400,7 @@ class TagsNavigation extends React.Component {
                     <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
                 </div>
                 <div style={_l(styles.flex1s)}>
-                    {tags}
+                    {list}
                 </div>
             </div>
         );
