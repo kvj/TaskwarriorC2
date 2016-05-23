@@ -503,11 +503,11 @@ class TasksPagePane extends PagePane {
         let {selection} = this.state;
         if (selection[task.uuid]) {
             // unselect
-            delete selection[task.uuid];
+            selection[task.uuid] = false;
         } else {
             selection[task.uuid] = true;
         }
-        this.setState({selection});
+        this.setState({selection: selection,});
     }
 
     onAdd() {
@@ -576,12 +576,12 @@ class TasksPagePane extends PagePane {
         let info = await controller.filter(data.report, data.filter);
         if (info) {
             // Load data
-            this.setState({
-                info: info,
-            });
             if (reset) {
                 this.resetSelection();
             }
+            this.setState({
+                info: info,
+            });
             onRefreshed(id, info);
         }
     }
