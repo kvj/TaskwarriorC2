@@ -3,9 +3,10 @@ import {layers, fontFamily, layersStyle} from './style';
 export let styles = {};
 
 export const init = () => {
-    const _layers = layers();
+    const [_layers, _colorDefs] = layers();
     const _fontFamily = fontFamily();
     const _layersStyle = layersStyle(_layers, _fontFamily);
+    const _colorsStyle = layersStyle(_colorDefs, _fontFamily);
     const _styles = {
         "vflex": {
             display: 'flex',
@@ -276,6 +277,10 @@ export const init = () => {
     for (var key in _styles) {
         styles[key] = _styles[key];
     };
+    for (var key in _colorsStyle) {
+        styles[`color_${key}`] = _colorsStyle[key];
+    };
+    console.log('Styles total:', styles);
 };
 
 export const _l = (...args) => {

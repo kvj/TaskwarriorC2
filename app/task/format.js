@@ -1,3 +1,7 @@
+import {colors} from '../styles/style';
+import {styles} from '../styles/main';
+
+
 export const parseDate = (s) => {
     if (!s || s.length != 16) {
         return undefined;
@@ -227,4 +231,102 @@ export const sortTasks = (info) => {
         }
         return 0;
     });
+};
+
+const coloring = {
+    tagged: (task) => {
+        if (task.tags && task.tags.length) { // Not empty
+            return ['tagged'];
+        };
+    },
+    recurring: (task) => {
+        if (task.recur) return ['recurring'];
+    },
+    blocked: (task) => {
+        if (task.depends && task.depends.length) return ['blocked'];
+    },
+    due: (task) => {
+        if (task.due) return ['due'];
+    },
+    'due.today': (task) => {
+        if (task.due_date) {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const finish = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1);
+            if (task.due_date.getTime() >= start.getTime() && task.due_date.getTime() < finish.getTime()) {
+                return ['due.today'];
+            };
+        }
+    },
+    scheduled: (task) => {
+        if (task.scheduled) return ['scheduled'];
+    },
+    overdue: (task) => {
+        if (task.due_date) {
+            const now = new Date();
+            const finish = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            if (task.due_date.getTime() < finish.getTime()) {
+                return ['overdue'];
+            };
+        }
+    },
+    'project.': (task, colors) => {
+        const project = task.project || 'none';
+        let name = '';
+        let cls = [];
+        for (let part of project.split('.')) {
+            if (name) name += '.';
+            name += part;
+            if (colors[`project.${name}`]) {
+                cls.push(`project.${name}`);
+            }
+        }
+        if (task.project && !cls.length) {
+            // Only project present
+            return ['project.']
+        }
+        return cls;
+    },
+    'tag.': (task, colors) => {
+        const tags = task.tags || [];
+        if (!tags.length && colors['tag.none']) { // No tags style
+            return ['tag.none'];
+        };
+        let cls = [];
+        for (let tag of tags) {
+            if (colors[`tag.${tag}`]) {
+                cls.push(`tag.${tag}`);
+            }
+        }
+        if (tags.length && !cls.length) {
+            // Only project present
+            return ['tag.'];
+        }
+        return cls;
+    },
+    completed: (task) => {
+        if (task.status == 'completed') return ['completed'];
+    },
+    deleted: (task) => {
+        if (task.status == 'deleted') return ['deleted'];
+    },
+    active: (task) => {
+        if (task.start) return ['active'];
+    },
+};
+
+export const calcColorStyles = (task, precedence) => {
+    const clrDef = colors();
+    let result = [];
+    for (let rule of precedence) {
+        if (!coloring[rule]) continue;
+        const sts = coloring[rule](task, clrDef);
+        if (!sts) continue;
+        for (let st of sts) {
+            if (styles[`color_${st}_bg`]) { // Only background
+                result.push(styles[`color_${st}_bg`]);
+            };
+        }
+    }
+    return result;
 };

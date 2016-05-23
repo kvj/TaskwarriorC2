@@ -1,8 +1,13 @@
 let style = {};
+let colorDefs = {};
 
 export const init = (css) => {
     style = css || {};
 };
+
+export const colors = () => {
+    return colorDefs;
+}
 
 export const fontFamily = () => {
     return style['font'] || 'Monaco Regular, Monospace';
@@ -47,7 +52,23 @@ export const layers = () => {
         br: clr('l2.br', '#ccc'),
     };
     result.i_sel = {
-        bg: clr('i_sel.bg', '#eef'),
+        bg: clr('i_sel.bg', '#b39ddb'),
     }
-    return result;
+    colorDefs = {
+        'due': {bg: '#fce4ec'},
+        'due.today': {bg: '#f8bbd0'},
+        'overdue': {bg: '#f48fb1'},
+        'recurring': {bg: '#bbdefb'},
+        'scheduled': {bg: '#b3e5fc'},
+        'active': {bg: '#ffe0b2'},
+        'completed': {bg: '#a5d6a7'},
+        'deleted': {bg: '#e57373'},
+        'tag.next': {bg: '#fffde7'},
+    };
+    for (let key in style) {
+        if (key.indexOf('color.') == 0) { // Override
+            colorDefs[key.substr(6)] = {bg: clr(key)};
+        };
+    };
+    return [result, colorDefs];
 };

@@ -936,7 +936,7 @@ export class TaskPageCmp extends React.Component {
                         onSelect(item);
                     }
                 };
-                let style = [];
+                let style = item.styles || [];
                 if (selection[item.uuid]) {
                     style.push(styles.task_selected);
                 }

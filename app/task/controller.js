@@ -1,5 +1,5 @@
 import {TaskProvider} from './provider';
-import {formatters, parseDate, sortTasks} from './format';
+import {formatters, parseDate, sortTasks, calcColorStyles} from './format';
 import {EventEmitter} from '../tool/events';
 import {init as styleInit} from '../styles/style';
 import {init as stylesInit} from '../styles/main';
@@ -145,8 +145,14 @@ export class TaskController {
             sort: [],
             cols: [],
             filter: '',
+            precedence: [],
         };
         let desc = [];
+        const ruleConf = await this.config('rule.precedence.color', true);
+        // console.log('ruleConf', ruleConf);
+        if (ruleConf['']) { // Have
+            result.precedence = ruleConf[''].split(',').reverse();
+        };
         const ctxConf = await this.config('context');
         const config = await this.config(`report.${report}.`, true);
         for (let key in config) {
@@ -276,6 +282,10 @@ export class TaskController {
             };
         });
         info.tasks = sortTasks(info);
+        // console.log('Precedence:', info.precedence);
+        info.tasks.forEach((task) => {
+            task.styles = calcColorStyles(task, info.precedence);
+        });
         // console.log('Filter:', info, cmd, code);
         return info;
     }
