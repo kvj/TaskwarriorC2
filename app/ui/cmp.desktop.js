@@ -936,7 +936,10 @@ export class TaskPageCmp extends React.Component {
                         onSelect(item);
                     }
                 };
-                let style = item.styles || [];
+                let style = [];
+                if (item.styles) { // Append
+                    style.push.apply(style, item.styles);
+                };
                 if (selection[item.uuid]) {
                     style.push(styles.task_selected);
                 }
@@ -1144,7 +1147,7 @@ export class StatusbarCmp extends React.Component {
                 <div style={_l(styles.floatBR)}>
                     {floats}
                 </div>
-                <div style={_l(styles.flex0)}>
+                <div style={_l(styles.flex0, spin? null: styles.hidden)}>
                     <i className={spinCls}></i>
                 </div>
                 {time}

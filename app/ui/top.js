@@ -507,7 +507,7 @@ class TasksPagePane extends PagePane {
         } else {
             selection[task.uuid] = true;
         }
-        this.setState({selection: selection,});
+        this.setState({selection});
     }
 
     onAdd() {

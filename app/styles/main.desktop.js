@@ -58,6 +58,10 @@ export const init = () => {
             display: 'none',
         },
 
+        "hidden": {
+            visibility: 'hidden',
+        },
+
         "btn": {
             border: 0,
             borderRadius: 0,
