@@ -31,16 +31,22 @@ class IconMenu extends React.Component {
     }
 
     render() {
-        const {children, dir} = this.props;
+        const {children, dir, style} = this.props;
         const {expanded} = this.state;
         let menu = null;
+        let st = [styles.hflex, styles.menu];
+        let wst = [styles.hflex, styles.menu_popup];
+        if (style && style.length) { // Copy
+            st = st.concat(style);
+            wst = wst.concat(style);
+        };
         if (expanded) { // Render
             menu = (
                 <div style={_l(styles.flex0, styles.menu_wrap)}>
                     <div
                         onMouseLeave={this.onMenuHide.bind(this)}
                         onClick={this.onMenuHide.bind(this)}
-                        style={_l(styles.hflex, styles.menu_popup)}
+                        style={_l(wst)}
                     >
                         {children}
                     </div>
@@ -48,9 +54,12 @@ class IconMenu extends React.Component {
             );
         };
         return (
-            <div style={_l(styles.hflex, styles.menu)}>
+            <div style={_l(st)}>
                 {menu}
-                <IconBtn icon="caret-left" onClick={this.onMenu.bind(this)}/>
+                <IconBtn
+                    icon={expanded? 'caret-right': 'caret-left'}
+                    onClick={this.onMenu.bind(this)}
+                />
             </div>
         );
     }
@@ -165,7 +174,7 @@ class Task extends React.Component {
                             >
                             {item.text}
                         </Text>
-                        <IconMenu>
+                        <IconMenu style={style}>
                             <IconBtn icon="close" onClick={(e) => {
                                 onAnnDelete(item.origin, e);
                             }}/>
@@ -200,7 +209,7 @@ class Task extends React.Component {
                         onClick(e, task.description);
                     }}>{task[`${desc_field}_`]}</Text>
                     {desc_count}
-                    <IconMenu>
+                    <IconMenu style={style}>
                         <IconBtn icon="close" onClick={(e) => {
                             onDelete(e);
                         }}/>
@@ -936,7 +945,7 @@ export class TaskPageCmp extends React.Component {
                         onSelect(item);
                     }
                 };
-                let style = [];
+                let style = [styles.one_item];
                 if (item.styles) { // Append
                     style.push.apply(style, item.styles);
                 };

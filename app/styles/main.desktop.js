@@ -208,9 +208,12 @@ export const init = () => {
         },
 
         one_task: {
+            margin: "0 3px 5px 3px",
+        },
+
+        one_item: {
             backgroundColor: _layers.l1.bg,
             color: _layers.l1.fg,
-            margin: "0 3px 5px 3px",
         },
 
         task_selected: {
