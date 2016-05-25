@@ -108,11 +108,29 @@ const Text = (props) => {
             <i className="fa fa-fw" style={styles.text_edit}></i>
         )
     }
+    let onDrag = undefined;
+    let draggable = false;
+    if (props.onDrag) { // Enable drag
+        onDrag = (e) => {
+            const [type, value, text] = props.onDrag(e);
+            if (type && value) { // Start drag
+                e.dataTransfer.setData('text/plain', text || value);
+                e.dataTransfer.setData(type, value);
+            };
+        };
+        draggable = true;
+    };
     return (
         <div style={_l(_st)} title={props.title || val} className="text-wrap" onClick={(evt) => {
             if (props.onClick) props.onClick(eventInfo(evt));
         }}>
-            <span className="text">{val}</span>
+            <span
+                className="text"
+                draggable={draggable}
+                onDragStart={onDrag}
+            >
+                {val}
+            </span>
             {editIcn}
             <span>{sfx}</span>
         </div>
@@ -323,9 +341,18 @@ class Task extends DnD {
                         icon={check_icon}
                         onClick={onDone}
                     />
-                    <Text editable style={descSt} onEdit={(e) => {
-                        onClick(e, task.description);
-                    }}>{task[`${desc_field}_`]}</Text>
+                    <Text
+                        editable
+                        style={descSt}
+                        onDrag={(e) => {
+                            return ['tw/task', task.uuid, task.description];
+                        }}
+                        onEdit={(e) => {
+                            onClick(e, task.description);
+                        }}
+                    >
+                        {task[`${desc_field}_`]}
+                    </Text>
                     {desc_count}
                     <IconMenu style={style}>
                         <IconBtn
@@ -1127,8 +1154,16 @@ export class TaskPageCmp extends React.Component {
                     if (type == 'tw/tag') { // Drop tag - add tag
                         onEdit(item, 'modify', `+${data}`, true);
                     };
-                    if (type == 'tw/project') { // Drop tag - add tag
+                    if (type == 'tw/project') { // Drop project - set project
                         onEdit(item, 'modify', `pro:${data}`, true);
+                    };
+                    if (type == 'tw/task') { // Drop task - add dependency
+                        let uuids = item.depends || [];
+                        if (uuids.includes(data) || item.uuid == data) { // Already or invalid
+                            return;
+                        };
+                        uuids.push(data);
+                        onEdit(item, 'modify', `depends:${uuids.join(',')}`, true);
                     };
                 };
                 let style = [styles.one_item];

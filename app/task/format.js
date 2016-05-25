@@ -203,7 +203,11 @@ export const formatters = {
         obj.depends_ro = true;
         const arr = obj.depends || [];
         if (Array.isArray(arr) && arr.length) {
+            obj.depends_title = `[${arr.length}]`;
             obj.depends_sort = arr.length;
+            if (format == 'indicator') {
+                return 'D';
+            }
             return `[${arr.length}]`;
         }
         obj.depends_sort = 0;
