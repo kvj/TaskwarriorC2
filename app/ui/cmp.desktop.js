@@ -15,9 +15,13 @@ const eventInfo = (e) => {
 
 const IconBtn = (props) => {
     return (
-        <button style={_l([styles.btn])} onClick={(evt) => {
-            if (props.onClick) props.onClick(eventInfo(evt));
-        }}>
+        <button
+            style={_l([styles.btn])}
+            onClick={(evt) => {
+                if (props.onClick) props.onClick(eventInfo(evt));
+            }}
+            title={props.title}
+        >
             <i className={`fa fa-fw fa-${props.icon}`}></i>
         </button>
     );
@@ -115,7 +119,104 @@ const Text = (props) => {
     );
 }
 
-class Task extends React.Component {
+class DnD extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.dropCount = 0;
+        this.dropTypes = [];
+        this.onDragStart = this.onDragStart.bind(this);
+        this.onDragFinish = this.onDragFinish.bind(this);
+        this.onDragOver = this.onDragOver.bind(this);
+        this.onDrop = this.onDrop.bind(this);
+    }
+
+    hasData(e) {
+        for (let type of e.dataTransfer.types) {
+            if (this.dropTypes.includes(type)) { // OK
+                return type;
+            };
+        }
+        return undefined;
+    }
+
+    onDragStart(e) {
+        if (!this.hasData(e)) return;
+        this.dropCount += 1;
+        if (this.dropCount == 1) { // First
+            this.setState({
+                dragTarget: true,
+            });
+        };
+        e.preventDefault();
+    }
+
+    onDragOver(e) {
+        if (!this.hasData(e)) return;
+        e.preventDefault();
+    }
+
+    onDragFinish(e) {
+        if (!this.hasData(e)) return;
+        this.dropCount -= 1;
+        if (this.dropCount == 0) { // Last
+            this.setState({
+                dragTarget: false,
+            });
+        };
+        e.preventDefault();
+    }
+
+    onDrop(e) {
+        const type = this.hasData(e);
+        if (!type) return;
+        this.dropCount = 0;
+        this.setState({
+            dragTarget: false,
+        });
+        this.onDropHandler(type, e.dataTransfer.getData(type), e);
+        e.preventDefault();
+    }
+
+    onDropHandler(type, data) {
+    }
+
+}
+
+/*
+class TaskTag extends DnD {
+
+    constructor(props) {
+        super(props);
+        this.dropTypes.push('tw/tag');
+        this.state = {};
+    }
+
+    onDropHandler(type, data) {
+        this.props.onDrop(type, data);
+    }
+
+    render() {
+        const {item} = this.props;
+        const {dragTarget} = this.state;
+        return (
+        );
+    }
+
+}
+*/
+
+class Task extends DnD {
+
+    constructor(props) {
+        super(props);
+        this.dropTypes.push('tw/tag', 'tw/project', 'tw/task');
+        this.state = {};
+    }
+
+    onDropHandler(type, data) {
+        this.props.onDrop(type, data);
+    }
 
     render() {
         const {
@@ -131,6 +232,7 @@ class Task extends React.Component {
             onStartStop,
             onTap,
         } = this.props;
+        const {dragTarget} = this.state;
         let desc_field = 'description'
         const fields = cols.map((item, idx) => {
             if (item.field == 'description') { // Separator
@@ -175,9 +277,13 @@ class Task extends React.Component {
                             {item.text}
                         </Text>
                         <IconMenu style={style}>
-                            <IconBtn icon="close" onClick={(e) => {
-                                onAnnDelete(item.origin, e);
-                            }}/>
+                            <IconBtn
+                                icon="close"
+                                onClick={(e) => {
+                                    onAnnDelete(item.origin, e);
+                                }}
+                                title="Remove annotation"
+                            />
                         </IconMenu>
                     </div>
                 );
@@ -196,10 +302,22 @@ class Task extends React.Component {
         if (task.status == 'recurring') {
             check_icon = 'refresh';
         }
+        let taskStyles = [styles.one_task];
+        if (dragTarget) { // As target
+           taskStyles.push(styles.task_drop);
+        };
+        taskStyles = taskStyles.concat(style);
         return (
-            <div style={_l([styles.one_task].concat(style))} onClick={(e) => {
-                onTap(eventInfo(e));
-            }}>
+            <div
+                style={_l(taskStyles)}
+                onClick={(e) => {
+                    onTap(eventInfo(e));
+                }}
+                onDragEnter={this.onDragStart}
+                onDragLeave={this.onDragFinish}
+                onDragOver={this.onDragOver}
+                onDrop={this.onDrop}
+            >
                 <div style={_l(styles.hflex)}>
                     <IconBtn
                         icon={check_icon}
@@ -210,15 +328,27 @@ class Task extends React.Component {
                     }}>{task[`${desc_field}_`]}</Text>
                     {desc_count}
                     <IconMenu style={style}>
-                        <IconBtn icon="close" onClick={(e) => {
-                            onDelete(e);
-                        }}/>
-                        <IconBtn icon="plus" onClick={(e) => {
-                            onAnnAdd(e);
-                        }}/>
-                        <IconBtn icon={running? 'stop': 'play'} onClick={(e) => {
-                            onStartStop(e);
-                        }}/>
+                        <IconBtn
+                            icon="close"
+                            onClick={(e) => {
+                                onDelete(e);
+                            }}
+                            title="Delete task"
+                        />
+                        <IconBtn
+                            icon="plus"
+                            onClick={(e) => {
+                                onAnnAdd(e);
+                            }}
+                            title="Add annotation"
+                        />
+                        <IconBtn
+                            icon={running? 'stop': 'play'}
+                            onClick={(e) => {
+                                onStartStop(e);
+                            }}
+                            title={running? "Stop task": "Start task"}
+                        />
                     </IconMenu>
                 </div>
                 <div style={_l(styles.hflex, styles.wflex)}>
@@ -255,6 +385,7 @@ export class ToolbarCmp extends React.Component {
                 <div style={_l([styles.flex0, styles.hbar])}>
                     <IconBtn
                         icon="navicon"
+                        title="Toggle Projects and Tags pane"
                         onClick={(e) => {
                             onTogglePane('navigation', e);
                         }}
@@ -265,18 +396,22 @@ export class ToolbarCmp extends React.Component {
                 <div style={_l([styles.flex0, styles.hbar])}>
                     <IconBtn
                         icon="terminal"
+                        title="Run custom task command"
                         onClick={onCommand}
                     />
                     <IconBtn
                         icon="undo"
+                        title="Undo latest operation"
                         onClick={onUndo}
                     />
                     <IconBtn
                         icon="cloud"
+                        title="Sync with taskd server"
                         onClick={onSync}
                     />
                     <IconBtn
                         icon="navicon"
+                        title="Toggle Reports and Contexts pane"
                         onClick={(e) => {
                             onTogglePane('reports', e);
                         }}
@@ -335,6 +470,11 @@ class ProjectsNavigation extends React.Component {
                     <div
                         key={item.project}
                         style={_l(st)}
+                        onDragStart={(e) => {
+                            e.dataTransfer.setData('text/plain', `pro:${item.project}`);
+                            e.dataTransfer.setData('tw/project', item.project);
+                        }}
+                        draggable
                         onClick={(e) => {
                             this.props.onClick(item, e);
                         }}
@@ -350,7 +490,11 @@ class ProjectsNavigation extends React.Component {
             <div style={_l(styles.vproxy)}>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <Text style={[styles.flex1]}>Projects</Text>
-                    <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
+                    <IconBtn
+                        icon="refresh"
+                        title="Refresh list"
+                        onClick={this.props.onRefresh}
+                    />
                 </div>
                 <div style={_l(styles.flex1s)}>
                     {renderProjects(projects)}
@@ -396,6 +540,11 @@ class TagsNavigation extends React.Component {
                     onClick={(e) => {
                         this.props.onClick(item, e);
                     }}
+                    onDragStart={(e) => {
+                        e.dataTransfer.setData('text/plain', `+${item.name}`);
+                        e.dataTransfer.setData('tw/tag', item.name);
+                    }}
+                    draggable
                 >
                     <Text style={[styles.flex1]}>{item.name}</Text>
                     <Text style={[styles.flex0]}>{item.count}</Text>
@@ -406,7 +555,11 @@ class TagsNavigation extends React.Component {
             <div style={_l(styles.vproxy)}>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <Text style={[styles.flex1]}>Tags</Text>
-                    <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
+                    <IconBtn
+                        icon="refresh"
+                        onClick={this.props.onRefresh}
+                        title="Refresh list"
+                    />
                 </div>
                 <div style={_l(styles.flex1s)}>
                     {list}
@@ -489,7 +642,11 @@ const ReportsList = React.createClass({
             <div style={_l(styles.vproxy)}>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <Text style={[styles.flex1]}>Reports</Text>
-                    <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
+                    <IconBtn
+                        icon="refresh"
+                        onClick={this.props.onRefresh}
+                        title="Refresh list"
+                    />
                 </div>
                 <div style={_l(styles.flex1s)}>
                     {reports}
@@ -524,7 +681,11 @@ const ContextsList = React.createClass({
             <div style={_l(styles.flex0, styles.vflex)}>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <Text style={[styles.flex1]}>Contexts</Text>
-                    <IconBtn icon="refresh" onClick={onRefresh}/>
+                    <IconBtn
+                        icon="refresh"
+                        onClick={onRefresh}
+                        title="Refresh list"
+                    />
                 </div>
                 {list}
             </div>
@@ -779,9 +940,17 @@ class TaskPageInput extends React.Component {
                     onKeyPress={this.onKey.bind(this)}
                     placeholder="Report"
                 />
-                <IconBtn icon="plus" onClick={this.props.onAdd}/>
+                <IconBtn
+                    icon="plus"
+                    onClick={this.props.onAdd}
+                    title="Add new"
+                />
                 <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
-                <IconBtn icon="thumb-tack" onClick={onPin}/>
+                <IconBtn
+                    icon="thumb-tack"
+                    onClick={onPin}
+                    title="Pin/unpin panel"
+                />
                 <IconBtn icon="close" onClick={this.props.onClose}/>
             </div>
         );
@@ -849,6 +1018,10 @@ class CmdPageInput extends React.Component {
         });
     }
 
+    componentDidMount() {
+        this.refs.input.focus();
+    }
+
     render() {
         const {onRefresh, onPin, onClose} = this.props;
         const line1 = (
@@ -856,13 +1029,18 @@ class CmdPageInput extends React.Component {
                 <input
                     style={_l(styles.inp, styles.flex1)}
                     type="text"
+                    ref="input"
                     value={this.state.cmd}
                     onChange={this.onChange.bind(this)}
                     onKeyPress={this.onKey.bind(this)}
                     placeholder="Command"
                 />
                 <IconBtn icon="refresh" onClick={onRefresh}/>
-                <IconBtn icon="thumb-tack" onClick={onPin}/>
+                <IconBtn
+                    icon="thumb-tack"
+                    onClick={onPin}
+                    title="Pin/unpin panel"
+                />
                 <IconBtn icon="close" onClick={onClose}/>
             </div>
         );
@@ -945,6 +1123,14 @@ export class TaskPageCmp extends React.Component {
                         onSelect(item);
                     }
                 };
+                const onDrop = (type, data) => {
+                    if (type == 'tw/tag') { // Drop tag - add tag
+                        onEdit(item, 'modify', `+${data}`, true);
+                    };
+                    if (type == 'tw/project') { // Drop tag - add tag
+                        onEdit(item, 'modify', `pro:${data}`, true);
+                    };
+                };
                 let style = [styles.one_item];
                 if (item.styles) { // Append
                     style.push.apply(style, item.styles);
@@ -968,6 +1154,7 @@ export class TaskPageCmp extends React.Component {
                         onStartStop={(e) => {
                             onEdit(item, running? 'stop': 'start', '', true);
                         }}
+                        onDrop={onDrop}
                     />
                 );
             });

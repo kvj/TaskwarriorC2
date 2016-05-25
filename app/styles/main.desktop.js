@@ -220,6 +220,10 @@ export const init = () => {
             backgroundColor: _layers.i_sel.bg,
         },
 
+        task_drop: {
+            transform: "scale(1.1)",
+        },
+
         one_nav: {
             backgroundColor: _layers.l1.bg,
             color: _layers.l1.fg,
