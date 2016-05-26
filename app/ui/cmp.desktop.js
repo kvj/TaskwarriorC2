@@ -229,11 +229,19 @@ class Task extends DnD {
     constructor(props) {
         super(props);
         this.dropTypes.push('tw/tag', 'tw/project', 'tw/task');
-        this.state = {};
+        this.state = {
+            dependsVisible: false,
+        };
     }
 
     onDropHandler(type, data) {
         this.props.onDrop(type, data);
+    }
+
+    toggleDepends() {
+        this.setState({
+            dependsVisible: !this.state.dependsVisible,
+        });
     }
 
     render() {
@@ -246,11 +254,12 @@ class Task extends DnD {
             onClick,
             onDelete,
             onAnnDelete,
+            onDepDelete,
             onAnnAdd,
             onStartStop,
             onTap,
         } = this.props;
-        const {dragTarget} = this.state;
+        const {dragTarget, dependsVisible} = this.state;
         let desc_field = 'description'
         const fields = cols.map((item, idx) => {
             if (item.field == 'description') { // Separator
@@ -259,6 +268,11 @@ class Task extends DnD {
             }
             const val = task[`${item.full}_`] || '';
             const editable = task[`${item.field}_ro`]? false: true;
+            const onFieldClick = (e) => {
+                if (item.field == 'depends' && task.dependsList) { // Toggle
+                    this.toggleDepends();
+                };
+            };
             return (
                 <Text
                     editable={editable}
@@ -270,6 +284,7 @@ class Task extends DnD {
                         // console.log('Click:', e);
                         onClick(e, edit_val);
                     }}
+                    onClick={onFieldClick}
                 >
                     {val}
                 </Text>
@@ -283,6 +298,30 @@ class Task extends DnD {
         if (task.description_count) {
             desc_count = (<Text style={[styles.description]}>{task.description_count}</Text>)
         }
+        let depends = null;
+        if (dependsVisible && task.dependsTasks) { // Render tasks
+            depends = task.dependsTasks.map((item) => {
+                return (
+                    <div style={_l(styles.hflex, styles.annotation_line)} key={item.id}>
+                        <Text
+                            title={item.description}
+                            style={[styles.flex1, styles.description, styles.textSmall, styles.oneLine]}
+                            >
+                            {`${item.id} ${item.description}`}
+                        </Text>
+                        <IconMenu style={style}>
+                            <IconBtn
+                                icon="close"
+                                onClick={(e) => {
+                                    onDepDelete(item.uuid, e);
+                                }}
+                                title="Remove dependency"
+                            />
+                        </IconMenu>
+                    </div>
+                );
+            });
+        };
         let annotations = null;
         if (task.description_ann) { // Have list
             annotations = task.description_ann.map((item, idx) => {
@@ -381,6 +420,7 @@ class Task extends DnD {
                 <div style={_l(styles.hflex, styles.wflex)}>
                     {fields}
                 </div>
+                {depends}
                 {annotations}
             </div>
         );
@@ -1150,6 +1190,11 @@ export class TaskPageCmp extends React.Component {
                         onSelect(item);
                     }
                 };
+                const onDepDelete = (uuid, e) => {
+                    let uuids = item.depends || [];
+                    const dep = uuids.map((u) => u != uuid? u: `-${u}`).join(',')
+                    onEdit(item, 'modify', `depends:${dep}`, true);
+                };
                 const onDrop = (type, data) => {
                     if (type == 'tw/tag') { // Drop tag - add tag
                         onEdit(item, 'modify', `+${data}`, true);
@@ -1190,6 +1235,7 @@ export class TaskPageCmp extends React.Component {
                             onEdit(item, running? 'stop': 'start', '', true);
                         }}
                         onDrop={onDrop}
+                        onDepDelete={onDepDelete}
                     />
                 );
             });

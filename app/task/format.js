@@ -203,11 +203,18 @@ export const formatters = {
         obj.depends_ro = true;
         const arr = obj.depends || [];
         if (Array.isArray(arr) && arr.length) {
-            obj.depends_title = `[${arr.length}]`;
             obj.depends_sort = arr.length;
+            obj.depends_title = `[${arr.length}]`;
+            if (format == 'count') { // 
+                return obj.depends_title;
+            };
             if (format == 'indicator') {
                 return 'D';
             }
+            if (obj.dependsTasks) { // Join IDs
+                obj.dependsList = true;
+                return obj.dependsTasks.map((t) => t.id).join(' ');
+            };
             return `[${arr.length}]`;
         }
         obj.depends_sort = 0;

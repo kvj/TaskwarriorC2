@@ -179,6 +179,7 @@ export class TaskController {
                         result.cols.push({
                             field: s,
                             full: s,
+                            display: '',
                         });
                     } else {
                         result.cols.push({
@@ -215,25 +216,10 @@ export class TaskController {
         return result;
     }
 
-    async filter(report, filter, info) {
-        if (!info) {
-            info = await this.reportInfo(report);
-        }
-        if (!info) {
-            this.err('Invalid input');
-            return undefined;
-        }
-        info.tasks = []; // Reset
-        let cmd = ['rc.json.array=off', 'export'];
-        if (info.context) {
-            cmd.push(`(${info.context})`)
-        }
-        if (info.filter) {
-            cmd.push(`(${info.filter})`);
-        }
-        if (filter) {
-            cmd.push(filter);
-        }
+    async exp(cmds) {
+        let cmd = ['rc.json.array=off'].concat(cmds);
+        cmd.push('export');
+        let result = [];
         const code = await this.call(cmd, {
             eat(line) {
                 if (!line) {
@@ -242,8 +228,10 @@ export class TaskController {
                 // Parse and save
                 try {
                     let json = JSON.parse(line);
-                    info.tasks.push(json);
-                    // console.log('Date:', json.entry, parseDate(json.entry));
+                    if (json.depends && !Array.isArray(json.depends)) { // Old style
+                        json.depends = json.depends.split(',');
+                    };
+                    result.push(json);
                 } catch (e) {
                     console.log('JSON error:', line);
                 }
@@ -253,15 +241,63 @@ export class TaskController {
             console.log('Failure:', cmd);
             return undefined;
         }
+        return result;
+    }
+
+    async filter(report, filter, info) {
+        if (!info) {
+            info = await this.reportInfo(report);
+        }
+        if (!info) {
+            this.err('Invalid input');
+            return undefined;
+        }
+        info.tasks = []; // Reset
+        let cmd = [];
+        if (info.context) {
+            cmd.push(`(${info.context})`)
+        }
+        if (info.filter) {
+            cmd.push(`(${info.filter})`);
+        }
+        if (filter) {
+            cmd.push(filter);
+        }
+        const expResult = await this.exp(cmd);
+        if (!expResult) {
+            return undefined;
+        };
+        info.tasks = expResult;
+        let hasDepends = false;
+        info.cols.forEach((item) => {
+            if (item.field == 'depends' && ['', 'list'].includes(item.display)) { // Need a list
+                hasDepends = true;
+            };
+        });
         // Calculate sizes
+        if (hasDepends) { // Load
+            for (var i = 0; i < info.tasks.length; i++) {
+                let task = info.tasks[i];
+                if (task.depends && task.depends.length) { // Make export call
+                    const uuids = task.depends.map((uuid) => `uuid:${uuid}`).join(' or ');
+                    const uuidsTasks = await this.exp([uuids]);
+                    if (uuidsTasks) { // OK
+                        task.dependsTasks = uuidsTasks.filter((t) => t.id > 0);
+                    };
+                };
+            };
+        };
         info.cols.forEach((item) => {
             item.visible = false;
             if (['status'].includes(item.field)) {
                 return;
             }
+            if (item.field == 'depends') { // Need a list
+                hasDepends = true;
+            };
             const handler = formatters[item.field];
             if (!handler) { // Not supported
-                // TODO: console.log('Not supported:', item.field);
+                // TODO: support UDA
                 // return;
             };
             // Colled max size
