@@ -510,8 +510,14 @@ class TasksPagePane extends PagePane {
         this.setState({selection});
     }
 
-    onAdd() {
-        this.props.onAdd(this.props.id, this.input().filter);
+    onAdd(e, ...cmds) {
+        let cmd = [];
+        const input = this.input().filter;
+        if (input) cmd.push(input);
+        cmds.forEach((item) => {
+            if (item) cmd.push(item);
+        });
+        this.props.onAdd(this.props.id, cmd.join(' '));
     }
 
     onEdit(task, cmd, input, unint=false) {
@@ -521,7 +527,7 @@ class TasksPagePane extends PagePane {
             tasks = info.tasks.filter((item) => selection[item.uuid]);
         }
         if (!tasks.length || !tasks.includes(task)) {
-            tasks = [task]; // Current
+            if (task) tasks = [task]; // Current
         }
         this.props.onEdit(this.props.id, cmd, tasks, input, unint);
     }

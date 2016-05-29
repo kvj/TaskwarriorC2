@@ -203,6 +203,13 @@ export class TaskController {
                 }
             }
         }
+        result.sort.push({
+            field: 'id',
+            asc: true,
+        }, {
+            field: 'description',
+            asc: true,
+        });
         if (desc.length == result.cols.length) {
             // Same side -> add label
             for (var i = 0; i < desc.length; i++) {
@@ -270,7 +277,7 @@ export class TaskController {
         info.tasks = expResult;
         let hasDepends = false;
         info.cols.forEach((item) => {
-            if (item.field == 'depends' && ['', 'list'].includes(item.display)) { // Need a list
+            if (item.field == 'depends') { // Need a list
                 hasDepends = true;
             };
         });

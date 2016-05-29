@@ -201,11 +201,11 @@ export const formatters = {
     },
     depends(obj, format) {
         obj.depends_ro = true;
-        const arr = obj.depends || [];
-        if (Array.isArray(arr) && arr.length) {
+        const arr = obj.dependsTasks || obj.depends || [];
+        if (arr.length) {
             obj.depends_sort = arr.length;
             obj.depends_title = `[${arr.length}]`;
-            if (format == 'count') { // 
+            if (format == 'count') { //
                 return obj.depends_title;
             };
             if (format == 'indicator') {

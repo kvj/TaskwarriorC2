@@ -280,6 +280,7 @@ class Task extends DnD {
                     title={task[`${item.field}_title`]}
                     key={idx}
                     onEdit={(e) => {
+                        e.field = item.field;
                         const edit_val = task[`${item.field}_edit`] || '';
                         // console.log('Click:', e);
                         onClick(e, edit_val);
@@ -1154,6 +1155,7 @@ export class TaskPageCmp extends React.Component {
             selection,
             onEdit,
             onSelect,
+            onAdd,
         } = this.props;
         let body = null;
         if (info) {
@@ -1183,6 +1185,14 @@ export class TaskPageCmp extends React.Component {
                     onEdit(item, 'denotate', text, true);
                 };
                 const onClick = (e, data, cmd='modify') => {
+                    if (e.alt) {
+                        let addCmd = data;
+                        if (e.field == 'id') {
+                            addCmd = `depends:${item.id || item.uuid}`;
+                        }
+                        onAdd(e, addCmd);
+                        return;
+                    }
                     onEdit(item, cmd, data);
                 };
                 const onTap = (e) => {
