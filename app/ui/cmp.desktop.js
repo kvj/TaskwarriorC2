@@ -10,6 +10,9 @@ const eventInfo = (e) => {
         alt: e.altKey || false,
         meta: e.metaKey || false,
         key: e.charCode || e.keyCode,
+        stop: () => {
+            e.stopPropagation();
+        },
     }
 };
 
@@ -282,7 +285,6 @@ class Task extends DnD {
                     onEdit={(e) => {
                         e.field = item.field;
                         const edit_val = task[`${item.field}_edit`] || '';
-                        // console.log('Click:', e);
                         onClick(e, edit_val);
                     }}
                     onClick={onFieldClick}
@@ -1187,12 +1189,13 @@ export class TaskPageCmp extends React.Component {
                     onEdit(item, 'denotate', text, true);
                 };
                 const onClick = (e, data, cmd='modify') => {
-                    if (e.alt) {
+                    if (e.meta) {
                         let addCmd = data;
                         if (e.field == 'id') {
                             addCmd = `depends:${item.id || item.uuid}`;
                         }
                         onAdd(e, addCmd);
+                        e.stop();
                         return;
                     }
                     onEdit(item, cmd, data);
