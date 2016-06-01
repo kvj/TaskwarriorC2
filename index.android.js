@@ -6,16 +6,28 @@ import {
   View
 } from 'react-native';
 
+import {TaskController} from './app/task/controller';
+
 class taskwc2 extends Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.loading}>
-          Loading...
-        </Text>
-      </View>
-    );
-  }
+
+    async componentDidMount() {
+        const controller = new TaskController();
+        if (await controller.init({})) { // OK
+            console.log('Ready to show UI');
+        } else {
+            console.log('Not ready');
+        }
+    }
+
+    render() {
+        return (
+            <View style={styles.container}>
+            <Text style={styles.loading}>
+            Loading...
+            </Text>
+            </View>
+        );
+    }
 }
 
 const styles = StyleSheet.create({

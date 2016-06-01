@@ -381,7 +381,7 @@ public class AccountController {
         return folder;
     }
 
-    private synchronized int callTask(StreamConsumer out, StreamConsumer err, boolean api, String... arguments) {
+    public int callTask(StreamConsumer out, StreamConsumer err, boolean api, String... arguments) {
         active = true;
         try {
             if (null == controller.executable) {
@@ -394,12 +394,10 @@ public class AccountController {
             }
             List<String> args = new ArrayList<>();
             args.add(controller.executable);
-            args.add("rc.color=off");
             if (api) {
+                args.add("rc.color=off");
                 args.add("rc.confirmation=off");
                 args.add("rc.verbose=nothing");
-            } else {
-                args.add("rc.verbose=none");
             }
             Collections.addAll(args, arguments);
             ProcessBuilder pb = new ProcessBuilder(args);

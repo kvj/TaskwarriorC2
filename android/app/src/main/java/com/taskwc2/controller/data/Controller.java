@@ -26,8 +26,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -182,19 +180,11 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
                 }
             }
         }
-        Collections.sort(result, new Comparator<String>() {
-            @Override
-            public int compare(String lhs, String rhs) {
-                return lhs.compareToIgnoreCase(rhs);
-            }
-        });
+        logger.d("Folders:", result);
         return result;
     }
 
-    public String createAccount(String name, String folderName) {
-        if (TextUtils.isEmpty(name)) {
-            return "Account name is mandatory";
-        }
+    public String createAccount(String folderName) {
         try {
             if (TextUtils.isEmpty(folderName)) {
                 folderName = UUID.randomUUID().toString().toLowerCase();
@@ -202,14 +192,14 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
             File folder = new File(context().getExternalFilesDir(null), folderName);
             if (!folder.exists()) {
                 if (!folder.mkdir()) {
-                    logger.w("Failed to create folder", name);
+                    logger.w("Failed to create folder", folderName);
                     return "Storage access error";
                 }
             }
             File taskrc = new File(folder, AccountController.TASKRC);
             if (!taskrc.exists()) {
                 if (!taskrc.createNewFile()) {
-                    logger.w("Failed to create folder", name);
+                    logger.w("Failed to create folder", folderName);
                     return "Storage access error";
                 }
             }
@@ -220,6 +210,7 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
                     return "Storage access error";
                 }
             }
+            logger.i("Created new profile:", folder);
             return null;
         } catch (Exception e) {
             return e.getMessage();
@@ -235,6 +226,7 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
     }
 
     public synchronized AccountController accountController(String id, boolean reload) {
+        logger.d("accountController:", id, reload);
         if (TextUtils.isEmpty(id)) {
             return null; // Will create later
         }
