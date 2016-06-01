@@ -524,6 +524,8 @@ class ProjectsNavigation extends React.Component {
                 item.index = idx;
                 return item;
             }).sort((a, b) => {
+                if (!a.project && b.project) return -1;
+                if (!b.project && a.project) return  1;
                 if (a.hilite && !b.hilite) return -1;
                 if (!a.hilite && b.hilite) return 1;
                 return a.index-b.index;
