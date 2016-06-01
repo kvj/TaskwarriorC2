@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">taskwc2</string>
+    <string name="pref_account_id">pref_account_id</string>
 </resources>

@@ -1,0 +1,3 @@
+[submodule "android/Lima1"]
+	path = android/Lima1
+	url = git@github.com:kvj/Lima1Common.git

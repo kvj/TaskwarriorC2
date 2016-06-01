@@ -1,13 +1,24 @@
 package com.taskwc2;
 
+import android.os.Bundle;
+
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
+import com.taskwc2.controller.data.Controller;
+
+import org.kvj.bravo7.form.FormController;
+import org.kvj.bravo7.form.impl.ViewFinder;
+import org.kvj.bravo7.form.impl.bundle.StringBundleAdapter;
+import org.kvj.bravo7.form.impl.widget.TransientAdapter;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends ReactActivity {
+
+    Controller controller = App.controller();
+    FormController form = new FormController(new ViewFinder.ActivityViewFinder(this));
 
     /**
      * Returns the name of the main component registered from JavaScript.
@@ -36,5 +47,11 @@ public class MainActivity extends ReactActivity {
         return Arrays.<ReactPackage>asList(
             new MainReactPackage()
         );
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        form.add(new TransientAdapter<>(new StringBundleAdapter(), controller.defaultAccount()), App.ACCOUNT_TYPE);
+        super.onCreate(savedInstanceState);
     }
 }
