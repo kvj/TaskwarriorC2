@@ -56,7 +56,7 @@ const formatDate = (obj, format, name, editable) => {
     if (format == 'iso') { // as is
         return obj[name];
     };
-    if (['age', 'relative', 'remaining'].includes(format)) { // relative
+    if (['age', 'relative', 'remaining'].indexOf(format) != -1) { // relative
         const [val, sfx] = dateRelative(dt);
         const mul = format == 'age'? -1: 1;
         return `${mul*val}${sfx}`;
@@ -104,7 +104,7 @@ export const formatters = {
     description(obj, format) {
         const ann = obj.annotations || [];
         let desc = obj.description || '';
-        obj.description_truncate = ['truncated', 'truncated_count'].includes(format);
+        obj.description_truncate = ['truncated', 'truncated_count'].indexOf(format) != -1;
         if (format == 'desc' || format == 'truncated') {
             return desc;
         }

@@ -7,8 +7,10 @@ import {
   TextInput,
   Image,
   ToastAndroid,
+  ViewPagerAndroid,
 } from 'react-native';
 import * as widget from './widget';
+import * as common from './cmp.common';
 
 export class AppCmp extends React.Component {
     constructor(props) {
@@ -217,6 +219,11 @@ export class MainCmp extends React.Component {
     render() {
         const {pages, pins, page, onNavigation} = this.props;
         const {input} = this.state;
+        const pageCmps = pages.map((pageCmp, idx) => {
+            return (
+                <View key={pageCmp.key}>{pageCmp.cmp}</View>
+            );
+        });
         let inputCmp = null;
         if (input) { // Render
             inputCmp = (
@@ -232,23 +239,37 @@ export class MainCmp extends React.Component {
         return (
             <View style={_l(styles.flex1)}>
                 {inputCmp}
+                <ViewPagerAndroid
+                    style={_l(styles.flex1)}
+                    initialPage={0}
+                >
+                    {pageCmps}
+                </ViewPagerAndroid>
             </View>
         );
     }
 }
 
+export class TaskPageCmp extends common.TaskPageCmp {
 
-export class TaskPageCmp extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+        };
     }
 
-    render() {
+    renderBody(header, info) {
+        const cols = info.cols.filter((item) => {
+            return item.visible;
+        });
         return (
-            <View />
+            <View style={_l(styles.vproxy)}>
+                <View style={_l(styles.flex0, styles.hflex, styles.wflex)}>{header}</View>
+                <View style={_l(styles.flex1)}></View>
+            </View>
         );
     }
+
 }
 
 export class CmdPageCmp extends React.Component {
@@ -286,4 +307,3 @@ export class StatusbarCmp extends React.Component {
         );
     }
 }
-

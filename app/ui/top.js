@@ -421,6 +421,7 @@ class PagePane extends React.Component {
     }
 
     componentWillUnmount() {
+        console.log('removeListener', typeof this.props.controller.events.removeListener);
         this.props.controller.events.removeListener('change', this.refreshHandler);
     }
 
@@ -529,7 +530,7 @@ class TasksPagePane extends PagePane {
         if (info && info.tasks) {
             tasks = info.tasks.filter((item) => selection[item.uuid]);
         }
-        if (!tasks.length || !tasks.includes(task)) {
+        if (!tasks.length || tasks.indexOf(task) == -1) {
             if (task) tasks = [task]; // Current
         }
         this.props.onEdit(this.props.id, cmd, tasks, input, unint);
@@ -551,7 +552,7 @@ class TasksPagePane extends PagePane {
 
     async onDone(task) {
         const {uuid, status} = task;
-        if (['waiting', 'pending'].includes(status)) { // OK to done
+        if (['waiting', 'pending'].indexOf(status) != -1) { // OK to done
             return this.onEdit(task, 'done', '', true);
         } else { // Show error
             return this.props.controller.err('Invalid task');

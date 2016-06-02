@@ -15,6 +15,10 @@ export const eventInfo = (e) => {
     }
 };
 
+export const Div = (props) => {
+    return (<div {...props}>{props.children}</div>)
+};
+
 export const IconBtn = (props) => {
     return (
         <button
@@ -203,4 +207,108 @@ export class DnD extends React.Component {
 
 }
 
+export class TaskPageInput extends React.Component {
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            report: props.report || '',
+            filter: props.filter || '',
+        };
+        this.onSearch = this.onSearch.bind(this);
+    }
+
+    onReportChange (evt) {
+        this.setState({
+            report: evt.target.value,
+        });
+    }
+
+    onFilterChange (evt) {
+        this.setState({
+            filter: evt.target.value,
+        });
+    }
+
+    componentDidMount() {
+        this.refs.filter.addEventListener('search', this.onSearch);
+    }
+
+    componentWillUnmount() {
+        this.refs.filter.removeEventListener('search', this.onSearch);
+    }
+
+    render() {
+        const {onPin} = this.props;
+        const line1 = (
+            <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
+                <input
+                    style={_l(styles.inp, styles.flex1)}
+                    type="text"
+                    value={this.state.report}
+                    onChange={this.onReportChange.bind(this)}
+                    onKeyPress={this.onKey.bind(this)}
+                    placeholder="Report"
+                />
+                <IconBtn
+                    icon="plus"
+                    onClick={this.props.onAdd}
+                    title="Add new"
+                />
+                <IconBtn icon="refresh" onClick={this.props.onRefresh} />
+                <IconBtn
+                    icon="thumb-tack"
+                    onClick={onPin}
+                    title="Pin/unpin panel"
+                />
+                <IconBtn icon="close" onClick={this.props.onClose} />
+            </div>
+        );
+        const line2 = (
+            <div style={_l(styles.flex0, styles.hflex)}>
+                <input
+                    style={_l(styles.inp, styles.flex1)}
+                    type="search"
+                    ref="filter"
+                    value={this.state.filter}
+                    onChange={this.onFilterChange.bind(this)}
+                    onKeyPress={this.onKey.bind(this)}
+                    onSearch={this.onSearch.bind(this)}
+                    placeholder="Filter"
+                />
+            </div>
+        );
+
+        return (
+            <div style={_l(styles.flex0)}>
+                {line1}
+                {line2}
+            </div>
+        );
+    }
+
+    input() {
+        return this.state;
+    }
+
+    onSearch(evt) {
+        if (!this.state.filter) { // Empty
+            this.props.onRefresh();
+        };
+    }
+
+    onKey(evt) {
+        if (evt.charCode == 13) {
+            // Refresh
+            this.props.onRefresh();
+        }
+    }
+
+    filter(filter) {
+        this.state.filter = filter;
+        this.setState({
+            filter: filter,
+        });
+    }
+
+}

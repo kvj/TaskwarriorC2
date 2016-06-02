@@ -296,7 +296,7 @@ export class TaskController {
         };
         info.cols.forEach((item) => {
             item.visible = false;
-            if (['status'].includes(item.field)) {
+            if ('status' == item.field) {
                 return;
             }
             if (item.field == 'depends') { // Need a list
@@ -318,7 +318,7 @@ export class TaskController {
                 task[`${item.full}_`] = val;
                 // console.log('Format:', item.field, val, item.display);
             });
-            if (max > 0) { // Visible
+            if (max > 0 || ['id', 'uuid', 'description'].indexOf(item.field) != -1) { // Visible
                 item.visible = true;
                 item.width = Math.max(max, item.label.length);
                 // console.log('Will display:', item.label, item.width);
@@ -329,7 +329,7 @@ export class TaskController {
         info.tasks.forEach((task) => {
             task.styles = calcColorStyles(task, info.precedence);
         });
-        // console.log('Filter:', info, cmd, code);
+        // console.log('Filter:', info, cmd);
         return info;
     }
 
