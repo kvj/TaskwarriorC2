@@ -1,3 +1,8 @@
 var ev = require('EventEmitter');
 
-export const EventEmitter = ev;
+export class EventEmitter extends ev {
+
+    on(...args) {
+        return this.addListener.apply(this, args);
+    }
+}

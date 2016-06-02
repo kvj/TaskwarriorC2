@@ -1,12 +1,11 @@
-import {layers, fontFamily, layersStyle} from './style';
+import {layers, fontFamily} from './style';
+import {makeCommon} from './main.common';
 
 export let styles = {};
 
 export const init = () => {
     const [_layers, _colorDefs] = layers();
     const _fontFamily = fontFamily();
-    const _layersStyle = layersStyle(_layers, _fontFamily);
-    const _colorsStyle = layersStyle(_colorDefs, _fontFamily);
     const _styles = {
         "vflex": {
             display: 'flex',
@@ -15,9 +14,6 @@ export const init = () => {
         "hflex": {
             display: 'flex',
             flexDirection: 'row',
-        },
-        "wflex": {
-            flexWrap: 'wrap',
         },
         "flex1": {
             flex: '1 1 auto',
@@ -42,12 +38,6 @@ export const init = () => {
             flex: '1',
             display: 'flex',
             flexDirection: 'row',
-        },
-        "hbar": {
-            alignItems: "center",
-        },
-        "eflex": {
-            justifyContent: "flex-end",
         },
         "max": {
             width: '100%',
@@ -282,14 +272,9 @@ export const init = () => {
         },
 
     };
-    for (var key in _layersStyle) {
-        styles[key] = _layersStyle[key];
-    };
+    makeCommon(styles);
     for (var key in _styles) {
         styles[key] = _styles[key];
-    };
-    for (var key in _colorsStyle) {
-        styles[`color_${key}`] = _colorsStyle[key];
     };
     console.log('Styles total:', styles);
 };

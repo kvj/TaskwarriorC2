@@ -1,7 +1,6 @@
 // High level React components
 
 import React from 'react';
-import {styles, _l} from '../styles/main';
 import * as cmp from './cmp';
 
 export class AppPane extends React.Component {
@@ -298,7 +297,9 @@ export class AppPane extends React.Component {
     }
 
     render() {
-        if (!this.state) return null;
+        if (!this.state) return (
+            <cmp.AppCmp />
+        );
         return (
             <cmp.AppCmp>
                 <ToolbarPane

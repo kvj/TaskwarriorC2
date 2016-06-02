@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import {styles, _l} from '../styles/main';
 
 const eventInfo = (e) => {
