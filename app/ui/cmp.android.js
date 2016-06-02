@@ -28,8 +28,48 @@ export class ToolbarCmp extends React.Component {
     }
 
     render() {
+        const {
+            onCommand,
+            onTogglePane,
+            onSync,
+            onUndo
+        } = this.props;
+        const actions = [{
+            title: 'Run command',
+            icon: {uri: 'ic_cmd'},
+            show: 'ifRoom',
+            onAction: onCommand,
+        }, {
+            title: 'Undo last command',
+            icon: {uri: 'ic_undo'},
+            show: 'always',
+            onAction: onUndo,
+        }, {
+            title: 'Sync',
+            icon: {uri: 'ic_sync'},
+            show: 'ifRoom',
+            onAction: onSync,
+        }, {
+            title: 'Show right pane',
+            icon: {uri: 'ic_menu'},
+            show: 'always',
+            onAction: () => {
+                onTogglePane('reports');
+            },
+        }];
         return (
-            <View />
+            <ToolbarAndroid
+                style={_l(styles.flex0, styles.toolbar)}
+                title="Taskwarrior"
+                actions={actions}
+                navIcon={{uri: 'ic_menu'}}
+                onIconClicked={() => {
+                    onTogglePane('navigation');
+                }}
+                onActionSelected={(idx) => {
+                    actions[idx].onAction();
+                }}
+            />
         );
     }
 

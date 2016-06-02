@@ -37,6 +37,10 @@ export const init = () => {
             flex: 1,
             flexDirection: 'row',
         },
+        toolbar: {
+            height: 56,
+        },
+
     };
     let __styles = makeCommon({});
     for (var key in _styles) {
