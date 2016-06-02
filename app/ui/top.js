@@ -294,7 +294,8 @@ export class AppPane extends React.Component {
     }
 
     async onSync() {
-        return await this.props.controller.sync();
+        this.onAdd('');
+        // return await this.props.controller.sync();
     }
 
     render() {

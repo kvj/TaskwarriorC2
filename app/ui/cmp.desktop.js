@@ -1,207 +1,6 @@
 import React from 'react';
 import {styles, _l} from '../styles/main';
-
-const eventInfo = (e) => {
-    if (!e) return undefined;
-    return {
-        shift: e.shiftKey || false,
-        ctrl: e.ctrlKey || false,
-        alt: e.altKey || false,
-        meta: e.metaKey || false,
-        key: e.charCode || e.keyCode,
-        stop: () => {
-            e.stopPropagation();
-        },
-    }
-};
-
-const IconBtn = (props) => {
-    return (
-        <button
-            style={_l([styles.btn])}
-            onClick={(evt) => {
-                if (props.onClick) props.onClick(eventInfo(evt));
-            }}
-            title={props.title}
-        >
-            <i className={`fa fa-fw fa-${props.icon}`}></i>
-        </button>
-    );
-}
-
-class IconMenu extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {expanded: false};
-    }
-
-    render() {
-        const {children, dir, style} = this.props;
-        const {expanded} = this.state;
-        let menu = null;
-        let st = [styles.hflex, styles.menu];
-        let wst = [styles.hflex, styles.menu_popup];
-        if (style && style.length) { // Copy
-            st = st.concat(style);
-            wst = wst.concat(style);
-        };
-        if (expanded) { // Render
-            menu = (
-                <div style={_l(styles.flex0, styles.menu_wrap)}>
-                    <div
-                        onMouseLeave={this.onMenuHide.bind(this)}
-                        onClick={this.onMenuHide.bind(this)}
-                        style={_l(wst)}
-                    >
-                        {children}
-                    </div>
-                </div>
-            );
-        };
-        return (
-            <div style={_l(st)}>
-                {menu}
-                <IconBtn
-                    icon={expanded? 'caret-right': 'caret-left'}
-                    onClick={this.onMenu.bind(this)}
-                />
-            </div>
-        );
-    }
-
-    onMenu() {
-        this.setState({
-            expanded: !this.state.expanded,
-        });
-    }
-
-    onMenuHide() {
-        this.setState({
-            expanded: false,
-        });
-    }
-}
-
-const Text = (props) => {
-    let _st = [styles.flex0, styles.text];
-    if (props.style && props.style.length) {
-        _st = _st.concat(props.style);
-    }
-    const val = props.children || '';
-    let sfx = ''
-    while (props.width > val.length+sfx.length) {
-        sfx += ' ';
-    }
-    let editIcn = null;
-    if (props.editable === true) {
-        editIcn = (
-            <i
-                className="fa fa-fw fa-pencil text-edit"
-                style={styles.text_edit}
-                onClick={(evt) => {
-                    props.onEdit && props.onEdit(eventInfo(evt));
-                }}
-            >
-            </i>
-        )
-    } else if (props.editable === false) {
-        editIcn = (
-            <i className="fa fa-fw" style={styles.text_edit}></i>
-        )
-    }
-    let onDrag = undefined;
-    let draggable = false;
-    if (props.onDrag) { // Enable drag
-        onDrag = (e) => {
-            const [type, value, text] = props.onDrag(e);
-            if (type && value) { // Start drag
-                e.dataTransfer.setData('text/plain', text || value);
-                e.dataTransfer.setData(type, value);
-            };
-        };
-        draggable = true;
-    };
-    return (
-        <div style={_l(_st)} title={props.title || val} className="text-wrap" onClick={(evt) => {
-            if (props.onClick) props.onClick(eventInfo(evt));
-        }}>
-            <span
-                className="text"
-                draggable={draggable}
-                onDragStart={onDrag}
-            >
-                {val}
-            </span>
-            {editIcn}
-            <span>{sfx}</span>
-        </div>
-    );
-}
-
-class DnD extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.dropCount = 0;
-        this.dropTypes = [];
-        this.onDragStart = this.onDragStart.bind(this);
-        this.onDragFinish = this.onDragFinish.bind(this);
-        this.onDragOver = this.onDragOver.bind(this);
-        this.onDrop = this.onDrop.bind(this);
-    }
-
-    hasData(e) {
-        for (let type of e.dataTransfer.types) {
-            if (this.dropTypes.includes(type)) { // OK
-                return type;
-            };
-        }
-        return undefined;
-    }
-
-    onDragStart(e) {
-        if (!this.hasData(e)) return;
-        this.dropCount += 1;
-        if (this.dropCount == 1) { // First
-            this.setState({
-                dragTarget: true,
-            });
-        };
-        e.preventDefault();
-    }
-
-    onDragOver(e) {
-        if (!this.hasData(e)) return;
-        e.preventDefault();
-    }
-
-    onDragFinish(e) {
-        if (!this.hasData(e)) return;
-        this.dropCount -= 1;
-        if (this.dropCount == 0) { // Last
-            this.setState({
-                dragTarget: false,
-            });
-        };
-        e.preventDefault();
-    }
-
-    onDrop(e) {
-        const type = this.hasData(e);
-        if (!type) return;
-        this.dropCount = 0;
-        this.setState({
-            dragTarget: false,
-        });
-        this.onDropHandler(type, e.dataTransfer.getData(type), e);
-        e.preventDefault();
-    }
-
-    onDropHandler(type, data) {
-    }
-
-}
+import * as widget from './widget';
 
 /*
 class TaskTag extends DnD {
@@ -226,7 +25,7 @@ class TaskTag extends DnD {
 }
 */
 
-class Task extends DnD {
+class Task extends widget.DnD {
 
     constructor(props) {
         super(props);
@@ -276,7 +75,7 @@ class Task extends DnD {
                 };
             };
             return (
-                <Text
+                <widget.Text
                     editable={editable}
                     width={item.width}
                     title={task[`${item.field}_title`]}
@@ -289,7 +88,7 @@ class Task extends DnD {
                     onClick={onFieldClick}
                 >
                     {val}
-                </Text>
+                </widget.Text>
             );
         });
         let descSt = [styles.description, styles.flex1];
@@ -298,28 +97,28 @@ class Task extends DnD {
         }
         let desc_count = null;
         if (task.description_count) {
-            desc_count = (<Text style={[styles.description]}>{task.description_count}</Text>)
+            desc_count = (<widget.Text style={[styles.description]}>{task.description_count}</widget.Text>)
         }
         let depends = null;
         if (dependsVisible && task.dependsTasks) { // Render tasks
             depends = task.dependsTasks.map((item) => {
                 return (
                     <div style={_l(styles.hflex, styles.annotation_line)} key={item.id}>
-                        <Text
+                        <widget.Text
                             title={item.description}
                             style={[styles.flex1, styles.description, styles.textSmall, styles.oneLine]}
                             >
                             {`${item.id} ${item.description}`}
-                        </Text>
-                        <IconMenu style={style}>
-                            <IconBtn
+                        </widget.Text>
+                        <widget.IconMenu style={style}>
+                            <widget.IconBtn
                                 icon="close"
                                 onClick={(e) => {
                                     onDepDelete(item.uuid, e);
                                 }}
                                 title="Remove dependency"
                             />
-                        </IconMenu>
+                        </widget.IconMenu>
                     </div>
                 );
             });
@@ -329,21 +128,21 @@ class Task extends DnD {
             annotations = task.description_ann.map((item, idx) => {
                 return (
                     <div style={_l(styles.hflex, styles.annotation_line)} key={idx}>
-                        <Text
+                        <widget.Text
                             title={item.title}
                             style={[styles.flex1, styles.description, styles.textSmall]}
                             >
                             {item.text}
-                        </Text>
-                        <IconMenu style={style}>
-                            <IconBtn
+                        </widget.Text>
+                        <widget.IconMenu style={style}>
+                            <widget.IconBtn
                                 icon="close"
                                 onClick={(e) => {
                                     onAnnDelete(item.origin, e);
                                 }}
                                 title="Remove annotation"
                             />
-                        </IconMenu>
+                        </widget.IconMenu>
                     </div>
                 );
             });
@@ -370,7 +169,7 @@ class Task extends DnD {
             <div
                 style={_l(taskStyles)}
                 onClick={(e) => {
-                    onTap(eventInfo(e));
+                    onTap(widget.eventInfo(e));
                 }}
                 onDragEnter={this.onDragStart}
                 onDragLeave={this.onDragFinish}
@@ -378,11 +177,11 @@ class Task extends DnD {
                 onDrop={this.onDrop}
             >
                 <div style={_l(styles.hflex)}>
-                    <IconBtn
+                    <widget.IconBtn
                         icon={check_icon}
                         onClick={onDone}
                     />
-                    <Text
+                    <widget.Text
                         editable
                         style={descSt}
                         onDrag={(e) => {
@@ -393,31 +192,31 @@ class Task extends DnD {
                         }}
                     >
                         {task[`${desc_field}_`]}
-                    </Text>
+                    </widget.Text>
                     {desc_count}
-                    <IconMenu style={style}>
-                        <IconBtn
+                    <widget.IconMenu style={style}>
+                        <widget.IconBtn
                             icon="close"
                             onClick={(e) => {
                                 onDelete(e);
                             }}
                             title="Delete task"
                         />
-                        <IconBtn
+                        <widget.IconBtn
                             icon="plus"
                             onClick={(e) => {
                                 onAnnAdd(e);
                             }}
                             title="Add annotation"
                         />
-                        <IconBtn
+                        <widget.IconBtn
                             icon={running? 'stop': 'play'}
                             onClick={(e) => {
                                 onStartStop(e);
                             }}
                             title={running? "Stop task": "Start task"}
                         />
-                    </IconMenu>
+                    </widget.IconMenu>
                 </div>
                 <div style={_l(styles.hflex, styles.wflex)}>
                     {fields}
@@ -452,7 +251,7 @@ export class ToolbarCmp extends React.Component {
         return (
             <div style={_l([styles.flex0, styles.toolbar, styles.hflex])}>
                 <div style={_l([styles.flex0, styles.hbar])}>
-                    <IconBtn
+                    <widget.IconBtn
                         icon="navicon"
                         title="Toggle Projects and Tags pane"
                         onClick={(e) => {
@@ -463,22 +262,22 @@ export class ToolbarCmp extends React.Component {
                 <div style={_l([styles.flex1, styles.hbar])}>
                 </div>
                 <div style={_l([styles.flex0, styles.hbar])}>
-                    <IconBtn
+                    <widget.IconBtn
                         icon="terminal"
                         title="Run custom task command"
                         onClick={onCommand}
                     />
-                    <IconBtn
+                    <widget.IconBtn
                         icon="undo"
                         title="Undo latest operation"
                         onClick={onUndo}
                     />
-                    <IconBtn
+                    <widget.IconBtn
                         icon="cloud"
                         title="Sync with taskd server"
                         onClick={onSync}
                     />
-                    <IconBtn
+                    <widget.IconBtn
                         icon="navicon"
                         title="Toggle Reports and Contexts pane"
                         onClick={(e) => {
@@ -550,8 +349,8 @@ class ProjectsNavigation extends React.Component {
                             this.props.onClick(item, e);
                         }}
                     >
-                        <Text style={[styles.flex1]}>{prefix+item.name}</Text>
-                        <Text style={[styles.flex0]}>{item.count}</Text>
+                        <widget.Text style={[styles.flex1]}>{prefix+item.name}</widget.Text>
+                        <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
                     </div>
                 );
                 return [jsx, renderProjects(item.children)];
@@ -560,8 +359,8 @@ class ProjectsNavigation extends React.Component {
         return (
             <div style={_l(styles.vproxy)}>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
-                    <Text style={[styles.flex1]}>Projects</Text>
-                    <IconBtn
+                    <widget.Text style={[styles.flex1]}>Projects</widget.Text>
+                    <widget.IconBtn
                         icon="refresh"
                         title="Refresh list"
                         onClick={this.props.onRefresh}
@@ -617,16 +416,16 @@ class TagsNavigation extends React.Component {
                     }}
                     draggable
                 >
-                    <Text style={[styles.flex1]}>{item.name}</Text>
-                    <Text style={[styles.flex0]}>{item.count}</Text>
+                    <widget.Text style={[styles.flex1]}>{item.name}</widget.Text>
+                    <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
                 </div>
             );
         });
         return (
             <div style={_l(styles.vproxy)}>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
-                    <Text style={[styles.flex1]}>Tags</Text>
-                    <IconBtn
+                    <widget.Text style={[styles.flex1]}>Tags</widget.Text>
+                    <widget.IconBtn
                         icon="refresh"
                         onClick={this.props.onRefresh}
                         title="Refresh list"
@@ -704,16 +503,16 @@ const ReportsList = React.createClass({
                     key={idx}
                     onClick={onClick}
                 >
-                    <Text style={[styles.oneLine]}>{item.name}</Text>
-                    <Text style={[styles.oneLine, styles.textSmall]}>{item.title}</Text>
+                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
+                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.title}</widget.Text>
                 </div>
             )
         });
         return (
             <div style={_l(styles.vproxy)}>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
-                    <Text style={[styles.flex1]}>Reports</Text>
-                    <IconBtn
+                    <widget.Text style={[styles.flex1]}>Reports</widget.Text>
+                    <widget.IconBtn
                         icon="refresh"
                         onClick={this.props.onRefresh}
                         title="Refresh list"
@@ -743,16 +542,16 @@ const ContextsList = React.createClass({
                     key={idx}
                     onClick={click}
                 >
-                    <Text style={[styles.oneLine]}>{item.name}</Text>
-                    <Text style={[styles.oneLine, styles.textSmall]}>{item.filter}</Text>
+                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
+                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.filter}</widget.Text>
                 </div>
             )
         });
         return (
             <div style={_l(styles.flex0, styles.vflex)}>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
-                    <Text style={[styles.flex1]}>Contexts</Text>
-                    <IconBtn
+                    <widget.Text style={[styles.flex1]}>Contexts</widget.Text>
+                    <widget.IconBtn
                         icon="refresh"
                         onClick={onRefresh}
                         title="Refresh list"
@@ -830,7 +629,7 @@ class PopupEditor extends React.Component {
     }
 
     onKey(evt) {
-        const e = eventInfo(evt);
+        const e = widget.eventInfo(evt);
         if (e.key == 13) { // Enter
             this.finish(true, e);
         }
@@ -848,7 +647,7 @@ class PopupEditor extends React.Component {
             <div style={_l(styles.floatCenter)}>
                 <div style={_l(styles.input_box)}>
                     <div style={_l(styles.hflex, styles.hbar, styles.wflex)}>
-                        <Text>{this.props.title}</Text>
+                        <widget.Text>{this.props.title}</widget.Text>
                         <input
                             style={_l(styles.inp, styles.flex1)}
                             type="search"
@@ -860,10 +659,10 @@ class PopupEditor extends React.Component {
                     </div>
                     <div style={_l(styles.hflex)}>
                         <div style={_l(styles.spacer)}></div>
-                        <IconBtn icon="check" onClick={(e) => {
+                        <widget.IconBtn icon="check" onClick={(e) => {
                             this.finish(true, e);
                         }}/>
-                        <IconBtn icon="close" onClick={(e) => {
+                        <widget.IconBtn icon="close" onClick={(e) => {
                             this.finish(false, e);
                         }}/>
                     </div>
@@ -949,7 +748,7 @@ export class MainCmp extends React.Component {
                 </div>
                 <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <div style={_l(styles.flex0, styles.hbar)}>
-                        <IconBtn icon="chevron-left" onClick={() => {
+                        <widget.IconBtn icon="chevron-left" onClick={() => {
                             onNavigation(-1);
                         }}/>
                     </div>
@@ -957,7 +756,7 @@ export class MainCmp extends React.Component {
                         {pageIndicators}
                     </div>
                     <div style={_l(styles.flex0, styles.hbar)}>
-                        <IconBtn icon="chevron-right" onClick={() => {
+                        <widget.IconBtn icon="chevron-right" onClick={() => {
                             onNavigation(1);
                         }}/>
                     </div>
@@ -1011,18 +810,18 @@ class TaskPageInput extends React.Component {
                     onKeyPress={this.onKey.bind(this)}
                     placeholder="Report"
                 />
-                <IconBtn
+                <widget.IconBtn
                     icon="plus"
                     onClick={this.props.onAdd}
                     title="Add new"
                 />
-                <IconBtn icon="refresh" onClick={this.props.onRefresh}/>
-                <IconBtn
+                <widget.IconBtn icon="refresh" onClick={this.props.onRefresh}/>
+                <widget.IconBtn
                     icon="thumb-tack"
                     onClick={onPin}
                     title="Pin/unpin panel"
                 />
-                <IconBtn icon="close" onClick={this.props.onClose}/>
+                <widget.IconBtn icon="close" onClick={this.props.onClose}/>
             </div>
         );
         const line2 = (
@@ -1106,13 +905,13 @@ class CmdPageInput extends React.Component {
                     onKeyPress={this.onKey.bind(this)}
                     placeholder="Command"
                 />
-                <IconBtn icon="refresh" onClick={onRefresh}/>
-                <IconBtn
+                <widget.IconBtn icon="refresh" onClick={onRefresh}/>
+                <widget.IconBtn
                     icon="thumb-tack"
                     onClick={onPin}
                     title="Pin/unpin panel"
                 />
-                <IconBtn icon="close" onClick={onClose}/>
+                <widget.IconBtn icon="close" onClick={onClose}/>
             </div>
         );
         return (
@@ -1171,7 +970,7 @@ export class TaskPageCmp extends React.Component {
                     // Insert spacer
                     return (<div key={idx} style={_l(styles.spacer)}></div>);
                 }
-                return (<Text editable={false} width={item.width} key={idx}>{item.label}</Text>);
+                return (<widget.Text editable={false} width={item.width} key={idx}>{item.label}</widget.Text>);
             });
             const tasks = info.tasks.map((item, idx) => {
                 const running = item.start? true: false;
@@ -1300,12 +1099,12 @@ export class CmdPageCmp extends React.Component {
         if (info) {
             const lines = info.lines.map((line, idx) => {
                 return (
-                    <Text
+                    <widget.Text
                         key={idx}
                         style={[styles.pre, styles[`cmdLine_${line.type}`]]}
                     >
                         {line.line}
-                    </Text>
+                    </widget.Text>
                 );
             })
             body = (
@@ -1409,7 +1208,7 @@ export class StatusbarCmp extends React.Component {
                 });
                 return (
                     <div key={idx} style={_l(styles.floatBlock)}>
-                        <Text>{item.message}</Text>
+                        <widget.Text>{item.message}</widget.Text>
                         <div style={_l(styles.hflex)}>
                             <div style={_l(styles.spacer)}></div>
                             {btns}
@@ -1421,16 +1220,16 @@ export class StatusbarCmp extends React.Component {
                 <div key={idx} style={_l(styles.floatBlock)} onClick={() => {
                     this.hideFloat(item);
                 }}>
-                    <Text>{item.message}</Text>
+                    <widget.Text>{item.message}</widget.Text>
                 </div>
             );
         });
         let time = null;
         if (this.state.time) {
             time = (
-                <Text style={[styles.oneLine, styles.flex0, styles.textSmall]}>
+                <widget.Text style={[styles.oneLine, styles.flex0, styles.textSmall]}>
                     {this.state.time.toLocaleTimeString()}:
-                </Text>
+                </widget.Text>
             );
         }
         return (
@@ -1442,11 +1241,11 @@ export class StatusbarCmp extends React.Component {
                     <i className={spinCls}></i>
                 </div>
                 {time}
-                <Text
+                <widget.Text
                     style={[styles.oneLine, styles.flex1, styles.textSmall]}
                 >
                     {this.state.message}
-                </Text>
+                </widget.Text>
             </div>
         );
     }

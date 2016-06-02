@@ -500,7 +500,7 @@ export class TaskController {
                     result.push({
                         name: report,
                         title: m[2].trim(),
-                        special: specialReports.includes(report),
+                        special: specialReports.indexOf(report) != -1,
                     });
                 }
             }

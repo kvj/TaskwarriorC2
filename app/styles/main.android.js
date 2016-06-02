@@ -9,7 +9,7 @@ export let styles = {};
 
 export const init = () => {
     const [_layers, _colorDefs] = layers();
-    const _fontFamily = fontFamily();
+    const _fontFamily = 'monospace';
     const _styles = {
         "vflex": {
             flexDirection: 'column',
@@ -39,6 +39,43 @@ export const init = () => {
         },
         toolbar: {
             height: 56,
+        },
+        input_box: {
+            position: 'absolute',
+            marginTop: 100,
+            left: 0,
+            right: 0,
+            borderWidth: 1,
+            borderStyle: 'solid',
+            borderColor: _layers.bg.br,
+            backgroundColor: _layers.bg.bg,
+            padding: 10,
+        },
+        btn: {
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 3,
+        },
+        icon: {
+            width: 32,
+            height: 32,
+        },
+        text: {
+            fontSize: 14,
+            fontFamily: _fontFamily,
+        },
+        inp: {
+            fontSize: 14,
+            width: 1024,
+            fontFamily: _fontFamily,
+            borderLeftWidth: 2,
+            borderStyle: 'solid',
+            borderLeftColor: _layers.l2.fg,
+            backgroundColor: _layers.l2.bg,
+            color: _layers.l2.fg,
+            height: 32,
+            padding: 3,
+            margin: 3,
         },
 
     };
