@@ -50,7 +50,7 @@ public class MainActivity extends ReactActivity {
      */
     @Override
     protected List<ReactPackage> getPackages() {
-        AccountController acc = controller.accountController(form, false);
+        AccountController acc = controller.accountController(form, true);
         List<ReactPackage> list = new ArrayList<>();
         list.add(new MainReactPackage());
         if (null == acc) { // Ask about new profile

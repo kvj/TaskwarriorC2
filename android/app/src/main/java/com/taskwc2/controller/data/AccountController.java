@@ -12,7 +12,6 @@ import com.taskwc2.App;
 import com.taskwc2.MainActivity;
 import com.taskwc2.controller.sync.SSLHelper;
 
-import org.json.JSONObject;
 import org.kvj.bravo7.log.Logger;
 import org.kvj.bravo7.util.Compat;
 import org.kvj.bravo7.util.Tasks;
@@ -381,7 +380,7 @@ public class AccountController {
         return folder;
     }
 
-    public int callTask(StreamConsumer out, StreamConsumer err, boolean api, String... arguments) {
+    public int callTask(StreamConsumer out, StreamConsumer err, StreamConsumer question, boolean api, String... arguments) {
         active = true;
         try {
             if (null == controller.executable) {
@@ -427,7 +426,7 @@ public class AccountController {
     }
 
     private boolean callTask(StreamConsumer out, StreamConsumer err, String... arguments) {
-        int result = callTask(out, err, true, arguments);
+        int result = callTask(out, err, null, true, arguments);
         return result == 0;
     }
 
@@ -605,49 +604,6 @@ public class AccountController {
         }
         return null;
     }
-
-    public List<JSONObject> taskList(String query) {
-        if (TextUtils.isEmpty(query)) {
-            query = "status:pending";
-        } else {
-            query = String.format("(%s)", query);
-        }
-        String context = taskSetting("context");
-        logger.d("taskList context:", context);
-        debug("List query:", query, "context:", context);
-        if (!TextUtils.isEmpty(context)) { // Have context configured
-            String cQuery = taskSetting(String.format("context.%s", context));
-            if (!TextUtils.isEmpty(cQuery)) { // Prepend context
-                debug("Context query:", cQuery);
-                query = String.format("(%s) %s", cQuery, query);
-            }
-            logger.d("Context query:", cQuery, query);
-        }
-        final List<JSONObject> result = new ArrayList<>();
-        List<String> params = new ArrayList<>();
-        params.add("rc.json.array=off");
-        params.add("export");
-        params.add(escape(query));
-        callTask(new StreamConsumer() {
-            @Override
-            public void eat(String line) {
-                if (!TextUtils.isEmpty(line)) {
-                    try {
-                        result.add(new JSONObject(line));
-                    } catch (Exception e) {
-                        logger.e(e, "Not JSON object:", line);
-                    }
-                }
-            }
-        }, errConsumer, params.toArray(new String[0]));
-        logger.d("List for:", query, result.size(), context);
-        return result;
-    }
-
-    public static String escape(String query) {
-        return query.replace(" ", "\\ "); //.replace("(", "\\(").replace(")", "\\)");
-    }
-
 
     public PendingIntent syncIntent(String type) {
         Intent intent = new Intent(controller.context(), SyncIntentReceiver.class);

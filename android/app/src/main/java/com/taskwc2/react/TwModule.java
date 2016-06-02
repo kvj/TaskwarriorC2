@@ -13,6 +13,8 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.uimanager.ViewManager;
 import com.taskwc2.controller.data.AccountController;
 
+import org.kvj.bravo7.log.Logger;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.List;
  */
 public class TwModule extends ReactContextBaseJavaModule {
 
+    Logger logger = Logger.forInstance(this);
     private AccountController acc;
 
     public TwModule(ReactApplicationContext reactContext, AccountController acc) {
@@ -40,21 +43,46 @@ public class TwModule extends ReactContextBaseJavaModule {
         return;
     }
 
+    class ArrayEater implements AccountController.StreamConsumer {
+
+        final List<String> array = new ArrayList<>();
+
+        @Override
+        public void eat(String line) {
+            array.add(line);
+        }
+
+        String[] array() {
+            return array.toArray(new String[size()]);
+        }
+
+        int size() {
+            return array.size();
+        }
+    }
+
     @ReactMethod
-    public void call(ReadableArray args, Callback linesEater, Boolean api, Promise promise) {
+    public void call(ReadableArray args, final Callback linesEater) {
+//        logger.d("Call:", args, linesEater, acc);
         if (null == acc) { // Invalid
-            promise.reject("not_configured", "Profile not configured");
+            linesEater.invoke("error", "Profile not configured");
             return;
         }
-        acc.callTask(new AccountController.StreamConsumer() {
-            @Override
-            public void eat(String line) {
-            }
-        }, new AccountController.StreamConsumer() {
-            @Override
-            public void eat(String line) {
-            }
-        }, api);
+        ArrayEater out = new ArrayEater();
+        ArrayEater err = new ArrayEater();
+        String[] arguments = new String[args.size()];
+        for (int i = 0; i < args.size(); i++) {
+            arguments[i] = args.getString(i);
+        }
+        int code = acc.callTask(out, err, null, false, arguments);
+        Object[] result = new Object[out.size()+err.size()+4];
+        result[0] = "success";
+        result[1] = code;
+        result[2] = out.size();
+        result[3] = err.size();
+        System.arraycopy(out.array(), 0, result, 4, out.size());
+        System.arraycopy(err.array(), 0, result, 4+out.size(), err.size());
+        linesEater.invoke(result);
     }
 
     public static class TwPackage implements ReactPackage {
