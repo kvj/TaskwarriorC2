@@ -7,21 +7,19 @@ export class AppPane extends React.Component {
 
     constructor(props) {
         super(props);
-    }
-
-    async componentDidMount() {
-        let conf = await this.props.controller.config('default.command');
-        const defaultCmd = conf['default.command'] || 'next';
-        conf = await this.props.controller.config('ui.pane.', true);
+        const {controller} = props;
         this.state = {
             pages: [],
-            defaultCmd: defaultCmd,
+            defaultCmd: controller.defaultCmd,
             panes: {
-                navigation: conf.navigation || 'dock',
-                reports: conf.reports || 'dock',
+                navigation: controller.panesConfig.navigation || 'dock',
+                reports: controller.panesConfig.reports || 'dock',
             },
             pins: [],
         };
+    }
+
+    componentDidMount() {
         this.showPage({
             type: 'list',
             report: this.state.defaultCmd,

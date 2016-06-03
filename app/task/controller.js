@@ -120,6 +120,9 @@ export class TaskController {
         stylesInit();
         await this.setupSync();
         this.scheduleSync();
+        let conf = await this.config('default.command');
+        this.defaultCmd = conf['default.command'] || 'next';
+        this.panesConfig = await this.config('ui.pane.', true);
         return true;
     }
 
