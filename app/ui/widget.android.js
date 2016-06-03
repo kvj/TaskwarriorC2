@@ -6,6 +6,7 @@ import {
   ToolbarAndroid,
   Text as RText,
   TouchableOpacity,
+  TouchableNativeFeedback,
   Image,
   TextInput,
 } from 'react-native';
@@ -69,7 +70,7 @@ export const IconBtn = (props) => {
     let icon = props.icon || '';
     icon = icon.replace('-', '_');
     return (
-        <TouchableOpacity
+        <TouchableNativeFeedback
             style={_l(styles.btn)}
             onPress={(evt) => {
                 if (props.onClick) props.onClick({});
@@ -78,19 +79,10 @@ export const IconBtn = (props) => {
                 if (props.onClick) props.onClick({longTap: true});
             }}
         >
-            <Image source={{uri: `ic_${icon}`}} style={_l(styles.icon)} />
-        </TouchableOpacity>
-    );
-    return (
-        <button
-            style={_l([styles.btn])}
-            onClick={(evt) => {
-                if (props.onClick) props.onClick(eventInfo(evt));
-            }}
-            title={props.title}
-        >
-            <i className={`fa fa-fw fa-${props.icon}`}></i>
-        </button>
+            <View>
+                <Image source={{uri: `ic_${icon}`}} style={_l(styles.icon)} />
+            </View>
+        </TouchableNativeFeedback>
     );
 }
 
@@ -157,13 +149,17 @@ export class TaskPageInput extends React.Component {
     }
 
     render() {
-        const {onPin} = this.props;
+        const {
+            onPin,
+            onRefresh,
+        } = this.props;
         const line1 = (
-            <View style={_l(styles.flex0, styles.hflex, styles.wflex)}>
+            <View style={_l(styles.flex0, styles.hflex, styles.wflex, styles.hbar)}>
                 <TextInput
                     style={_l(styles.inp, styles.flex1)}
                     value={this.state.report}
                     onChangeText={this.onReportChange.bind(this)}
+                    onSubmitEditing={onRefresh}
                     placeholder="Report"
                 />
                 <IconBtn
@@ -176,12 +172,13 @@ export class TaskPageInput extends React.Component {
             </View>
         );
         const line2 = (
-            <View style={_l(styles.flex0, styles.hflex)}>
+            <View style={_l(styles.flex0, styles.vflex)}>
                 <TextInput
-                    style={_l(styles.inp, styles.flex1)}
+                    style={_l(styles.inp)}
                     ref="filter"
                     value={this.state.filter}
                     onChangeText={this.onFilterChange.bind(this)}
+                    onSubmitEditing={onRefresh}
                     placeholder="Filter"
                 />
             </View>
