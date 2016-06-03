@@ -44,7 +44,11 @@ export const init = () => {
             height: 56,
         },
         input_box: {
-            flex: 0,
+            position: 'absolute',
+            marginTop: 100,
+            left: 0,
+            right: 0,
+            top: 0,
             borderWidth: 1,
             borderStyle: 'solid',
             borderColor: _layers.bg.br,
@@ -54,18 +58,19 @@ export const init = () => {
         btn: {
             justifyContent: 'center',
             alignItems: 'center',
-            padding: 5,
+            padding: 0,
+            margin: 0,
         },
         icon: {
-            width: 26,
-            height: 26,
+            width: 32,
+            height: 32,
         },
         text: {
-            fontSize: 14,
+            fontSize: 16,
             fontFamily: _fontFamily,
         },
         inp: {
-            fontSize: 14,
+            fontSize: 16,
             fontFamily: _fontFamily,
             borderLeftWidth: 2,
             borderStyle: 'solid',
@@ -75,6 +80,30 @@ export const init = () => {
             height: 32,
             padding: 3,
             margin: 3,
+        },
+        description: {
+            alignSelf: 'center',
+        },
+        menu: {
+        },
+
+        menu_wrap: {
+        },
+
+        menu_popup: {
+        },
+        textSmall: {
+            fontSize: 14,
+        },
+        annotation_line: {
+            marginLeft: 26,
+        },
+        one_task: {
+            marginTop: 0,
+            marginBottom: 5,
+        },
+        task_selected: {
+            backgroundColor: _layers.i_sel.bg,
         },
 
     };

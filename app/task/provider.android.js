@@ -20,7 +20,6 @@ export class TaskProvider {
                 if (type == 'error') rej(result);
                 if (type == 'success') {
                     resp(result);
-                    // console.log('Success:', type, result, outs, errs, lines);
                     if (out && outs) { // Copy to out
                         for (var i = 0; i < outs; i++) {
                             out.eat(lines[i]);
@@ -33,7 +32,16 @@ export class TaskProvider {
                     };
                 }
             };
-            app.call(args, cb);
+            let arr = [];
+            for (let s of args) {
+                if (!s) continue;
+                if (s[0] == '(' && s[s.length-1] == ')') {
+                    arr.push(s);
+                    continue;
+                }
+                arr.push.apply(arr, s.split(' '));
+            }
+            app.call(arr, cb);
         });
     }
 }

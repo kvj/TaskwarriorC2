@@ -14,7 +14,60 @@ export const Div = (props) => {
     return (<View {...props}>{props.children}</View>);
 };
 
+export class IconMenu extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {expanded: false};
+    }
+
+    render() {
+        const {children, dir, style} = this.props;
+        const {expanded} = this.state;
+        let menu = null;
+        let st = [styles.hflex, styles.menu];
+        let wst = [styles.hflex, styles.menu_popup];
+        if (style && style.length) { // Copy
+            st = st.concat(style);
+            wst = wst.concat(style);
+        };
+        if (expanded) { // Render
+            menu = (
+                <View style={_l(styles.flex0, styles.menu_wrap)}>
+                    <View
+                        style={_l(wst)}
+                    >
+                        {children}
+                    </View>
+                </View>
+            );
+        };
+        return (
+            <View style={_l(st)}>
+                {menu}
+                <IconBtn
+                    icon={expanded? 'menu_right': 'menu_left'}
+                    onClick={this.onMenu.bind(this)}
+                />
+            </View>
+        );
+    }
+
+    onMenu() {
+        this.setState({
+            expanded: !this.state.expanded,
+        });
+    }
+
+    onMenuHide() {
+        this.setState({
+            expanded: false,
+        });
+    }
+}
 export const IconBtn = (props) => {
+    let icon = props.icon || '';
+    icon = icon.replace('-', '_');
     return (
         <TouchableOpacity
             style={_l(styles.btn)}
@@ -25,7 +78,7 @@ export const IconBtn = (props) => {
                 if (props.onClick) props.onClick({longTap: true});
             }}
         >
-            <Image source={{uri: `ic_${props.icon}`}} style={_l(styles.icon)} />
+            <Image source={{uri: `ic_${icon}`}} style={_l(styles.icon)} />
         </TouchableOpacity>
     );
     return (
@@ -54,8 +107,14 @@ export const Text = (props) => {
     if (props.editable !== undefined) {
         sfx += ' ';
     }
+    let lines = undefined;
+    if (props.style && props.style.indexOf(styles.oneLine)) { // Single line
+        lines = 1;
+    };
     return (
-        <RText style={_l(_st)}
+        <RText
+            style={_l(_st)}
+            numberOfLines={lines}
             onPress={() => {
                 if (props.onClick) props.onClick({});
             }}
@@ -69,6 +128,10 @@ export const Text = (props) => {
 }
 
 export class DnD extends React.Component {
+    constructor(props) {
+        super(props);
+        this.dropTypes = [];
+    }
 }
 
 export class TaskPageInput extends React.Component {
@@ -109,7 +172,7 @@ export class TaskPageInput extends React.Component {
                     title="Add new"
                 />
                 <IconBtn icon="refresh" onClick={this.props.onRefresh} />
-                <IconBtn icon="cancel" onClick={this.props.onClose} />
+                <IconBtn icon="close" onClick={this.props.onClose} />
             </View>
         );
         const line2 = (

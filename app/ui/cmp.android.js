@@ -8,6 +8,7 @@ import {
   Image,
   ToastAndroid,
   ViewPagerAndroid,
+  ListView,
 } from 'react-native';
 import * as widget from './widget';
 import * as common from './cmp.common';
@@ -238,13 +239,13 @@ export class MainCmp extends React.Component {
         };
         return (
             <View style={_l(styles.flex1)}>
-                {inputCmp}
                 <ViewPagerAndroid
                     style={_l(styles.flex1)}
                     initialPage={0}
                 >
                     {pageCmps}
                 </ViewPagerAndroid>
+                {inputCmp}
             </View>
         );
     }
@@ -254,18 +255,41 @@ export class TaskPageCmp extends common.TaskPageCmp {
 
     constructor(props) {
         super(props);
+        let ds = new ListView.DataSource({
+            rowHasChanged: (r1, r2) => {
+                return true;
+            }
+        });
         this.state = {
+            dataSource: ds,
+        };
+    }
+
+    componentWillReceiveProps(props) {
+        const {dataSource} = this.state;
+        const {info, selection} = props;
+        if (info && info.tasks) { // Update ds
+            this.setState({
+                dataSource: dataSource.cloneWithRows(info.tasks),
+            });
         };
     }
 
     renderBody(header, info) {
+        const renderOne = (task, sid, idx) => {
+            return this.renderTask(task, idx, cols);
+        };
         const cols = info.cols.filter((item) => {
             return item.visible;
         });
         return (
             <View style={_l(styles.vproxy)}>
                 <View style={_l(styles.flex0, styles.hflex, styles.wflex)}>{header}</View>
-                <View style={_l(styles.flex1)}></View>
+                <ListView
+                    style={_l(styles.flex1)}
+                    dataSource={this.state.dataSource}
+                    renderRow={renderOne}
+                />
             </View>
         );
     }

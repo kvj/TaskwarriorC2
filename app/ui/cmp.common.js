@@ -234,6 +234,11 @@ export class TaskPageCmp extends React.Component {
         } = this.props;
         const running = item.start? true: false;
         const onDone = (e) => {
+            if (e.longTap || e.meta) { // Do as select
+                onSelect(item);
+                e.stop && e.stop();
+                return;
+            };
             this.props.onDone(item);
         };
         const onAnnAdd = (e) => {
