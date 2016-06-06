@@ -293,7 +293,10 @@ export class AppPane extends React.Component {
     }
 
     async onSync() {
-        return await this.props.controller.sync();
+        const success = await this.props.controller.sync();
+        if (success) {
+            this.props.controller.info('Sync complete');
+        }
     }
 
     render() {

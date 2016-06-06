@@ -36,6 +36,9 @@ export const makeCommon = (style) => {
             top: 0,
             bottom: 0,
         },
+        paneTitle: {
+            marginLeft: 5,
+        }
     };
     for (var key in _layersStyle) {
         style[key] = _layersStyle[key];

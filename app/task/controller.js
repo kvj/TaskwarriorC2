@@ -396,7 +396,7 @@ export class TaskController {
 
     async sync() {
         this.events.emit('sync:start');
-        const code = await this.call(['sync'], this.streamNotify('notify:info'), this.streamNotify(), {slow: true});
+        const code = await this.call(['sync'], null, this.streamNotify(), {slow: true});
         this.events.emit('sync:finish');
         if (code == 0) {
             this.notifyChange();

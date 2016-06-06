@@ -123,7 +123,10 @@ export const init = () => {
 
         one_nav: {
             backgroundColor: _layers.l1.bg,
+            marginLeft: 3,
+            marginRight: 3,
             marginBottom: 5,
+            padding: 5,
         },
 
         hilite: {

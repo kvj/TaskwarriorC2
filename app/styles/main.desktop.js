@@ -210,6 +210,7 @@ export const init = () => {
             color: _layers.l1.fg,
             margin: "0 3px 5px 3px",
             cursor: "pointer",
+            padding: 3,
         },
 
         hilite: {

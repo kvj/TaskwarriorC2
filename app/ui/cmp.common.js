@@ -422,7 +422,7 @@ export class ProjectsNavigation extends React.Component {
         }
         return (
             <widget.Div style={_l(styles.vproxy)}>
-                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>
                     <widget.Text style={[styles.flex1]}>Projects</widget.Text>
                     <widget.IconBtn
                         icon="refresh"
@@ -480,7 +480,7 @@ export class TagsNavigation extends React.Component {
         }
         return (
             <widget.Div style={_l(styles.vproxy)}>
-                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>
                     <widget.Text style={[styles.flex1]}>Tags</widget.Text>
                     <widget.IconBtn
                         icon="refresh"
@@ -514,7 +514,7 @@ export const ReportsList = React.createClass({
         });
         return (
             <widget.Div style={_l(styles.vproxy)}>
-                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>
                     <widget.Text style={[styles.flex1]}>Reports</widget.Text>
                     <widget.IconBtn
                         icon="refresh"
@@ -566,4 +566,3 @@ export const ContextsList = React.createClass({
         );
     },
 });
-

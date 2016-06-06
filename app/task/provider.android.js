@@ -1,4 +1,7 @@
-import { NativeModules } from 'react-native';
+import {
+    NativeModules,
+    InteractionManager,
+} from 'react-native';
 
 const app = NativeModules.TwModule;
 
@@ -45,16 +48,18 @@ export class TaskProvider {
                     };
                 }
             };
-            let arr = [];
-            for (let s of args) {
-                if (!s) continue;
-                if (s[0] == '(' && s[s.length-1] == ')') {
-                    arr.push(s);
-                    continue;
+            InteractionManager.runAfterInteractions(() => {
+                let arr = [];
+                for (let s of args) {
+                    if (!s) continue;
+                    if (s[0] == '(' && s[s.length-1] == ')') {
+                        arr.push(s);
+                        continue;
+                    }
+                    arr.push.apply(arr, s.split(' '));
                 }
-                arr.push.apply(arr, s.split(' '));
-            }
-            app.call(arr, cb);
+                app.call(arr, cb);
+            });
         });
     }
 }
