@@ -247,7 +247,6 @@ export class AppPane extends React.Component {
     }
 
     onReportClick(report) {
-        console.log('Click on report:', report);
         if (report.special) { //
             this.showPage({
                 cmd: report.name,
@@ -423,7 +422,6 @@ class PagePane extends React.Component {
     }
 
     componentWillUnmount() {
-        console.log('removeListener', typeof this.props.controller.events.removeListener);
         this.props.controller.events.removeListener('change', this.refreshHandler);
     }
 

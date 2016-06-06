@@ -115,6 +115,74 @@ class PaneCmp extends React.Component {
     }
 }
 
+class ProjectsNavigation extends common.ProjectsNavigation {
+
+    renderList(list) {
+        const projects = list.map((item, idx) => {
+            let prefix = '';
+            for (var i = 0; i < item.indent; i++) {
+                prefix += ' ';
+            }
+            let st = [styles.one_nav, styles.hflex, styles.hbar];
+            if (item.hilite) st.push(styles.hilite);
+            return (
+                <div
+                    key={item.project}
+                    style={_l(st)}
+                    onDragStart={(e) => {
+                        e.dataTransfer.setData('text/plain', `pro:${item.project}`);
+                        e.dataTransfer.setData('tw/project', item.project);
+                    }}
+                    draggable
+                    onClick={(e) => {
+                        this.props.onClick(item, e);
+                    }}
+                >
+                    <widget.Text style={[styles.flex1]}>{prefix+item.name}</widget.Text>
+                    <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
+                </div>
+            );
+        });
+        return (
+            <div style={_l(styles.flex1s)}>
+                {projects}
+            </div>
+        );
+    }
+}
+
+class TagsNavigation extends common.TagsNavigation {
+
+    renderList(list) {
+        const tags = list.map((item, idx) => {
+            let st = [styles.one_nav, styles.hflex, styles.hbar];
+            if (item.hilite) st.push(styles.hilite);
+            return (
+                <div
+                    key={item.name}
+                    style={_l(st)}
+                    onClick={(e) => {
+                        this.props.onClick(item, e);
+                    }}
+                    onDragStart={(e) => {
+                        e.dataTransfer.setData('text/plain', `+${item.name}`);
+                        e.dataTransfer.setData('tw/tag', item.name);
+                    }}
+                    draggable
+                >
+                    <widget.Text style={[styles.flex1]}>{item.name}</widget.Text>
+                    <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
+                </div>
+            );
+        });
+        return (
+            <div style={_l(styles.flex1s)}>
+                {tags}
+            </div>
+        );
+    }
+}
+
 export class NavigationCmp extends PaneCmp {
 
     constructor(props) {
@@ -134,13 +202,13 @@ export class NavigationCmp extends PaneCmp {
         }
         return (
             <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
-                <common.ProjectsNavigation
+                <ProjectsNavigation
                     onRefresh={this.props.onRefreshProjects}
                     onClick={this.props.onProjectClick}
                     projects={this.props.projects || []}
                     info={this.props.info}
                 />
-                <common.TagsNavigation
+                <TagsNavigation
                     onRefresh={this.props.onRefreshTags}
                     onClick={this.props.onTagClick}
                     tags={this.props.tags || []}

@@ -366,12 +366,17 @@ export class TaskPageCmp extends React.Component {
 
 export class ProjectsNavigation extends React.Component {
 
-    render() {
-        const {projects, info} = this.props;
-        if (!projects.length || (projects.length == 1 && projects[0].project == '')) {
-            // No projects
-            return null;
-        }
+    constructor(props) {
+        super(props);
+        this.state = {list: this.convert(props)};
+    }
+
+    renderList(list) {
+        return null;
+    }
+
+    convert(props) {
+        const {projects, info} = props;
         let hilites = {};
         if (info && info.tasks) { // Have something
             info.tasks.forEach((item) => {
@@ -381,8 +386,9 @@ export class ProjectsNavigation extends React.Component {
                 }
             });
         };
-        const renderProjects = (arr) => {
-            return arr.map((item, idx) => {
+        let list = [];
+        const transformProjects = (arr) => {
+            arr.map((item, idx) => {
                 item.hilite = hilites[item.project];
                 item.index = idx;
                 return item;
@@ -392,58 +398,50 @@ export class ProjectsNavigation extends React.Component {
                 if (a.hilite && !b.hilite) return -1;
                 if (!a.hilite && b.hilite) return 1;
                 return a.index-b.index;
-            }).map((item, idx) => {
-                let prefix = '';
-                for (var i = 0; i < item.indent; i++) {
-                    prefix += ' ';
-                }
-                let st = [styles.one_nav, styles.hflex, styles.hbar];
-                if (item.hilite) st.push(styles.hilite);
-                const jsx = (
-                    <div
-                        key={item.project}
-                        style={_l(st)}
-                        onDragStart={(e) => {
-                            e.dataTransfer.setData('text/plain', `pro:${item.project}`);
-                            e.dataTransfer.setData('tw/project', item.project);
-                        }}
-                        draggable
-                        onClick={(e) => {
-                            this.props.onClick(item, e);
-                        }}
-                    >
-                        <widget.Text style={[styles.flex1]}>{prefix+item.name}</widget.Text>
-                        <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
-                    </div>
-                );
-                return [jsx, renderProjects(item.children)];
+            }).forEach((item, idx) => {
+                list.push(item);
+                transformProjects(item.children);
             });
         };
+        transformProjects(projects);
+        return list;
+    }
+
+    componentWillReceiveProps(props) {
+        this.setState({list: this.convert(props)});
+    }
+
+    render() {
+        const projects = this.state.list;
+        if (!projects.length || (projects.length == 1 && projects[0].project == '')) {
+            // No projects
+            return null;
+        }
         return (
-            <div style={_l(styles.vproxy)}>
-                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+            <widget.Div style={_l(styles.vproxy)}>
+                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <widget.Text style={[styles.flex1]}>Projects</widget.Text>
                     <widget.IconBtn
                         icon="refresh"
                         title="Refresh list"
                         onClick={this.props.onRefresh}
                     />
-                </div>
-                <div style={_l(styles.flex1s)}>
-                    {renderProjects(projects)}
-                </div>
-            </div>
+                </widget.Div>
+                {this.renderList(projects)}
+            </widget.Div>
         );
     }
 }
 
 export class TagsNavigation extends React.Component {
 
-    render() {
-        const {info, tags} = this.props;
-        if (!tags.length) {
-            return null; // Hide
-        }
+    constructor(props) {
+        super(props);
+        this.state = {tags: this.convert(props)};
+    }
+
+    convert(props) {
+        const {info, tags} = props;
         let hilites = {};
         if (info && info.tasks) { // Have something
             info.tasks.forEach((item) => {
@@ -455,7 +453,7 @@ export class TagsNavigation extends React.Component {
                 }
             });
         };
-        const list = tags.map((item, idx) => {
+        return tags.map((item, idx) => {
             item.hilite = hilites[item.name];
             item.index = idx;
             return item;
@@ -463,43 +461,35 @@ export class TagsNavigation extends React.Component {
             if (a.hilite && !b.hilite) return -1;
             if (!a.hilite && b.hilite) return 1;
             return a.index-b.index;
-        }).map((item, idx) => {
-            let st = [styles.one_nav, styles.hflex, styles.hbar];
-            if (item.hilite) st.push(styles.hilite);
-            return (
-                <div
-                    key={item.name}
-                    style={_l(st)}
-                    onClick={(e) => {
-                        this.props.onClick(item, e);
-                    }}
-                    onDragStart={(e) => {
-                        e.dataTransfer.setData('text/plain', `+${item.name}`);
-                        e.dataTransfer.setData('tw/tag', item.name);
-                    }}
-                    draggable
-                >
-                    <widget.Text style={[styles.flex1]}>{item.name}</widget.Text>
-                    <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
-                </div>
-            );
         });
+    }
+
+    componentWillReceiveProps(props) {
+        this.setState({
+            tags: this.convert(props),
+        });
+    }
+
+    render() {
+        const {tags} = this.state;
+        if (!tags.length) {
+            return null; // Hide
+        }
         return (
-            <div style={_l(styles.vproxy)}>
-                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+            <widget.Div style={_l(styles.vproxy)}>
+                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
                     <widget.Text style={[styles.flex1]}>Tags</widget.Text>
                     <widget.IconBtn
                         icon="refresh"
                         onClick={this.props.onRefresh}
                         title="Refresh list"
                     />
-                </div>
-                <div style={_l(styles.flex1s)}>
-                    {list}
-                </div>
-            </div>
+                </widget.Div>
+                {this.renderList(tags)}
+            </widget.Div>
         );
     }
+
 }
 
 export const ReportsList = React.createClass({

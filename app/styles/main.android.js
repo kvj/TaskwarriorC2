@@ -137,7 +137,10 @@ export const init = () => {
         right_dock: {
             marginRight: _layers.panes.right.width,
         },
-
+        none: {
+            width: 0,
+            position: 'absolute',
+        },
     };
     let __styles = makeCommon({});
     for (var key in _styles) {

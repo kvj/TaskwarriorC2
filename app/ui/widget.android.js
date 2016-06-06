@@ -12,7 +12,13 @@ import {
 } from 'react-native';
 
 export const Div = (props) => {
-    return (<View {...props}>{props.children}</View>);
+    return (
+        <View
+            {...props}
+        >
+            {props.children}
+        </View>
+    );
 };
 
 export class IconMenu extends React.Component {
@@ -70,7 +76,7 @@ export const IconBtn = (props) => {
     let icon = props.icon || '';
     icon = icon.replace('-', '_');
     return (
-        <TouchableNativeFeedback
+        <TouchableOpacity
             style={_l(styles.btn)}
             onPress={(evt) => {
                 if (props.onClick) props.onClick({});
@@ -82,7 +88,7 @@ export const IconBtn = (props) => {
             <View>
                 <Image source={{uri: `ic_${icon}`}} style={_l(styles.icon)} />
             </View>
-        </TouchableNativeFeedback>
+        </TouchableOpacity>
     );
 }
 
@@ -103,16 +109,18 @@ export const Text = (props) => {
     if (props.style && props.style.indexOf(styles.oneLine) != -1) { // Single line
         lines = 1;
     };
+    const pressHandler = props.onClick? () => {
+        props.onClick({});
+    }: undefined;
+    const longPressHandler = props.onEdit? () => {
+        props.onEdit({longTap: true});
+    }: undefined;
     return (
         <RText
             style={_l(_st)}
             numberOfLines={lines}
-            onPress={() => {
-                if (props.onClick) props.onClick({});
-            }}
-            onLongPress={() => {
-                if (props.onEdit) props.onEdit({longTap: true});
-            }}
+            onPress={pressHandler}
+            onLongPress={longPressHandler}
         >
             {val}{sfx}
         </RText>

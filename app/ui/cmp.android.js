@@ -9,6 +9,7 @@ import {
   ToastAndroid,
   ViewPagerAndroid,
   ListView,
+  TouchableNativeFeedback,
 } from 'react-native';
 import * as widget from './widget';
 import * as common from './cmp.common';
@@ -112,6 +113,110 @@ class PaneCmp extends React.Component {
     }
 }
 
+class ProjectsNavigation extends common.ProjectsNavigation {
+    
+    constructor(props) {
+        super(props);
+        let ds = new ListView.DataSource({
+            rowHasChanged: (r1, r2) => true
+        });
+        this.state.dataSource = ds.cloneWithRows(this.state.list);
+    }
+
+    componentWillReceiveProps(props) {
+        const {dataSource} = this.state;
+        const list = this.convert(props);
+        this.setState({
+            list,
+            dataSource: dataSource.cloneWithRows(list),
+        });
+    }
+
+    renderList(list) {
+        const renderOne = (item) => {
+            let st = [styles.one_nav, styles.hflex, styles.hbar];
+            if (item.hilite) st.push(styles.hilite);
+            let prefix = '';
+            for (var i = 0; i < item.indent; i++) {
+                prefix += ' ';
+            }
+            return (
+                <TouchableNativeFeedback
+                    key={item.name}
+                    onPress={() => {
+                        this.props.onClick(item, {});
+                    }}
+                >
+                    <View
+                        style={_l(st)}
+                    >
+                        <widget.Text style={[styles.flex1]}>{prefix+item.name}</widget.Text>
+                        <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
+                    </View>
+                </TouchableNativeFeedback>
+            );
+        };
+        return (
+            <ListView
+                style={_l(styles.flex1)}
+                dataSource={this.state.dataSource}
+                renderRow={renderOne}
+            />
+        );
+    }
+
+}
+
+class TagsNavigation extends common.TagsNavigation {
+
+    constructor(props) {
+        super(props);
+        let ds = new ListView.DataSource({
+            rowHasChanged: (r1, r2) => true
+        });
+        this.state.dataSource = ds.cloneWithRows(this.state.tags);
+    }
+
+
+    componentWillReceiveProps(props) {
+        const {dataSource} = this.state;
+        const tags = this.convert(props);
+        this.setState({
+            tags,
+            dataSource: dataSource.cloneWithRows(tags),
+        });
+    }
+
+    renderList(list) {
+        const renderOne = (item) => {
+            let st = [styles.one_nav, styles.hflex, styles.hbar];
+            if (item.hilite) st.push(styles.hilite);
+            return (
+                <TouchableNativeFeedback
+                    key={item.name}
+                    onPress={() => {
+                        this.props.onClick(item, {});
+                    }}
+                >
+                    <View
+                        style={_l(st)}
+                    >
+                        <widget.Text style={[styles.flex1]}>{item.name}</widget.Text>
+                        <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
+                    </View>
+                </TouchableNativeFeedback>
+            );
+        };
+        return (
+            <ListView
+                style={_l(styles.flex1)}
+                dataSource={this.state.dataSource}
+                renderRow={renderOne}
+            />
+        );
+    }
+}
+
 export class NavigationCmp extends PaneCmp {
     constructor(props) {
         super(props, 'left');
@@ -126,6 +231,18 @@ export class NavigationCmp extends PaneCmp {
         let st = [styles.left_pane, styles.left_pane_float, styles.navigation, styles.vflex];
         return (
             <View style={_l(st)}>
+                <ProjectsNavigation
+                    onRefresh={this.props.onRefreshProjects}
+                    onClick={this.props.onProjectClick}
+                    projects={this.props.projects || []}
+                    info={this.props.info}
+                />
+                <TagsNavigation
+                    onRefresh={this.props.onRefreshTags}
+                    onClick={this.props.onTagClick}
+                    tags={this.props.tags || []}
+                    info={this.props.info}
+                />
             </View>
         );
     }
@@ -357,7 +474,6 @@ export class StatusbarCmp extends React.Component {
     }
 
     showMessage(type, message) {
-        console.log('Show message:', type, message);
         if (type == 'error') { // Long Toast
             ToastAndroid.show(message, ToastAndroid.LONG);
         };
