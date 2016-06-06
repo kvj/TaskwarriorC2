@@ -241,6 +241,7 @@ export class TaskController {
                     if (json.depends && !Array.isArray(json.depends)) { // Old style
                         json.depends = json.depends.split(',');
                     };
+                    json.unique = json.id || json.uuid;
                     result.push(json);
                 } catch (e) {
                     console.log('JSON error:', line);

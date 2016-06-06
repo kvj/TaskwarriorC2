@@ -56,7 +56,7 @@ class Task extends widget.DnD {
                     editable={editable}
                     width={item.width}
                     title={task[`${item.field}_title`]}
-                    key={idx}
+                    key={item.full}
                     onEdit={(e) => {
                         e.field = item.field;
                         const edit_val = task[`${item.field}_edit`] || '';
@@ -84,7 +84,7 @@ class Task extends widget.DnD {
         if (dependsVisible && task.dependsTasks) { // Render tasks
             depends = task.dependsTasks.map((item) => {
                 return (
-                    <widget.Div style={_l(styles.hflex, styles.annotation_line)} key={item.id}>
+                    <widget.Div style={_l(styles.hflex, styles.annotation_line)} key={item.unique}>
                         <widget.Text
                             title={item.description}
                             style={[styles.flex1, styles.description, styles.textSmall, styles.oneLine]}
@@ -108,7 +108,10 @@ class Task extends widget.DnD {
         if (task.description_ann) { // Have list
             annotations = task.description_ann.map((item, idx) => {
                 return (
-                    <widget.Div style={_l(styles.hflex, styles.annotation_line)} key={idx}>
+                    <widget.Div
+                        style={_l(styles.hflex, styles.annotation_line)}
+                        key={item.unique}
+                    >
                         <widget.Text
                             title={item.title}
                             style={[styles.flex1, styles.description, styles.textSmall]}

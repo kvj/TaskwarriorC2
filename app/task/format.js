@@ -124,6 +124,7 @@ export const formatters = {
             return {
                 text: outp,
                 origin: line.description,
+                unique: line.entry,
                 date: dt,
                 title: dt? dt.toLocaleString(): line.description,
             };
@@ -205,6 +206,10 @@ export const formatters = {
         if (arr.length) {
             obj.depends_sort = arr.length;
             obj.depends_title = `[${arr.length}]`;
+            if (obj.dependsTasks) { // Join IDs
+                obj.dependsList = true;
+                obj.depends_title = obj.dependsTasks.map((t) => t.id).join(' ');
+            };
             if (format == 'count') { //
                 return obj.depends_title;
             };
@@ -212,8 +217,7 @@ export const formatters = {
                 return 'D';
             }
             if (obj.dependsTasks) { // Join IDs
-                obj.dependsList = true;
-                return obj.dependsTasks.map((t) => t.id).join(' ');
+                return obj.depends_title;
             };
             return `[${arr.length}]`;
         }
