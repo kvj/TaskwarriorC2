@@ -14,6 +14,19 @@ export class TaskProvider {
         return result;
     }
 
+    configurePanes(conf) {
+        conf._modes = {
+            "dock": true,
+            "float": true,
+            "hidden": true,
+        };
+        conf._default = 'dock';
+        // TODO: only do that for phones
+        conf._default = 'hidden';
+        conf._modes.dock = false;
+        return conf;
+    }
+
     call(args, out, err, options={}) {
         return new Promise((resp, rej) => {
             const cb = (type, result, outs, errs, ...lines) => {

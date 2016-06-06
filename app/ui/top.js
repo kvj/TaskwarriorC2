@@ -12,8 +12,8 @@ export class AppPane extends React.Component {
             pages: [],
             defaultCmd: controller.defaultCmd,
             panes: {
-                navigation: controller.panesConfig.navigation || 'dock',
-                reports: controller.panesConfig.reports || 'dock',
+                left: controller.panesConfig.left || controller.panesConfig._default,
+                right: controller.panesConfig.right || controller.panesConfig._default,
             },
             pins: [],
         };
@@ -39,14 +39,15 @@ export class AppPane extends React.Component {
 
     togglePane(pane) {
         let state = this.state.panes[pane];
+        const {_modes} = this.props.controller.panesConfig;
         console.log('Toggle pane:', pane, state);
         if (!state) return;
         if (state == 'dock') { // Hide
-            state = 'hidden';
+            state = _modes['hidden']? 'hidden': 'float';
         } else if (state == 'hidden') {
-            state = 'float';
+            state = _modes["float"]? 'float': 'dock';
         } else {
-            state = 'dock';
+            state = _modes['dock']? 'dock': 'hidden';
         }
         this.state.panes[pane] = state;
         this.setState({
@@ -246,6 +247,7 @@ export class AppPane extends React.Component {
     }
 
     onReportClick(report) {
+        console.log('Click on report:', report);
         if (report.special) { //
             this.showPage({
                 cmd: report.name,
@@ -258,7 +260,7 @@ export class AppPane extends React.Component {
                 type: 'list',
             });
         }
-        this.hidePane('reports');
+        this.hidePane('right');
     }
 
     current(key=this.state.page) {
@@ -276,7 +278,7 @@ export class AppPane extends React.Component {
         if (page && page.ref) {
             page.ref.filter(`+${tag.name}`);
         }
-        this.hidePane('navigation');
+        this.hidePane('left');
     }
 
     onProjectClick(project) {
@@ -284,7 +286,7 @@ export class AppPane extends React.Component {
         if (page && page.ref) {
             page.ref.filter(`pro:${project.project}`);
         }
-        this.hidePane('navigation');
+        this.hidePane('left');
     }
 
     async onUndo() {
@@ -299,6 +301,8 @@ export class AppPane extends React.Component {
         if (!this.state) return (
             <cmp.AppCmp />
         );
+        const {panes, pages, pins, page} = this.state;
+        const {controller} = this.props;
         return (
             <cmp.AppCmp>
                 <ToolbarPane
@@ -309,33 +313,34 @@ export class AppPane extends React.Component {
                 />
                 <CenterPane>
                     <MainPane
-                        controller={this.props.controller}
-                        pages={this.state.pages}
-                        pins={this.state.pins}
-                        page={this.state.page}
+                        navigation={panes.navigation}
+                        panes={panes}
+                        pages={pages}
+                        pins={pins}
+                        page={page}
                         ref="main"
                         onNavigation={this.onNavigation.bind(this)}
                         onInput={this.processInput.bind(this)}
                     />
                     <NavigationPane
-                        controller={this.props.controller}
+                        controller={controller}
                         onTagClick={this.onTagClick.bind(this)}
                         onProjectClick={this.onProjectClick.bind(this)}
                         ref="navigation"
-                        mode={this.state.panes.navigation}
+                        mode={panes.left}
                         onHide={this.hidePane.bind(this)}
                     />
                     <ReportsPane
                         ref="reports"
-                        controller={this.props.controller}
+                        controller={controller}
                         onReportClick={this.onReportClick.bind(this)}
                         onContextClick={this.onContextClick.bind(this)}
-                        mode={this.state.panes.reports}
+                        mode={panes.right}
                         onHide={this.hidePane.bind(this)}
                     />
                 </CenterPane>
                 <StatusbarPane
-                    controller={this.props.controller}
+                    controller={controller}
                 />
             </cmp.AppCmp>
         );

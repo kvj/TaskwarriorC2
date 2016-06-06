@@ -102,8 +102,40 @@ export const init = () => {
             marginTop: 0,
             marginBottom: 5,
         },
+        one_item: {
+            backgroundColor: _layers.l1.bg,
+        },
         task_selected: {
             backgroundColor: _layers.i_sel.bg,
+        },
+        reports: {
+            borderStyle: 'solid',
+            borderColor: _layers.bg.br,
+            borderWidth: 1,
+            borderRightWidth: 1,
+        },
+        navigation: {
+            borderStyle: 'solid',
+            borderColor: _layers.bg.br,
+            borderWidth: 1,
+            borderLeftWidth: 1,
+        },
+
+        one_nav: {
+            backgroundColor: _layers.l1.bg,
+            marginBottom: 5,
+        },
+
+        hilite: {
+            backgroundColor: _layers.l2.bg,
+        },
+        oneLine: {
+        },
+        left_dock: {
+            marginLeft: _layers.panes.left.width,
+        },
+        right_dock: {
+            marginRight: _layers.panes.right.width,
         },
 
     };

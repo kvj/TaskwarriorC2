@@ -100,7 +100,7 @@ export const Text = (props) => {
         sfx += ' ';
     }
     let lines = undefined;
-    if (props.style && props.style.indexOf(styles.oneLine)) { // Single line
+    if (props.style && props.style.indexOf(styles.oneLine) != -1) { // Single line
         lines = 1;
     };
     return (

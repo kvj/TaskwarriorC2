@@ -363,3 +363,214 @@ export class TaskPageCmp extends React.Component {
         );
     }
 }
+
+export class ProjectsNavigation extends React.Component {
+
+    render() {
+        const {projects, info} = this.props;
+        if (!projects.length || (projects.length == 1 && projects[0].project == '')) {
+            // No projects
+            return null;
+        }
+        let hilites = {};
+        if (info && info.tasks) { // Have something
+            info.tasks.forEach((item) => {
+                if (item.project) {
+                    const val = hilites[item.project] || 0;
+                    hilites[item.project] = val+1;
+                }
+            });
+        };
+        const renderProjects = (arr) => {
+            return arr.map((item, idx) => {
+                item.hilite = hilites[item.project];
+                item.index = idx;
+                return item;
+            }).sort((a, b) => {
+                if (!a.project && b.project) return -1;
+                if (!b.project && a.project) return  1;
+                if (a.hilite && !b.hilite) return -1;
+                if (!a.hilite && b.hilite) return 1;
+                return a.index-b.index;
+            }).map((item, idx) => {
+                let prefix = '';
+                for (var i = 0; i < item.indent; i++) {
+                    prefix += ' ';
+                }
+                let st = [styles.one_nav, styles.hflex, styles.hbar];
+                if (item.hilite) st.push(styles.hilite);
+                const jsx = (
+                    <div
+                        key={item.project}
+                        style={_l(st)}
+                        onDragStart={(e) => {
+                            e.dataTransfer.setData('text/plain', `pro:${item.project}`);
+                            e.dataTransfer.setData('tw/project', item.project);
+                        }}
+                        draggable
+                        onClick={(e) => {
+                            this.props.onClick(item, e);
+                        }}
+                    >
+                        <widget.Text style={[styles.flex1]}>{prefix+item.name}</widget.Text>
+                        <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
+                    </div>
+                );
+                return [jsx, renderProjects(item.children)];
+            });
+        };
+        return (
+            <div style={_l(styles.vproxy)}>
+                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+                    <widget.Text style={[styles.flex1]}>Projects</widget.Text>
+                    <widget.IconBtn
+                        icon="refresh"
+                        title="Refresh list"
+                        onClick={this.props.onRefresh}
+                    />
+                </div>
+                <div style={_l(styles.flex1s)}>
+                    {renderProjects(projects)}
+                </div>
+            </div>
+        );
+    }
+}
+
+export class TagsNavigation extends React.Component {
+
+    render() {
+        const {info, tags} = this.props;
+        if (!tags.length) {
+            return null; // Hide
+        }
+        let hilites = {};
+        if (info && info.tasks) { // Have something
+            info.tasks.forEach((item) => {
+                if (item.tags) {
+                    item.tags.forEach((tag) => {
+                        const val = hilites[tag] || 0;
+                        hilites[tag] = val+1;
+                    })
+                }
+            });
+        };
+        const list = tags.map((item, idx) => {
+            item.hilite = hilites[item.name];
+            item.index = idx;
+            return item;
+        }).sort((a, b) => {
+            if (a.hilite && !b.hilite) return -1;
+            if (!a.hilite && b.hilite) return 1;
+            return a.index-b.index;
+        }).map((item, idx) => {
+            let st = [styles.one_nav, styles.hflex, styles.hbar];
+            if (item.hilite) st.push(styles.hilite);
+            return (
+                <div
+                    key={item.name}
+                    style={_l(st)}
+                    onClick={(e) => {
+                        this.props.onClick(item, e);
+                    }}
+                    onDragStart={(e) => {
+                        e.dataTransfer.setData('text/plain', `+${item.name}`);
+                        e.dataTransfer.setData('tw/tag', item.name);
+                    }}
+                    draggable
+                >
+                    <widget.Text style={[styles.flex1]}>{item.name}</widget.Text>
+                    <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
+                </div>
+            );
+        });
+        return (
+            <div style={_l(styles.vproxy)}>
+                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+                    <widget.Text style={[styles.flex1]}>Tags</widget.Text>
+                    <widget.IconBtn
+                        icon="refresh"
+                        onClick={this.props.onRefresh}
+                        title="Refresh list"
+                    />
+                </div>
+                <div style={_l(styles.flex1s)}>
+                    {list}
+                </div>
+            </div>
+        );
+    }
+}
+
+export const ReportsList = React.createClass({
+    render() {
+        const reports = this.props.reports.map((item, idx) => {
+            const onClick = () => {
+                this.props.onClick(item);
+            };
+            return (
+                <widget.Div
+                    style={_l(styles.one_nav)}
+                    key={idx}
+                    onClick={onClick}
+                >
+                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
+                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.title}</widget.Text>
+                </widget.Div>
+            )
+        });
+        return (
+            <widget.Div style={_l(styles.vproxy)}>
+                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+                    <widget.Text style={[styles.flex1]}>Reports</widget.Text>
+                    <widget.IconBtn
+                        icon="refresh"
+                        onClick={this.props.onRefresh}
+                        title="Refresh list"
+                    />
+                </widget.Div>
+                <widget.Div style={_l(styles.flex1s)}>
+                    {reports}
+                </widget.Div>
+            </widget.Div>
+        );
+    },
+});
+
+export const ContextsList = React.createClass({
+    render() {
+        const {contexts, onRefresh, onClick} = this.props;
+        if (!contexts) {
+            return null; // Hide
+        }
+        const list = contexts.map((item, idx) => {
+            const click = () => {
+                onClick(item.context);
+            };
+            return (
+                <widget.Div
+                    style={_l(styles.one_nav, item.selected? styles.hilite: null)}
+                    key={idx}
+                    onClick={click}
+                >
+                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
+                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.filter}</widget.Text>
+                </widget.Div>
+            )
+        });
+        return (
+            <widget.Div style={_l(styles.flex0, styles.vflex)}>
+                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
+                    <widget.Text style={[styles.flex1]}>Contexts</widget.Text>
+                    <widget.IconBtn
+                        icon="refresh"
+                        onClick={onRefresh}
+                        title="Refresh list"
+                    />
+                </widget.Div>
+                {list}
+            </widget.Div>
+        );
+    },
+});
+

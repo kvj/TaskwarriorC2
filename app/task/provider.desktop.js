@@ -12,6 +12,16 @@ export class TaskProvider {
         return true;
     }
 
+    configurePanes(conf) {
+        conf._modes = {
+            "dock": true,
+            "float": true,
+            "hidden": true,
+        };
+        conf._default = 'dock';
+        return conf;
+    }
+
     call(args, out, err, options={}) {
         // Return promise
         const yesno = /^(.+)\s\((\S+)\)\s*$/;

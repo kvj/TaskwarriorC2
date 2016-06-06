@@ -143,7 +143,7 @@ export const init = () => {
         },
 
         navigation: {
-            width: 150,
+            width: _layers.panes.left.width,
             borderRight: `1px solid ${_layers.bg.br}`,
             backgroundColor: _layers.bg.bg,
             order: 0,
@@ -166,17 +166,8 @@ export const init = () => {
         },
 
         reports: {
-            width: 150,
             borderLeft: `1px solid ${_layers.bg.br}`,
-            backgroundColor: _layers.bg.bg,
             order: 2,
-        },
-
-        reportsFloat: {
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            bottom: 0,
         },
 
         tasks: {

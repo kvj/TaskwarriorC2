@@ -54,6 +54,14 @@ export const layers = () => {
     result.i_sel = {
         bg: clr('i_sel.bg', '#b39ddb'),
     }
+    result.panes = {
+        left: {
+            width: style['pane.left.width'] || 150,
+        },
+        right: {
+            width: style['pane.right.width'] || 150,
+        },
+    };
     colorDefs = {
         'due': {bg: '#fce4ec'},
         'due.today': {bg: '#f8bbd0'},

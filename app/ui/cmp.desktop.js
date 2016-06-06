@@ -53,7 +53,7 @@ export class ToolbarCmp extends React.Component {
                         icon="navicon"
                         title="Toggle Projects and Tags pane"
                         onClick={(e) => {
-                            onTogglePane('navigation', e);
+                            onTogglePane('left', e);
                         }}
                     />
                 </div>
@@ -79,7 +79,7 @@ export class ToolbarCmp extends React.Component {
                         icon="navicon"
                         title="Toggle Reports and Contexts pane"
                         onClick={(e) => {
-                            onTogglePane('reports', e);
+                            onTogglePane('right', e);
                         }}
                     />
                 </div>
@@ -98,144 +98,6 @@ export class CenterCmp extends React.Component {
         );
     }
 };
-
-class ProjectsNavigation extends React.Component {
-
-    render() {
-        const {projects, info} = this.props;
-        if (!projects.length || (projects.length == 1 && projects[0].project == '')) {
-            // No projects
-            return null;
-        }
-        let hilites = {};
-        if (info && info.tasks) { // Have something
-            info.tasks.forEach((item) => {
-                if (item.project) {
-                    const val = hilites[item.project] || 0;
-                    hilites[item.project] = val+1;
-                }
-            });
-        };
-        const renderProjects = (arr) => {
-            return arr.map((item, idx) => {
-                item.hilite = hilites[item.project];
-                item.index = idx;
-                return item;
-            }).sort((a, b) => {
-                if (!a.project && b.project) return -1;
-                if (!b.project && a.project) return  1;
-                if (a.hilite && !b.hilite) return -1;
-                if (!a.hilite && b.hilite) return 1;
-                return a.index-b.index;
-            }).map((item, idx) => {
-                let prefix = '';
-                for (var i = 0; i < item.indent; i++) {
-                    prefix += ' ';
-                }
-                let st = [styles.one_nav, styles.hflex, styles.hbar];
-                if (item.hilite) st.push(styles.hilite);
-                const jsx = (
-                    <div
-                        key={item.project}
-                        style={_l(st)}
-                        onDragStart={(e) => {
-                            e.dataTransfer.setData('text/plain', `pro:${item.project}`);
-                            e.dataTransfer.setData('tw/project', item.project);
-                        }}
-                        draggable
-                        onClick={(e) => {
-                            this.props.onClick(item, e);
-                        }}
-                    >
-                        <widget.Text style={[styles.flex1]}>{prefix+item.name}</widget.Text>
-                        <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
-                    </div>
-                );
-                return [jsx, renderProjects(item.children)];
-            });
-        };
-        return (
-            <div style={_l(styles.vproxy)}>
-                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
-                    <widget.Text style={[styles.flex1]}>Projects</widget.Text>
-                    <widget.IconBtn
-                        icon="refresh"
-                        title="Refresh list"
-                        onClick={this.props.onRefresh}
-                    />
-                </div>
-                <div style={_l(styles.flex1s)}>
-                    {renderProjects(projects)}
-                </div>
-            </div>
-        );
-    }
-}
-
-class TagsNavigation extends React.Component {
-
-    render() {
-        const {info, tags} = this.props;
-        if (!tags.length) {
-            return null; // Hide
-        }
-        let hilites = {};
-        if (info && info.tasks) { // Have something
-            info.tasks.forEach((item) => {
-                if (item.tags) {
-                    item.tags.forEach((tag) => {
-                        const val = hilites[tag] || 0;
-                        hilites[tag] = val+1;
-                    })
-                }
-            });
-        };
-        const list = tags.map((item, idx) => {
-            item.hilite = hilites[item.name];
-            item.index = idx;
-            return item;
-        }).sort((a, b) => {
-            if (a.hilite && !b.hilite) return -1;
-            if (!a.hilite && b.hilite) return 1;
-            return a.index-b.index;
-        }).map((item, idx) => {
-            let st = [styles.one_nav, styles.hflex, styles.hbar];
-            if (item.hilite) st.push(styles.hilite);
-            return (
-                <div
-                    key={item.name}
-                    style={_l(st)}
-                    onClick={(e) => {
-                        this.props.onClick(item, e);
-                    }}
-                    onDragStart={(e) => {
-                        e.dataTransfer.setData('text/plain', `+${item.name}`);
-                        e.dataTransfer.setData('tw/tag', item.name);
-                    }}
-                    draggable
-                >
-                    <widget.Text style={[styles.flex1]}>{item.name}</widget.Text>
-                    <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
-                </div>
-            );
-        });
-        return (
-            <div style={_l(styles.vproxy)}>
-                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
-                    <widget.Text style={[styles.flex1]}>Tags</widget.Text>
-                    <widget.IconBtn
-                        icon="refresh"
-                        onClick={this.props.onRefresh}
-                        title="Refresh list"
-                    />
-                </div>
-                <div style={_l(styles.flex1s)}>
-                    {list}
-                </div>
-            </div>
-        );
-    }
-}
 
 class PaneCmp extends React.Component {
 
@@ -256,7 +118,7 @@ class PaneCmp extends React.Component {
 export class NavigationCmp extends PaneCmp {
 
     constructor(props) {
-        super(props, 'navigation');
+        super(props, 'left');
     }
 
     render() {
@@ -272,13 +134,13 @@ export class NavigationCmp extends PaneCmp {
         }
         return (
             <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
-                <ProjectsNavigation
+                <common.ProjectsNavigation
                     onRefresh={this.props.onRefreshProjects}
                     onClick={this.props.onProjectClick}
                     projects={this.props.projects || []}
                     info={this.props.info}
                 />
-                <TagsNavigation
+                <common.TagsNavigation
                     onRefresh={this.props.onRefreshTags}
                     onClick={this.props.onTagClick}
                     tags={this.props.tags || []}
@@ -289,105 +151,33 @@ export class NavigationCmp extends PaneCmp {
     }
 };
 
-const ReportsList = React.createClass({
-    render() {
-        const reports = this.props.reports.map((item, idx) => {
-            const onClick = () => {
-                this.props.onClick(item);
-            };
-            return (
-                <div
-                    style={_l(styles.one_nav)}
-                    key={idx}
-                    onClick={onClick}
-                >
-                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
-                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.title}</widget.Text>
-                </div>
-            )
-        });
-        return (
-            <div style={_l(styles.vproxy)}>
-                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
-                    <widget.Text style={[styles.flex1]}>Reports</widget.Text>
-                    <widget.IconBtn
-                        icon="refresh"
-                        onClick={this.props.onRefresh}
-                        title="Refresh list"
-                    />
-                </div>
-                <div style={_l(styles.flex1s)}>
-                    {reports}
-                </div>
-            </div>
-        );
-    },
-});
-
-const ContextsList = React.createClass({
-    render() {
-        const {contexts, onRefresh, onClick} = this.props;
-        if (!contexts) {
-            return null; // Hide
-        }
-        const list = contexts.map((item, idx) => {
-            const click = () => {
-                onClick(item.context);
-            };
-            return (
-                <div
-                    style={_l(styles.one_nav, item.selected? styles.hilite: null)}
-                    key={idx}
-                    onClick={click}
-                >
-                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
-                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.filter}</widget.Text>
-                </div>
-            )
-        });
-        return (
-            <div style={_l(styles.flex0, styles.vflex)}>
-                <div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
-                    <widget.Text style={[styles.flex1]}>Contexts</widget.Text>
-                    <widget.IconBtn
-                        icon="refresh"
-                        onClick={onRefresh}
-                        title="Refresh list"
-                    />
-                </div>
-                {list}
-            </div>
-        );
-    },
-});
-
 export class ReportsCmp extends PaneCmp {
 
     constructor(props) {
-        super(props, 'reports');
+        super(props, 'right');
     }
 
     render() {
         const {reports, onReportsRefresh, onReportClick} = this.props;
         const {contexts, onContextsRefresh, onContextClick} = this.props;
-        let st = [styles.reports, styles.vflex];
+        let st = [styles.right_pane, styles.reports, styles.vflex];
         if (this.props.mode == 'dock') {
             st.push(styles.flex0);
         }
         if (this.props.mode == 'float') {
-            st.push(styles.reportsFloat);
+            st.push(styles.right_pane_float);
         }
         if (this.props.mode == 'hidden') {
             st.push(styles.none);
         }
         return (
             <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
-                <ReportsList
+                <common.ReportsList
                     reports={reports}
                     onRefresh={onReportsRefresh}
                     onClick={onReportClick}
                 />
-                <ContextsList
+                <common.ContextsList
                     contexts={contexts}
                     onRefresh={onContextsRefresh}
                     onClick={onContextClick}

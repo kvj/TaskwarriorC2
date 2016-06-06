@@ -61,7 +61,7 @@ export class ToolbarCmp extends React.Component {
             icon: {uri: 'ic_menu'},
             show: 'always',
             onAction: () => {
-                onTogglePane('reports');
+                onTogglePane('right');
             },
         }];
         return (
@@ -71,7 +71,7 @@ export class ToolbarCmp extends React.Component {
                 actions={actions}
                 navIcon={{uri: 'ic_menu'}}
                 onIconClicked={() => {
-                    onTogglePane('navigation');
+                    onTogglePane('left');
                 }}
                 onActionSelected={(idx) => {
                     actions[idx].onAction();
@@ -97,28 +97,66 @@ export class CenterCmp extends React.Component {
     }
 }
 
-export class NavigationCmp extends React.Component {
-    constructor(props) {
+class PaneCmp extends React.Component {
+
+    constructor(props, name) {
         super(props);
+        this.name = name;
+    }
+
+    hide(e) {
+        const {mode, onHide} = this.props;
+        if (mode == 'float') {
+            onHide(this.name);
+        };
+    }
+}
+
+export class NavigationCmp extends PaneCmp {
+    constructor(props) {
+        super(props, 'left');
         this.state = {};
     }
 
     render() {
+        const {mode} = this.props;
+        if (mode == 'hidden') {
+            return null;
+        }
+        let st = [styles.left_pane, styles.left_pane_float, styles.navigation, styles.vflex];
         return (
-            <View />
+            <View style={_l(st)}>
+            </View>
         );
     }
 }
 
 export class ReportsCmp extends React.Component {
     constructor(props) {
-        super(props);
+        super(props, 'right');
         this.state = {};
     }
 
     render() {
+        const {reports, onReportsRefresh, onReportClick, mode} = this.props;
+        const {contexts, onContextsRefresh, onContextClick} = this.props;
+        if (mode == 'hidden') {
+            return null;
+        }
+        let st = [styles.right_pane, styles.right_pane_float, styles.reports, styles.vflex];
         return (
-            <View />
+            <View style={_l(st)}>
+                <common.ReportsList
+                    reports={reports}
+                    onRefresh={onReportsRefresh}
+                    onClick={onReportClick}
+                />
+                <common.ContextsList
+                    contexts={contexts}
+                    onRefresh={onContextsRefresh}
+                    onClick={onContextClick}
+                />
+            </View>
         );
     }
 }
@@ -218,7 +256,7 @@ export class MainCmp extends React.Component {
     }
 
     render() {
-        const {pages, pins, page, onNavigation} = this.props;
+        const {pages, pins, page, onNavigation, panes} = this.props;
         const {input} = this.state;
         const pageCmps = pages.map((pageCmp, idx) => {
             return (
@@ -237,8 +275,11 @@ export class MainCmp extends React.Component {
                 />
             );
         };
+        let st = [styles.flex1];
+        if (panes.left == 'dock') st.push(styles.left_dock);
+        if (panes.right == 'dock') st.push(styles.right_dock);
         return (
-            <View style={_l(styles.flex1)}>
+            <View style={_l(st)}>
                 <ViewPagerAndroid
                     style={_l(styles.flex1)}
                     initialPage={0}
