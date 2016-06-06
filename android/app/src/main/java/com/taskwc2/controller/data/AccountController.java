@@ -14,6 +14,8 @@ import com.taskwc2.controller.sync.SSLHelper;
 
 import org.kvj.bravo7.log.Logger;
 import org.kvj.bravo7.util.Compat;
+import org.kvj.bravo7.util.DataUtil;
+import org.kvj.bravo7.util.Listeners;
 import org.kvj.bravo7.util.Tasks;
 
 import java.io.CharArrayWriter;
@@ -48,6 +50,13 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class AccountController {
 
+    private static final Pattern QUESTION_PARSE = Pattern.compile("^(.+)\\s\\((\\S+)\\)\\s*$");
+
+    public interface TaskListener {
+        public void onQuestion(String question, DataUtil.Callback<Integer> callback, List<String> answers);
+    }
+
+    private Listeners<TaskListener> taskListeners = new Listeners<TaskListener>();
     private Thread acceptThread = null;
     private final String accountName;
     private Set<NotificationType> notificationTypes = new HashSet<>();
@@ -271,7 +280,7 @@ public class AccountController {
         toggleSyncNotification(n, NotificationType.Sync);
         StringAggregator err = new StringAggregator();
         StringAggregator out = new StringAggregator();
-        boolean result = callTask(out, err, "rc.taskd.socket=" + socketName, "sync");
+        boolean result = callTask(out, err, "sync");
         debug("Sync result:", result);
         logger.d("Sync result:", result, "ERR:", err.text(), "OUT:", out.text());
         n = controller.newNotification(accountName);
@@ -337,10 +346,22 @@ public class AccountController {
         Thread thread = new Thread() {
             @Override
             public void run() {
+                final DataUtil.Callback<String> questionAnswer = new DataUtil.Callback<String>() {
+                    @Override
+                    public boolean call(String value) {
+                        try {
+                            outputStream.write(String.format("%s\n", value).getBytes("utf-8"));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return false;
+                        }
+                        return true;
+                    }
+                };
 
                 try {
                     CharArrayWriter line = new CharArrayWriter();
-                    int ch = -1;
+                    int ch;
                     while ((ch = reader.read()) >= 0) {
                         if (ch == '\n') {
                             // New line
@@ -351,6 +372,32 @@ public class AccountController {
                             continue;
                         }
                         line.write(ch);
+                        if (null != outputStream) {
+                            final Matcher m = QUESTION_PARSE.matcher(line.toString());
+                            if (m.find()) {
+                                // Ask
+                                final List<String> choices = new ArrayList<>();
+                                Collections.addAll(choices, m.group(2).split("/"));
+                                final DataUtil.Callback<Integer> cb = new DataUtil.Callback<Integer>() {
+                                    @Override
+                                    public boolean call(Integer value) {
+                                        questionAnswer.call(choices.get(value));
+                                        return true;
+                                    }
+                                };
+                                boolean ignored =
+                                    taskListeners.emit(new Listeners.ListenerEmitter<TaskListener>() {
+                                    @Override
+                                    public boolean emit(TaskListener listener) {
+                                        listener.onQuestion(m.group(1), cb, choices);
+                                        return false;
+                                    }
+                                });
+                                if (ignored) {
+                                    questionAnswer.call(choices.get(choices.size()-1)); // Last answer
+                                }
+                            }
+                        }
                     }
                     if (line.size() > 0) {
                         // Last line
@@ -393,6 +440,9 @@ public class AccountController {
             }
             List<String> args = new ArrayList<>();
             args.add(controller.executable);
+            if (!TextUtils.isEmpty(socketName)) { // Have socket opened - add key
+                args.add("rc.taskd.socket=" + socketName);
+            }
             if (api) {
                 args.add("rc.color=off");
                 args.add("rc.confirmation=off");
