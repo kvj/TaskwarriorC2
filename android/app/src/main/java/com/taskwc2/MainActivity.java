@@ -54,9 +54,9 @@ public class MainActivity extends ReactActivity {
         List<ReactPackage> list = new ArrayList<>();
         list.add(new MainReactPackage());
         if (null == acc) { // Ask about new profile
-            Dialogs.questionDialog(this, "New Profile", "Create new Profile?", new Dialogs.Callback<Void>() {
+            Dialogs.questionDialog(this, "Create new Profile?", null, new Dialogs.Callback<Integer>() {
                 @Override
-                public void run(Void data) {
+                public void run(Integer data) {
                     String message = controller.createAccount(null); // Random
                     if (!TextUtils.isEmpty(message)) { // Error
                         controller.messageLong(message);
