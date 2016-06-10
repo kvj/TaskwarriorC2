@@ -10,6 +10,7 @@ import {
   ViewPagerAndroid,
   ListView,
   TouchableNativeFeedback,
+  BackAndroid,
 } from 'react-native';
 import * as widget from './widget';
 import * as common from './cmp.common';
@@ -281,6 +282,7 @@ export class ReportsCmp extends React.Component {
 export class PopupEditor extends React.Component {
     constructor(props) {
         super(props);
+        this.onBack = this.onBack.bind(this);
         this.state = {
             input: props.input || '',
         };
@@ -298,6 +300,11 @@ export class PopupEditor extends React.Component {
         });
     }
 
+    onBack() {
+        this.finish(false);
+        return true;
+    }
+
     finish(success, e={}) {
         const input = this.state.input.trim();
         if (success)
@@ -308,6 +315,11 @@ export class PopupEditor extends React.Component {
 
     componentDidMount() {
         this.refs.input.focus();
+        BackAndroid.addEventListener('hardwareBackPress', this.onBack);
+    }
+
+    componentWillUnmount() {
+        BackAndroid.removeEventListener('hardwareBackPress', this.onBack);
     }
 
     render() {

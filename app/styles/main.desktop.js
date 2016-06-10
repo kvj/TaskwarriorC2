@@ -272,6 +272,7 @@ export const init = () => {
             top: 150,
             fontSize: '3em',
             textAlign: 'center',
+            opacity: 0.2,
         },
 
     };

@@ -18,7 +18,7 @@ export const eventInfo = (e) => {
 export const LoadingIndicator = (props) => {
     return (
         <div style={_l(styles.loadingIndicator)}>
-            <i className="fa fa-spinner fa-spin fa-fw"></i>
+            <i className="fa fa-circle-o-notch fa-spin fa-fw"></i>
         </div>
     );
 };
