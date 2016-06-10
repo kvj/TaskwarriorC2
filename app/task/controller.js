@@ -110,6 +110,12 @@ export class TaskController {
                 };
             };
         };
+        config.onState = (state) => {
+            // console.log('State change:', state);
+            if (state == 'active') { // Refresh everything
+                this.notifyChange();
+            };
+        };
         const provider = new TaskProvider(config);
         if (!await provider.init()) { // OK
             return false;

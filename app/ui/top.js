@@ -595,7 +595,7 @@ class TasksPagePane extends PagePane {
             let info = await controller.filter(data.report, data.filter);
             let newState = {
                 loading: false,
-            }
+            };
             if (info) {
                 // Load data
                 if (reset) {

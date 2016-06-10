@@ -1,6 +1,7 @@
 import {
     NativeModules,
     InteractionManager,
+    AppState,
 } from 'react-native';
 
 const app = NativeModules.TwModule;
@@ -11,9 +12,14 @@ export class TaskProvider {
         this.config = config;
     }
 
+    handleAppStateChange(state) {
+        this.config.onState(state);
+    }
+
     async init() {
         // console.log('Init:', app);
         const result = await app.init(this.config);
+        AppState.addEventListener('change', this.handleAppStateChange.bind(this));
         return result;
     }
 

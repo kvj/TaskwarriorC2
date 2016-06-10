@@ -1,5 +1,6 @@
 const spawn = require('child_process').spawn;
 const readline = require('readline');
+const {ipcRenderer} = require('electron');
 
 export class TaskProvider {
 
@@ -9,6 +10,9 @@ export class TaskProvider {
     }
 
     init() {
+        ipcRenderer.on('state', (evt, state) => {
+            this.config.onState(state);
+        });
         return true;
     }
 
