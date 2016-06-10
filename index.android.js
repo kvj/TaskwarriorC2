@@ -8,6 +8,7 @@ import {
 
 import {TaskController} from './app/task/controller';
 import {AppPane} from './app/ui/top';
+import {smooth} from './app/tool/ui';
 
 class taskwc2 extends Component {
 
@@ -17,13 +18,13 @@ class taskwc2 extends Component {
     }
 
     async componentDidMount() {
-        const controller = new TaskController();
-        if (await controller.init({})) { // OK
-            console.log('Ready to show UI');
-            this.setState({controller,});
-        } else {
-            console.log('Not ready');
-        }
+        return smooth(async () => {
+            const controller = new TaskController();
+            if (await controller.init({})) { // OK
+                console.log('Ready to show UI');
+                this.setState({controller});
+            }
+        });
     }
 
     render() {

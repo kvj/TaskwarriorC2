@@ -3,6 +3,8 @@
 import React from 'react';
 import * as cmp from './cmp';
 
+import {smooth} from '../tool/ui';
+
 export class AppPane extends React.Component {
 
     constructor(props) {
@@ -96,7 +98,9 @@ export class AppPane extends React.Component {
     }
 
     async processInput(input, ctx) {
-        return await this.props.controller.cmd(ctx.cmd, input, ctx.tasks);
+        return smooth(async () => {
+            return await this.props.controller.cmd(ctx.cmd, input, ctx.tasks);
+        });
     }
 
     onClose(key) {
@@ -473,21 +477,23 @@ class CmdPagePane extends PagePane {
     refresh() {
     }
 
-    async run() {
+    run() {
         const {controller, onRefreshed, id} = this.props;
         let data = this.input();
-        let info = await controller.cmdRaw(data.cmd, (outp) => {
-            this.setState({
-                info: outp,
+        smooth(async () => {
+            let info = await controller.cmdRaw(data.cmd, (outp) => {
+                this.setState({
+                    info: outp,
+                });
             });
+            if (info) {
+                // Load data
+                this.setState({
+                    info: info,
+                });
+                onRefreshed(id, info);
+            }
         });
-        if (info) {
-            // Load data
-            this.setState({
-                info: info,
-            });
-            onRefreshed(id, info);
-        }
     }
 }
 
@@ -583,20 +589,22 @@ class TasksPagePane extends PagePane {
         );
     }
 
-    async refresh(reset) {
+    refresh(reset) {
         const {controller, onRefreshed, id} = this.props;
         let data = this.input();
-        let info = await controller.filter(data.report, data.filter);
-        if (info) {
-            // Load data
-            if (reset) {
-                this.resetSelection();
+        smooth(async () => {
+            let info = await controller.filter(data.report, data.filter);
+            if (info) {
+                // Load data
+                if (reset) {
+                    this.resetSelection();
+                }
+                this.setState({
+                    info: info,
+                });
+                onRefreshed(id, info);
             }
-            this.setState({
-                info: info,
-            });
-            onRefreshed(id, info);
-        }
+        });
     }
 }
 
@@ -640,19 +648,17 @@ class NavigationPane extends React.Component {
         this.refreshTags();
     }
 
-    refreshProjects() {
-        this.props.controller.tags().then((tags) => {
-            this.setState({
-                tags: tags,
-            });
+    async refreshProjects() {
+        return smooth(async () => {
+            const tags = await this.props.controller.tags();
+            if (tags) this.setState({tags});
         });
     }
 
-    refreshTags() {
-        this.props.controller.projects().then((projects) => {
-            this.setState({
-                projects: projects,
-            });
+    async refreshTags() {
+        return smooth(async () => {
+            const projects = await this.props.controller.projects();
+            if (projects) this.setState({projects});
         });
     }
 
@@ -691,16 +697,20 @@ class ReportsPane extends React.Component {
     }
 
     async refreshReports() {
-        const reports = await this.props.controller.reports();
-        this.setState({
-            reports: reports,
+        return smooth(async () => {
+            const reports = await this.props.controller.reports();
+            this.setState({
+                reports: reports,
+            });
         });
     }
 
     async refreshContexts() {
-        const data = await this.props.controller.contexts();
-        this.setState({
-            contexts: data,
+        return smooth(async () => {
+            const data = await this.props.controller.contexts();
+            this.setState({
+                contexts: data,
+            });
         });
     }
 

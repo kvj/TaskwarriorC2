@@ -5,6 +5,7 @@ import 'babel-polyfill';
 import {styles, _l} from './styles/main';
 import {TaskController} from './task/controller';
 import {AppPane} from './ui/top';
+import {smooth} from './tool/ui';
 
 class DesktopMain extends React.Component {
 
@@ -16,10 +17,12 @@ class DesktopMain extends React.Component {
     }
 }
 
-export const start = async () => {
+export const start = () => {
     const domNode = document.getElementById('app');
     const controller = new TaskController();
-    if (await controller.init({})) { // OK
-        ReactDOM.render(React.createElement(DesktopMain, {controller}), domNode);
-    };
+    smooth(async () => {
+        if (await controller.init({})) { // OK
+            ReactDOM.render(React.createElement(DesktopMain, {controller}), domNode);
+        };
+    });
 };

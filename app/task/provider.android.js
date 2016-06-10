@@ -48,18 +48,16 @@ export class TaskProvider {
                     };
                 }
             };
-            InteractionManager.runAfterInteractions(() => {
-                let arr = [];
-                for (let s of args) {
-                    if (!s) continue;
-                    if (s[0] == '(' && s[s.length-1] == ')') {
-                        arr.push(s);
-                        continue;
-                    }
-                    arr.push.apply(arr, s.split(' '));
+            let arr = [];
+            for (let s of args) {
+                if (!s) continue;
+                if (s[0] == '(' && s[s.length-1] == ')') {
+                    arr.push(s);
+                    continue;
                 }
-                app.call(arr, cb);
-            });
+                arr.push.apply(arr, s.split(' '));
+            }
+            app.call(arr, cb);
         });
     }
 }
