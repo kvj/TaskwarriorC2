@@ -16,7 +16,11 @@ app.on('ready', () => {
             mainWindow.webContents.send('state', state); 
         };
     };
-    mainWindow = new BrowserWindow({width: 800, height: 600});
+    mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        title: 'Taskwarrior',
+    });
     mainWindow.loadURL('file://' + __dirname + '/desktop.html');
     // mainWindow.openDevTools();
     mainWindow.on('closed', () => {
