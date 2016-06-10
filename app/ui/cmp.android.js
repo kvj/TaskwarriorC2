@@ -11,6 +11,7 @@ import {
   ListView,
   TouchableNativeFeedback,
   BackAndroid,
+  Dimensions,
 } from 'react-native';
 import * as widget from './widget';
 import * as common from './cmp.common';
@@ -323,9 +324,14 @@ export class PopupEditor extends React.Component {
     }
 
     render() {
+        const windowSize = Dimensions.get('window');
+        let lineStyle = [styles.hflex, styles.hbar];
+        if (windowSize.width < 600) { // Smaller than Nexus 7
+            lineStyle = styles.vflex;
+        };
         return (
             <View style={_l(styles.input_box, styles.vflex)}>
-                <View style={_l(styles.hbar, styles.hflex, styles.wflex)}>
+                <View style={_l(lineStyle)}>
                     <widget.Text>{this.props.title}</widget.Text>
                     <TextInput
                         style={_l(styles.inp, styles.flex1)}
