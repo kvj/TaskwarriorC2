@@ -16,6 +16,7 @@ export const init = () => {
         },
         "hflex": {
             flexDirection: 'row',
+            alignItems: 'flex-start',
         },
         "flex1": {
             flex: 1,
@@ -83,14 +84,6 @@ export const init = () => {
         },
         description: {
             alignSelf: 'center',
-        },
-        menu: {
-        },
-
-        menu_wrap: {
-        },
-
-        menu_popup: {
         },
         textSmall: {
             fontSize: 14,

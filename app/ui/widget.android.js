@@ -49,17 +49,17 @@ export class IconMenu extends React.Component {
         };
         if (expanded) { // Render
             menu = (
-                <View style={_l(styles.flex0, styles.menu_wrap)}>
-                    <View
-                        style={_l(wst)}
-                    >
-                        {children}
-                    </View>
+                <View
+                    collapsable={false}
+                    style={_l(wst)}
+                >
+                    {children}
                 </View>
             );
         };
         return (
-            <View style={_l(st)}>
+            <View
+                style={_l(st)}>
                 {menu}
                 <IconBtn
                     icon={expanded? 'menu_right': 'menu_left'}
