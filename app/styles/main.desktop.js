@@ -202,7 +202,7 @@ export const init = () => {
         },
 
         task_drop: {
-            transform: "scale(1.1)",
+            transform: "translateX(15px)",
         },
 
         one_nav: {
@@ -261,6 +261,17 @@ export const init = () => {
             position: "absolute",
             top: 0,
             right: 0,
+        },
+        pane: {
+            position: 'relative',
+        },
+        loadingIndicator: {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 150,
+            fontSize: '3em',
+            textAlign: 'center',
         },
 
     };

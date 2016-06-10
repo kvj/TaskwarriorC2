@@ -467,6 +467,7 @@ class CmdPagePane extends PagePane {
                 {...this.props}
                 ref="cmp"
                 info={this.state.info}
+                loading={this.state.loading}
                 onRefresh={this.run.bind(this)}
                 onClose={this.onClose.bind(this)}
                 onPin={this.onPin.bind(this)}
@@ -480,6 +481,7 @@ class CmdPagePane extends PagePane {
     run() {
         const {controller, onRefreshed, id} = this.props;
         let data = this.input();
+        this.setState({loading: true});
         smooth(async () => {
             let info = await controller.cmdRaw(data.cmd, (outp) => {
                 this.setState({
@@ -493,6 +495,7 @@ class CmdPagePane extends PagePane {
                 });
                 onRefreshed(id, info);
             }
+            this.setState({loading: false});
         });
     }
 }
@@ -504,12 +507,6 @@ class TasksPagePane extends PagePane {
         this.state = {
             selection: {},
         };
-    }
-
-    resetSelection() {
-        this.setState({
-            selection: {},
-        });
     }
 
     select(task) {
@@ -576,6 +573,7 @@ class TasksPagePane extends PagePane {
                 ref="cmp"
                 info={this.state.info}
                 selection={this.state.selection}
+                loading={this.state.loading}
                 onRefresh={() => {
                     this.refresh(true);
                 }}
@@ -590,20 +588,23 @@ class TasksPagePane extends PagePane {
     }
 
     refresh(reset) {
+        this.setState({loading: true});
         const {controller, onRefreshed, id} = this.props;
         let data = this.input();
         smooth(async () => {
             let info = await controller.filter(data.report, data.filter);
+            let newState = {
+                loading: false,
+            }
             if (info) {
                 // Load data
                 if (reset) {
-                    this.resetSelection();
+                    newState.selection = {};
                 }
-                this.setState({
-                    info: info,
-                });
+                newState.info = info;
                 onRefreshed(id, info);
             }
+            this.setState(newState);
         });
     }
 }

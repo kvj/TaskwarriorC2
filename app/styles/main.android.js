@@ -144,6 +144,16 @@ export const init = () => {
             width: 0,
             position: 'absolute',
         },
+        pane: {
+            position: 'relative',
+        },
+        loadingIndicator: {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 100,
+            alignItems: 'center',
+        },
     };
     let __styles = makeCommon({});
     for (var key in _styles) {

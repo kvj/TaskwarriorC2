@@ -328,6 +328,7 @@ export class TaskPageCmp extends React.Component {
             onEdit,
             onSelect,
             onAdd,
+            loading,
         } = this.props;
         let body = null;
         if (info) {
@@ -353,8 +354,12 @@ export class TaskPageCmp extends React.Component {
             // Render tasks
             body = this.renderBody(header_items, info);
         }
+        let loadingIndicator;
+        if (loading) { // Show it
+            loadingIndicator = (<widget.LoadingIndicator />);
+        };
         return (
-            <widget.Div style={_l(styles.vproxy)}>
+            <widget.Div style={_l(styles.vproxy, styles.pane)}>
                 <widget.TaskPageInput
                     {...this.props}
                     ref="input"
@@ -362,6 +367,7 @@ export class TaskPageCmp extends React.Component {
                 <widget.Div style={_l(styles.vproxy)}>
                     {body}
                 </widget.Div>
+                {loadingIndicator}
             </widget.Div>
         );
     }
