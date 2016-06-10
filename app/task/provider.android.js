@@ -66,4 +66,9 @@ export class TaskProvider {
             app.call(arr, cb);
         });
     }
+
+    schedule(seconds, type, interval, conf) {
+        // No callback
+        return app.scheduleSync(seconds, conf);
+    }
 }

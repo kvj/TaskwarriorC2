@@ -135,9 +135,9 @@ export class TaskController {
     async setupSync() {
         const timers = await this.config('ui.sync.', true);
         this.timers = {
-            normal: parseInt(timers['periodical'], 10) || 0,
-            error: parseInt(timers['error'], 10) || 0,
-            commit: parseInt(timers['commit'], 10) || 0,
+            normal: parseInt(timers['periodical'] || 120, 10) || 0,
+            error: parseInt(timers['error'] || 30, 10) || 0,
+            commit: parseInt(timers['commit'] || 10, 10) || 0,
         };
         console.log('setupSync:', this.timers);
     }
@@ -145,7 +145,7 @@ export class TaskController {
     scheduleSync(type='normal') {
         const timeout = this.timers[type] || this.timers.normal || 0;
         if (timeout > 0 && this.provider) { // Have timeout
-            this.provider.schedule(timeout*60, 'sync', true);
+            this.provider.schedule(timeout*60, 'sync', true, this.timers);
         };
     }
 

@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">taskwc2</string>
     <string name="pref_account_id">pref_account_id</string>
+    <string name="pref_sync_normal">pref_sync_normal</string>
+    <string name="pref_sync_error">pref_sync_error</string>
 </resources>

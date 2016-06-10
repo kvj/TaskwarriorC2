@@ -37,6 +37,19 @@ public class TwModule extends ReactContextBaseJavaModule {
         return "TwModule";
     }
 
+    private int fromMap(ReadableMap map, String attr) {
+        int value = 0;
+        if (map.hasKey(attr)) value = map.getInt(attr);
+        return value;
+    }
+
+    @ReactMethod
+    public void scheduleSync(int seconds, ReadableMap timers) {
+        if (null == acc) return;
+        acc.rememberTimers(fromMap(timers, "normal"), fromMap(timers, "error"));
+        acc.scheduleSync(seconds);
+    }
+
     @ReactMethod
     public void init(ReadableMap config, Promise promise) {
         promise.resolve(acc != null);

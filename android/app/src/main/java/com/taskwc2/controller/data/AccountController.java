@@ -10,6 +10,7 @@ import android.text.TextUtils;
 
 import com.taskwc2.App;
 import com.taskwc2.MainActivity;
+import com.taskwc2.R;
 import com.taskwc2.controller.sync.SSLHelper;
 
 import org.kvj.bravo7.log.Logger;
@@ -50,7 +51,27 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class AccountController {
 
-    private static final Pattern QUESTION_PARSE = Pattern.compile("^(.+)\\s\\((\\S+)\\)\\s*$");
+    private static final Pattern QUESTION_PARSE = Pattern.compile("^(.+\\?)\\s\\((\\S+)\\)\\s*$");
+
+    public void scheduleSync(int seconds) {
+        if (seconds <= 0) {
+            logger.w("Ignore schedule - not configured", seconds);
+            return;
+        }
+        if (null == syncSocket) { // Have socket opened - add key
+            logger.w("Sync is not configured");
+            return;
+        }
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.SECOND, seconds);
+        controller.scheduleAlarm(c.getTime(), syncIntent("alarm"));
+        logger.d("Scheduled:", c.getTime(), socketName);
+    }
+
+    public void rememberTimers(int normal, int error) {
+        controller.settings().intSettings(R.string.pref_sync_normal, normal);
+        controller.settings().intSettings(R.string.pref_sync_error, error);
+    }
 
     public interface TaskListener {
         public void onQuestion(String question, DataUtil.Callback<Integer> callback, List<String> answers);
@@ -195,11 +216,14 @@ public class AccountController {
         }
     }
 
-    public enum TimerType {Periodical("periodical"), AfterError("onerror"), AfterChange("onchange");
+    public enum TimerType {
+        Periodical(R.string.pref_sync_normal),
+        AfterError(R.string.pref_sync_error);
+//        AfterChange("onchange");
 
-        private final String type;
+        private final int type;
 
-        TimerType(String type) {
+        TimerType(int type) {
             this.type = type;
         }
     }
@@ -225,33 +249,9 @@ public class AccountController {
     }
 
     public void scheduleSync(final TimerType type) {
-        new Tasks.SimpleTask<Double>() {
-            @Override
-            protected Double doInBackground() {
-                Map<String, String> config = taskSettings(androidConf(String.format("sync.%s", type.type)));
-                if (config.isEmpty()) {
-                    return 0.0;
-                }
-                try {
-                    return Double.parseDouble(config.values().iterator().next());
-                } catch (Exception e) {
-                    logger.w("Failed to parse:", e.getMessage(), config);
-                }
-                return 0.0;
-            }
-
-            @Override
-            protected void onPostExecute(Double minutes) {
-                if (minutes <= 0) {
-                    logger.d("Ignore schedule - not configured", type);
-                    return;
-                }
-                Calendar c = Calendar.getInstance();
-                c.add(Calendar.SECOND, (int) (minutes * 60.0));
-                controller.scheduleAlarm(c.getTime(), syncIntent("alarm"));
-                logger.d("Scheduled:", c.getTime(), type);
-            }
-        }.exec();
+        int normal = controller.settings().settingsInt(TimerType.Periodical.type, 0);
+        int seconds = controller.settings().settingsInt(type.type, normal);
+        scheduleSync(seconds);
     }
 
     private String androidConf(String format) {
@@ -349,6 +349,7 @@ public class AccountController {
                 final DataUtil.Callback<String> questionAnswer = new DataUtil.Callback<String>() {
                     @Override
                     public boolean call(String value) {
+                        logger.d("Answer:", value);
                         try {
                             outputStream.write(String.format("%s\n", value).getBytes("utf-8"));
                         } catch (IOException e) {
@@ -378,6 +379,7 @@ public class AccountController {
                                 // Ask
                                 final List<String> choices = new ArrayList<>();
                                 Collections.addAll(choices, m.group(2).split("/"));
+                                logger.d("Question:", m.group(1), choices, line);
                                 final DataUtil.Callback<Integer> cb = new DataUtil.Callback<Integer>() {
                                     @Override
                                     public boolean call(Integer value) {
@@ -440,7 +442,7 @@ public class AccountController {
             }
             List<String> args = new ArrayList<>();
             args.add(controller.executable);
-            if (!TextUtils.isEmpty(socketName)) { // Have socket opened - add key
+            if (null != syncSocket) { // Have socket opened - add key
                 args.add("rc.taskd.socket=" + socketName);
             }
             if (api) {
