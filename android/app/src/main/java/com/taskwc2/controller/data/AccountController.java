@@ -51,7 +51,7 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class AccountController {
 
-    private static final Pattern QUESTION_PARSE = Pattern.compile("^(.+\\?)\\s\\((\\S+)\\)\\s*$");
+    private static final Pattern QUESTION_PARSE = Pattern.compile("^(.+\\?)\\s\\((\\S+)\\)\\s$");
 
     public void scheduleSync(int seconds) {
         if (seconds <= 0) {
@@ -73,11 +73,6 @@ public class AccountController {
         controller.settings().intSettings(R.string.pref_sync_error, error);
     }
 
-    public interface TaskListener {
-        public void onQuestion(String question, DataUtil.Callback<Integer> callback, List<String> answers);
-    }
-
-    private Listeners<TaskListener> taskListeners = new Listeners<TaskListener>();
     private Thread acceptThread = null;
     private final String accountName;
     private Set<NotificationType> notificationTypes = new HashSet<>();
@@ -118,6 +113,8 @@ public class AccountController {
 
     public interface StreamConsumer {
         public void eat(String line);
+
+        public void flush();
     }
 
     private class ToLogConsumer implements StreamConsumer {
@@ -133,6 +130,11 @@ public class AccountController {
         @Override
         public void eat(String line) {
             logger.log(level, prefix, line);
+        }
+
+        @Override
+        public void flush() {
+
         }
     }
 
@@ -209,6 +211,11 @@ public class AccountController {
                 builder.append('\n');
             }
             builder.append(line);
+        }
+
+        @Override
+        public void flush() {
+
         }
 
         private String text() {
@@ -330,6 +337,10 @@ public class AccountController {
                     }
                 }
             }
+
+            @Override
+            public void flush() {
+            }
         }, errConsumer, "rc.defaultwidth=1000", "show");
         return result;
     }
@@ -352,6 +363,7 @@ public class AccountController {
                         logger.d("Answer:", value);
                         try {
                             outputStream.write(String.format("%s\n", value).getBytes("utf-8"));
+                            outputStream.flush();
                         } catch (IOException e) {
                             e.printStackTrace();
                             return false;
@@ -377,9 +389,10 @@ public class AccountController {
                             final Matcher m = QUESTION_PARSE.matcher(line.toString());
                             if (m.find()) {
                                 // Ask
+                                outConsumer.flush();
                                 final List<String> choices = new ArrayList<>();
                                 Collections.addAll(choices, m.group(2).split("/"));
-                                logger.d("Question:", m.group(1), choices, line);
+                                logger.d("Question:", m.group(1), choices, line, line.size(), (int)ch);
                                 final DataUtil.Callback<Integer> cb = new DataUtil.Callback<Integer>() {
                                     @Override
                                     public boolean call(Integer value) {
@@ -388,9 +401,9 @@ public class AccountController {
                                     }
                                 };
                                 boolean ignored =
-                                    taskListeners.emit(new Listeners.ListenerEmitter<TaskListener>() {
+                                    controller.listeners().emit(new Listeners.ListenerEmitter<Controller.TaskListener>() {
                                     @Override
-                                    public boolean emit(TaskListener listener) {
+                                    public boolean emit(Controller.TaskListener listener) {
                                         listener.onQuestion(m.group(1), cb, choices);
                                         return false;
                                     }
@@ -429,7 +442,7 @@ public class AccountController {
         return folder;
     }
 
-    public int callTask(StreamConsumer out, StreamConsumer err, StreamConsumer question, boolean api, String... arguments) {
+    public int callTask(StreamConsumer out, StreamConsumer err, boolean question, boolean api, String... arguments) {
         active = true;
         try {
             if (null == controller.executable) {
@@ -456,9 +469,9 @@ public class AccountController {
             pb.environment().put("TASKRC", new File(tasksFolder, TASKRC).getAbsolutePath());
             pb.environment().put("TASKDATA", new File(tasksFolder, DATA_FOLDER).getAbsolutePath());
             Process p = pb.start();
-            logger.d("Calling now:", tasksFolder, args);
+            logger.d("Calling now:", tasksFolder, args, question);
 //            debug("Execute:", args);
-            Thread outThread = readStream(p.getInputStream(), p.getOutputStream(), out);
+            Thread outThread = readStream(p.getInputStream(), question? p.getOutputStream(): null, out);
             Thread errThread = readStream(p.getErrorStream(), null, err);
             int exitCode = p.waitFor();
             logger.d("Exit code:", exitCode, args);
@@ -478,7 +491,7 @@ public class AccountController {
     }
 
     private boolean callTask(StreamConsumer out, StreamConsumer err, String... arguments) {
-        int result = callTask(out, err, null, true, arguments);
+        int result = callTask(out, err, false, true, arguments);
         return result == 0;
     }
 

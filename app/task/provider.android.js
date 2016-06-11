@@ -63,7 +63,7 @@ export class TaskProvider {
                 }
                 arr.push.apply(arr, s.split(' '));
             }
-            app.call(arr, cb);
+            app.call(arr, options, cb);
         });
     }
 

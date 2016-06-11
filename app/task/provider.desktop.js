@@ -28,7 +28,7 @@ export class TaskProvider {
 
     call(args, out, err, options={}) {
         // Return promise
-        const yesno = /^(.+)\s\((\S+)\)\s*$/;
+        const yesno = /^(.+)\s\((\S+)\)\s$/;
         return new Promise((resp, rej) => {
             const handleQuestion = async (question, choices) => {
                 const answer = await this.config.onQuestion(question, choices);
@@ -75,13 +75,13 @@ export class TaskProvider {
             }
             // console.log('Run:', arr, args);
             const task = spawn(this.config.task || 'task', arr);
-            stream2out(task.stdout, out, true);
+            stream2out(task.stdout, out, options.question);
             stream2out(task.stderr, err, false);
             task.on('close', (code) => {
                 if (options.slow) {
                     setTimeout(() => {
                         resp(code);
-                    }, 10);
+                    }, 1);
                 } else {
                     resp(code);
                 }

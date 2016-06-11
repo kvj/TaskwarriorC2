@@ -56,7 +56,7 @@ public class TwModule extends ReactContextBaseJavaModule {
         return;
     }
 
-    class ArrayEater implements AccountController.StreamConsumer {
+    abstract class ArrayEater implements AccountController.StreamConsumer {
 
         final List<String> array = new ArrayList<>();
 
@@ -75,19 +75,33 @@ public class TwModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void call(ReadableArray args, final Callback linesEater) {
+    public void call(ReadableArray args, ReadableMap config, final Callback linesEater) {
 //        logger.d("Call:", args, linesEater, acc);
         if (null == acc) { // Invalid
             linesEater.invoke("error", "Profile not configured");
             return;
         }
-        ArrayEater out = new ArrayEater();
-        ArrayEater err = new ArrayEater();
+        ArrayEater out = new ArrayEater(){
+
+            @Override
+            public void flush() {
+            }
+        };
+        ArrayEater err = new ArrayEater(){
+
+            @Override
+            public void flush() {
+            }
+        };
         String[] arguments = new String[args.size()];
         for (int i = 0; i < args.size(); i++) {
             arguments[i] = args.getString(i);
         }
-        int code = acc.callTask(out, err, null, false, arguments);
+        boolean question = false;
+        if (config.hasKey("question")) { // Expect question in response
+            question = config.getBoolean("question");
+        }
+        int code = acc.callTask(out, err, question, false, arguments);
         Object[] result = new Object[out.size()+err.size()+4];
         result[0] = "success";
         result[1] = code;

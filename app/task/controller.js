@@ -344,7 +344,10 @@ export class TaskController {
     }
 
     async undo() {
-        const code = await this.call(['undo'], null, this.streamNotify(), {slow: true});
+        const code = await this.call(['undo'], null, this.streamNotify(), {
+            slow: true,
+            question: true,
+        });
         console.log('Undo:', code);
         if (code == 0) { // Success
             this.notifyChange();
@@ -364,7 +367,10 @@ export class TaskController {
         cmds.push(cmd);
         cmds.push(input);
         // console.log('cmd', cmds);
-        const code = await this.call(cmds, this.streamNotify('notify:info'), this.streamNotify(), {slow: true});
+        const code = await this.call(cmds, this.streamNotify('notify:info'), this.streamNotify(), {
+            slow: true,
+            question: true,
+        });
         console.log('cmd result', cmds, code);
         if (code === 0) {
             this.notifyChange();
@@ -386,6 +392,7 @@ export class TaskController {
         };
         const code = await this.provider.call([cmd], out, err, {
             slow: true,
+            question: true,
             flush: () => {
                 handler && handler({lines: stream2result(out, 'out')});
             },

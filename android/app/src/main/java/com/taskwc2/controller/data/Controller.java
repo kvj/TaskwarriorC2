@@ -14,6 +14,7 @@ import com.taskwc2.App;
 import com.taskwc2.R;
 
 import org.kvj.bravo7.form.FormController;
+import org.kvj.bravo7.util.DataUtil;
 import org.kvj.bravo7.util.Listeners;
 
 import java.io.BufferedReader;
@@ -35,6 +36,12 @@ import java.util.UUID;
  * Created by vorobyev on 10/4/15.
  */
 public class Controller extends org.kvj.bravo7.ng.Controller {
+
+    public interface TaskListener {
+        public void onQuestion(String question, DataUtil.Callback<Integer> callback, List<String> answers);
+    }
+
+    private Listeners<TaskListener> taskListeners = new Listeners<TaskListener>();
 
     public static interface ToastMessageListener {
 
@@ -286,5 +293,9 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
                 return false; // One shot
             }
         });
+    }
+
+    public Listeners<TaskListener> listeners() {
+        return taskListeners;
     }
 }
