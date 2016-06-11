@@ -332,7 +332,7 @@ export class PopupEditor extends React.Component {
         return (
             <View style={_l(styles.input_box, styles.vflex)}>
                 <View style={_l(lineStyle)}>
-                    <widget.Text>{this.props.title}</widget.Text>
+                    <widget.Text style={_l(styles.input_text)}>{this.props.title}</widget.Text>
                     <TextInput
                         style={_l(styles.inp, styles.flex1)}
                         ref="input"
@@ -393,6 +393,7 @@ export class MainCmp extends React.Component {
     render() {
         const {pages, pins, page, onNavigation, panes} = this.props;
         const {input} = this.state;
+        const {pager} = this.refs;
         const pageCmps = pages.map((pageCmp, idx) => {
             return (
                 <View key={pageCmp.key}>{pageCmp.cmp}</View>
@@ -417,6 +418,10 @@ export class MainCmp extends React.Component {
             <View style={_l(st)}>
                 <ViewPagerAndroid
                     style={_l(styles.flex1)}
+                    ref="pager"
+                    onPageSelected={(evt) => {
+                        onNavigation(0, evt.nativeEvent.position);
+                    }}
                     initialPage={0}
                 >
                     {pageCmps}
@@ -424,6 +429,16 @@ export class MainCmp extends React.Component {
                 {inputCmp}
             </View>
         );
+    }
+
+    componentDidUpdate() {
+        const {pages, page} = this.props;
+        const {pager} = this.refs;
+        pages.forEach((item, idx) => {
+            if (item.key == page) { // Found
+                pager.setPage(idx);
+            };
+        })
     }
 }
 
@@ -472,17 +487,60 @@ export class TaskPageCmp extends common.TaskPageCmp {
 
 }
 
-export class CmdPageCmp extends React.Component {
+export class CmdPageCmp extends common.CmdPageCmp {
+
     constructor(props) {
         super(props);
-        this.state = {};
+        let ds = new ListView.DataSource({
+            rowHasChanged: (r1, r2) => {
+                return true;
+            }
+        });
+        this.state = {
+            dataSource: ds,
+        };
     }
 
-    render() {
+    componentWillReceiveProps(props) {
+        const {dataSource} = this.state;
+        const {info, selection} = props;
+        const {list} = this.refs;
+        if (info && info.lines) { // Update ds
+            this.setState({
+                dataSource: dataSource.cloneWithRows(info.lines),
+            });
+            if (list) { // Scroll
+                list.scrollTo({
+                    x: 0,
+                    y: 0,
+                    animated: false
+                });
+            };
+        };
+    }
+
+    renderBody(header, info) {
+        const renderOne = (line, sid, idx) => {
+            return (
+                <widget.Text
+                    key={idx}
+                    single
+                    style={[styles.pre, styles[`cmdLine_${line.type}`]]}
+                >
+                    {line.line}
+                </widget.Text>
+            );
+        };
         return (
-            <View />
+            <ListView
+                ref="list"
+                style={_l(styles.flex1)}
+                dataSource={this.state.dataSource}
+                renderRow={renderOne}
+            />
         );
     }
+
 }
 
 export class StatusbarCmp extends React.Component {

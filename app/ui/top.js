@@ -226,7 +226,7 @@ export class AppPane extends React.Component {
         this.setState({pages, pins});
     }
 
-    onNavigation(dir) {
+    onNavigation(dir, index) {
         let {pages, page} = this.state;
         let idx = pages.findIndex((item) => {
             return item.key == page;
@@ -238,6 +238,8 @@ export class AppPane extends React.Component {
             case 1:
                 if (idx < pages.length-1) idx += 1;
                 break;
+            case 0:
+                idx = index;
         }
         this.setState({
             page: pages[idx].key,

@@ -215,6 +215,72 @@ export class DnD extends React.Component {
 
 }
 
+export class CmdPageInput extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            cmd: props.cmd || '',
+        };
+    }
+
+    onChange (evt) {
+        this.setState({
+            cmd: evt.target.value,
+        });
+    }
+
+    componentDidMount() {
+        this.refs.input.focus();
+    }
+
+    render() {
+        const {onRefresh, onPin, onClose} = this.props;
+        const line1 = (
+            <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
+                <input
+                    style={_l(styles.inp, styles.flex1)}
+                    type="text"
+                    ref="input"
+                    value={this.state.cmd}
+                    onChange={this.onChange.bind(this)}
+                    onKeyPress={this.onKey.bind(this)}
+                    placeholder="Command"
+                />
+                <IconBtn icon="refresh" onClick={onRefresh} />
+                <IconBtn
+                    icon="thumb-tack"
+                    onClick={onPin}
+                    title="Pin/unpin panel"
+                />
+                <IconBtn icon="close" onClick={onClose} />
+            </div>
+        );
+        return (
+            <div style={_l(styles.flex0)}>
+                {line1}
+            </div>
+        );
+    }
+
+    input() {
+        return this.state;
+    }
+
+    filter() {
+        // TODO: no-op
+    }
+
+    onKey(evt) {
+        if (evt.charCode == 13) {
+            // Refresh
+            this.props.onRefresh();
+        }
+    }
+
+}
+
+
 export class TaskPageInput extends React.Component {
 
     constructor(props) {

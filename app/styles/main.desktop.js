@@ -189,7 +189,7 @@ export const init = () => {
         },
 
         one_task: {
-            margin: "0 3px 5px 3px",
+            marginBottom: 5,
         },
 
         one_item: {
@@ -264,6 +264,9 @@ export const init = () => {
         },
         pane: {
             position: 'relative',
+        },
+        paneBody: {
+            margin: 3,          
         },
         loadingIndicator: {
             position: 'absolute',

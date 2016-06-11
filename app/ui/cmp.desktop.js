@@ -423,73 +423,10 @@ export class MainCmp extends React.Component {
     }
 };
 
-class CmdPageInput extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            cmd: props.cmd || '',
-        };
-    }
-
-    onChange (evt) {
-        this.setState({
-            cmd: evt.target.value,
-        });
-    }
-
-    componentDidMount() {
-        this.refs.input.focus();
-    }
-
-    render() {
-        const {onRefresh, onPin, onClose} = this.props;
-        const line1 = (
-            <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
-                <input
-                    style={_l(styles.inp, styles.flex1)}
-                    type="text"
-                    ref="input"
-                    value={this.state.cmd}
-                    onChange={this.onChange.bind(this)}
-                    onKeyPress={this.onKey.bind(this)}
-                    placeholder="Command"
-                />
-                <widget.IconBtn icon="refresh" onClick={onRefresh}/>
-                <widget.IconBtn
-                    icon="thumb-tack"
-                    onClick={onPin}
-                    title="Pin/unpin panel"
-                />
-                <widget.IconBtn icon="close" onClick={onClose}/>
-            </div>
-        );
-        return (
-            <div style={_l(styles.flex0)}>
-                {line1}
-            </div>
-        );
-    }
-
-    input() {
-        return this.state;
-    }
-
-    onKey(evt) {
-        if (evt.charCode == 13) {
-            // Refresh
-            this.props.onRefresh();
-        }
-    }
-
-}
-
 export class TaskPageCmp extends common.TaskPageCmp {
 
     constructor(props) {
         super(props);
-        this.state = {
-        };
     }
 
     renderBody(header, info) {
@@ -509,57 +446,30 @@ export class TaskPageCmp extends common.TaskPageCmp {
 
 }
 
-export class CmdPageCmp extends React.Component {
+export class CmdPageCmp extends common.CmdPageCmp {
 
     constructor(props) {
         super(props);
-        this.state = {
-        };
     }
 
-
-    input() {
-        return this.refs.input.input();
-    }
-
-    filter(filter) {
-        this.refs.input.filter(filter);
-    }
-
-    render() {
-        const {
-            info,
-        } = this.props;
-        let body = null;
-        if (info) {
-            const lines = info.lines.map((line, idx) => {
-                return (
-                    <widget.Text
-                        key={idx}
-                        style={[styles.pre, styles[`cmdLine_${line.type}`]]}
-                    >
-                        {line.line}
-                    </widget.Text>
-                );
-            })
-            body = (
-                <div style={_l(styles.vproxy, styles.relative)}>
-                    <div style={_l(styles.cmdPane)}>{lines}</div>
-                </div>
+    renderBody(info) {
+        const lines = info.lines.map((line, idx) => {
+            return (
+                <widget.Text
+                    key={idx}
+                    style={[styles.pre, styles[`cmdLine_${line.type}`]]}
+                >
+                    {line.line}
+                </widget.Text>
             );
-        }
+        });
         return (
-            <div style={_l(styles.vproxy)}>
-                <CmdPageInput
-                    {...this.props}
-                    ref="input"
-                />
-                <div style={_l(styles.vproxy)}>
-                    {body}
-                </div>
+            <div style={_l(styles.vproxy, styles.relative)}>
+                <div style={_l(styles.cmdPane)}>{lines}</div>
             </div>
         );
     }
+
 }
 
 export class StatusbarCmp extends React.Component {

@@ -364,7 +364,56 @@ export class TaskPageCmp extends React.Component {
                     {...this.props}
                     ref="input"
                 />
-                <widget.Div style={_l(styles.vproxy)}>
+                <widget.Div style={_l(styles.vproxy, styles.paneBody)}>
+                    {body}
+                </widget.Div>
+                {loadingIndicator}
+            </widget.Div>
+        );
+    }
+}
+
+export class CmdPageCmp extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+        };
+    }
+
+    input() {
+        return this.refs.input.input();
+    }
+
+    filter(filter) {
+        this.refs.input.filter(filter);
+    }
+
+    renderBody(info) {
+        return null;
+    }
+
+    render() {
+        const {
+            info,
+            loading,
+        } = this.props;
+        let body = null;
+        if (info) {
+            // Render lines
+            body = this.renderBody(info);
+        }
+        let loadingIndicator;
+        if (loading) { // Show it
+            loadingIndicator = (<widget.LoadingIndicator />);
+        };
+        return (
+            <widget.Div style={_l(styles.vproxy, styles.pane)}>
+                <widget.CmdPageInput
+                    {...this.props}
+                    ref="input"
+                />
+                <widget.Div style={_l(styles.vproxy, styles.paneBody)}>
                     {body}
                 </widget.Div>
                 {loadingIndicator}

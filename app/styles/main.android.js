@@ -47,14 +47,17 @@ export const init = () => {
         input_box: {
             position: 'absolute',
             marginTop: 100,
-            left: 0,
-            right: 0,
+            left: 3,
+            right: 3,
             top: 0,
-            borderWidth: 1,
+            borderWidth: 2,
             borderStyle: 'solid',
             borderColor: _layers.bg.br,
             backgroundColor: _layers.bg.bg,
             padding: 3,
+        },
+        input_text: {
+            margin: 3,
         },
         btn: {
             justifyContent: 'center',
@@ -136,6 +139,9 @@ export const init = () => {
         none: {
             width: 0,
             position: 'absolute',
+        },
+        paneBody: {
+            margin: 3,          
         },
         pane: {
             position: 'relative',

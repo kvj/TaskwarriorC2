@@ -118,6 +118,9 @@ export const Text = (props) => {
     if (props.style && props.style.indexOf(styles.oneLine) != -1) { // Single line
         lines = 1;
     };
+    if (props.single) { // Same
+        lines = 1;
+    };
     const pressHandler = props.onClick? () => {
         props.onClick({});
     }: undefined;
@@ -225,6 +228,57 @@ export class TaskPageInput extends React.Component {
         this.setState({
             filter: filter,
         });
+    }
+
+}
+
+export class CmdPageInput extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            cmd: props.cmd || '',
+        };
+    }
+
+    onChange (value) {
+        this.setState({
+            cmd: value,
+        });
+    }
+
+    render() {
+        const {
+            onPin,
+            onRefresh,
+            onClose,
+        } = this.props;
+        const line1 = (
+            <View style={_l(styles.flex0, styles.hflex, styles.wflex, styles.hbar)}>
+                <TextInput
+                    style={_l(styles.inp, styles.flex1)}
+                    value={this.state.cmd}
+                    onChangeText={this.onChange.bind(this)}
+                    onSubmitEditing={onRefresh}
+                    placeholder="Taskwarriror command"
+                />
+                <IconBtn icon="refresh" onClick={onRefresh} />
+                <IconBtn icon="close" onClick={onClose} />
+            </View>
+        );
+        return (
+            <View style={_l(styles.flex0)}>
+                {line1}
+            </View>
+        );
+    }
+
+    input() {
+        return this.state;
+    }
+
+    filter(filter) {
+        // TODO: no-op
     }
 
 }
