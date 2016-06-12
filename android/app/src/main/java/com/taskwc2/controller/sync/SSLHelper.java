@@ -2,6 +2,9 @@ package com.taskwc2.controller.sync;
 
 import android.util.Base64;
 
+import com.taskwc2.controller.sync.der.DerInputStream;
+import com.taskwc2.controller.sync.der.DerValue;
+
 import org.kvj.bravo7.log.Logger;
 import org.kvj.bravo7.util.Compat;
 
@@ -33,9 +36,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import com.taskwc2.controller.sync.der.DerInputStream;
-import com.taskwc2.controller.sync.der.DerValue;
-
 public class SSLHelper {
 
     static Logger logger = Logger.forClass(SSLHelper.class);
@@ -57,7 +57,7 @@ public class SSLHelper {
         StringBuilder b64 = new StringBuilder();
         int delimiters = 0;
         for (String token : tokens) {
-            if (token.startsWith("-----") && token.endsWith("-----")) {
+            if (token.startsWith("-----") && token.trim().endsWith("-----")) {
                 delimiters++;
                 if (delimiters  == 2) {
                     break;
@@ -65,7 +65,7 @@ public class SSLHelper {
                 continue;
             }
             if (delimiters == 1) {
-                b64.append(token);
+                b64.append(token.trim());
             }
         }
         return Base64.decode(b64.toString(), Base64.DEFAULT);
