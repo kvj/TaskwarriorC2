@@ -42,7 +42,7 @@ export class AppPane extends React.Component {
     togglePane(pane) {
         let state = this.state.panes[pane];
         const {_modes} = this.props.controller.panesConfig;
-        console.log('Toggle pane:', pane, state);
+        // console.log('Toggle pane:', pane, state);
         if (!state) return;
         if (state == 'dock') { // Hide
             state = _modes['hidden']? 'hidden': 'float';

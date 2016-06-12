@@ -10,6 +10,7 @@ import {
   ViewPagerAndroid,
   ListView,
   TouchableNativeFeedback,
+  TouchableOpacity,
   BackAndroid,
   Dimensions,
 } from 'react-native';
@@ -208,8 +209,8 @@ export class NavigationCmp extends PaneCmp {
         if (mode == 'hidden') {
             return null;
         }
-        let st = [styles.left_pane, styles.left_pane_float, styles.navigation, styles.vflex];
-        return (
+        let st = [styles.left_pane, styles.navigation, styles.vflex];
+        const pane = (
             <View style={_l(st)}>
                 <ProjectsNavigation
                     title="Projects"
@@ -227,6 +228,19 @@ export class NavigationCmp extends PaneCmp {
                     tags={this.props.tags || []}
                     info={this.props.info}
                 />
+            </View>
+        );
+        return (
+            <View style={_l(styles.float_pane)}>
+                {pane}
+                <TouchableOpacity
+                    onPress={() => {
+                        this.hide();
+                    }}
+                    style={_l(styles.flex1, styles.float_space)}
+                >
+                    <View></View>
+                </TouchableOpacity>
             </View>
         );
     }
@@ -273,7 +287,7 @@ const ContextsNavigation = makeNavigation(common.ContextsList, (item, props) => 
     );
 });
 
-export class ReportsCmp extends React.Component {
+export class ReportsCmp extends PaneCmp {
     constructor(props) {
         super(props, 'right');
         this.state = {};
@@ -285,8 +299,8 @@ export class ReportsCmp extends React.Component {
         if (mode == 'hidden') {
             return null;
         }
-        let st = [styles.right_pane, styles.right_pane_float, styles.reports, styles.vflex];
-        return (
+        let st = [styles.right_pane, styles.reports, styles.vflex];
+        const pane = (
             <View style={_l(st)}>
                 <ReportsNavigation
                     title="Reports"
@@ -302,6 +316,19 @@ export class ReportsCmp extends React.Component {
                     onRefresh={onContextsRefresh}
                     onClick={onContextClick}
                 />
+            </View>
+        );
+        return (
+            <View style={_l(styles.float_pane)}>
+                <TouchableOpacity
+                    onPress={() => {
+                        this.hide();
+                    }}
+                    style={_l(styles.flex1, styles.float_space)}
+                >
+                    <View></View>
+                </TouchableOpacity>
+                {pane}
             </View>
         );
     }
@@ -504,6 +531,7 @@ export class TaskPageCmp extends common.TaskPageCmp {
             <View style={_l(styles.vproxy)}>
                 <View style={_l(styles.flex0, styles.hflex, styles.wflex)}>{header}</View>
                 <ListView
+                    enableEmptySections={true}
                     style={_l(styles.flex1)}
                     dataSource={this.state.dataSource}
                     renderRow={renderOne}
@@ -562,6 +590,7 @@ export class CmdPageCmp extends common.CmdPageCmp {
             <ListView
                 ref="list"
                 style={_l(styles.flex1)}
+                enableEmptySections={true}
                 dataSource={this.state.dataSource}
                 renderRow={renderOne}
             />

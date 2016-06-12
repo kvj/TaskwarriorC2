@@ -277,6 +277,20 @@ export const init = () => {
             textAlign: 'center',
             opacity: 0.2,
         },
+        float_pane: {
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            left: 0,
+            top: 0,
+            flexDirection: 'row',
+            alignItems: 'stretch',
+            display: 'flex',
+        },
+        float_space: {
+            backgroundColor: _layers.bg.bg,
+            opacity: 0.2,
+        },
 
     };
     makeCommon(styles);

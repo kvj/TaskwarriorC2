@@ -153,6 +153,18 @@ export const init = () => {
             top: 100,
             alignItems: 'center',
         },
+        float_pane: {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            right: 0,
+            flexDirection: 'row',
+            alignItems: 'stretch',
+        },
+        float_space: {
+            backgroundColor: '#88888822',
+        },
     };
     let __styles = makeCommon({});
     for (var key in _styles) {

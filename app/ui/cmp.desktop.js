@@ -191,16 +191,11 @@ export class NavigationCmp extends PaneCmp {
 
     render() {
         let st = [styles.navigation, styles.vflex];
-        if (this.props.mode == 'dock') {
-            st.push(styles.flex0);
-        }
-        if (this.props.mode == 'float') {
-            st.push(styles.navigationFloat);
-        }
-        if (this.props.mode == 'hidden') {
-            st.push(styles.none);
-        }
-        return (
+        const {mode} = this.props;
+        if (mode == 'hidden') {
+            return null;
+        };
+        const pane = (
             <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
                 <ProjectsNavigation
                     title="Projects"
@@ -220,6 +215,15 @@ export class NavigationCmp extends PaneCmp {
                 />
             </div>
         );
+        if (mode == 'float') {
+            return (
+                <div style={_l(styles.float_pane)}>
+                    {pane}
+                    <div style={_l(styles.float_space, styles.flex1)}></div>
+                </div>
+            );
+        };
+        return pane;
     }
 };
 
@@ -284,19 +288,20 @@ export class ReportsCmp extends PaneCmp {
     }
 
     render() {
-        const {reports, onReportsRefresh, onReportClick} = this.props;
-        const {contexts, onContextsRefresh, onContextClick} = this.props;
-        let st = [styles.right_pane, styles.reports, styles.vflex];
-        if (this.props.mode == 'dock') {
-            st.push(styles.flex0);
-        }
-        if (this.props.mode == 'float') {
-            st.push(styles.right_pane_float);
-        }
-        if (this.props.mode == 'hidden') {
-            st.push(styles.none);
-        }
-        return (
+        const {
+            reports, 
+            onReportsRefresh, 
+            onReportClick, 
+            mode, 
+            contexts, 
+            onContextsRefresh, 
+            onContextClick
+        } = this.props;
+        if (mode == 'hidden') {
+            return null; // No render
+        };
+        let st = [styles.right_pane, styles.reports, styles.vflex, styles.flex0];
+        const pane = (
             <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
                 <ReportsList
                     title="Reports"
@@ -314,6 +319,15 @@ export class ReportsCmp extends PaneCmp {
                 />
             </div>
         );
+        if (mode == 'float') {
+            return (
+                <div style={_l(styles.float_pane)}>
+                    <div style={_l(styles.float_space, styles.flex1)}></div>
+                    {pane}
+                </div>
+            );
+        }
+        return pane;
     }
 };
 
