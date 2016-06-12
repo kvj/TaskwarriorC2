@@ -203,12 +203,16 @@ export class NavigationCmp extends PaneCmp {
         return (
             <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
                 <ProjectsNavigation
+                    title="Projects"
+                    style={styles.flex1}
                     onRefresh={this.props.onRefreshProjects}
                     onClick={this.props.onProjectClick}
                     projects={this.props.projects || []}
                     info={this.props.info}
                 />
                 <TagsNavigation
+                    title="Tags"
+                    style={styles.flex1}
                     onRefresh={this.props.onRefreshTags}
                     onClick={this.props.onTagClick}
                     tags={this.props.tags || []}
@@ -218,6 +222,60 @@ export class NavigationCmp extends PaneCmp {
         );
     }
 };
+
+class ContextsList extends common.ContextsList {
+    
+    renderList(list) {
+        const {onRefresh, onClick} = this.props;
+        const items = list.map((item, idx) => {
+            const click = () => {
+                onClick(item.context);
+            };
+            return (
+                <widget.Div
+                    style={_l(styles.one_nav, item.selected? styles.hilite: null)}
+                    key={idx}
+                    onClick={click}
+                >
+                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
+                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.filter}</widget.Text>
+                </widget.Div>
+            )
+        });
+        return (
+            <widget.Div style={_l(styles.vflex)}>
+                {items}
+            </widget.Div>
+        );
+    }
+}
+
+class ReportsList extends common.ReportsList {
+
+    renderList(list) {
+        const reports = list.map((item, idx) => {
+            const onClick = () => {
+                this.props.onClick(item);
+            };
+            return (
+                <widget.Div
+                    style={_l(styles.one_nav)}
+                    key={idx}
+                    onClick={onClick}
+                >
+                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
+                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.title}</widget.Text>
+                </widget.Div>
+            )
+        });
+        return (
+            <widget.Div style={_l(styles.flex1s)}>
+                {reports}
+            </widget.Div>
+        );
+    }
+
+}
 
 export class ReportsCmp extends PaneCmp {
 
@@ -240,12 +298,16 @@ export class ReportsCmp extends PaneCmp {
         }
         return (
             <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
-                <common.ReportsList
+                <ReportsList
+                    title="Reports"
+                    style={styles.flex1}
                     reports={reports}
                     onRefresh={onReportsRefresh}
                     onClick={onReportClick}
                 />
-                <common.ContextsList
+                <ContextsList
+                    title="Contexts"
+                    style={styles.flex0}
                     contexts={contexts}
                     onRefresh={onContextsRefresh}
                     onClick={onContextClick}

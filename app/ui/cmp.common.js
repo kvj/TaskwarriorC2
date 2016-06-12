@@ -422,7 +422,7 @@ export class CmdPageCmp extends React.Component {
     }
 }
 
-export class ProjectsNavigation extends React.Component {
+class Navigation extends React.Component {
 
     constructor(props) {
         super(props);
@@ -430,8 +430,41 @@ export class ProjectsNavigation extends React.Component {
     }
 
     renderList(list) {
-        return null;
+        return null; // Implement me
     }
+
+    convert(props) {
+        return []; // Implement me
+    }
+
+    componentWillReceiveProps(props) {
+        this.setState({list: this.convert(props)});
+    }
+
+    render() {
+        const list = this.state.list;
+        if (!list.length) {
+            // No items
+            return null;
+        }
+        const {title, onRefresh, style} = this.props;
+        return (
+            <widget.Div style={_l(styles.vflex, style)}>
+                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>
+                    <widget.Text style={[styles.flex1]}>{title}</widget.Text>
+                    <widget.IconBtn
+                        icon="refresh"
+                        title="Refresh list"
+                        onClick={onRefresh}
+                    />
+                </widget.Div>
+                {this.renderList(list)}
+            </widget.Div>
+        );
+    }
+}
+
+export class ProjectsNavigation extends Navigation {
 
     convert(props) {
         const {projects, info} = props;
@@ -465,38 +498,17 @@ export class ProjectsNavigation extends React.Component {
         return list;
     }
 
-    componentWillReceiveProps(props) {
-        this.setState({list: this.convert(props)});
-    }
-
     render() {
         const projects = this.state.list;
         if (!projects.length || (projects.length == 1 && projects[0].project == '')) {
             // No projects
             return null;
         }
-        return (
-            <widget.Div style={_l(styles.vproxy)}>
-                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>
-                    <widget.Text style={[styles.flex1]}>Projects</widget.Text>
-                    <widget.IconBtn
-                        icon="refresh"
-                        title="Refresh list"
-                        onClick={this.props.onRefresh}
-                    />
-                </widget.Div>
-                {this.renderList(projects)}
-            </widget.Div>
-        );
+        return super.render();
     }
 }
 
-export class TagsNavigation extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {tags: this.convert(props)};
-    }
+export class TagsNavigation extends Navigation {
 
     convert(props) {
         const {info, tags} = props;
@@ -522,102 +534,17 @@ export class TagsNavigation extends React.Component {
         });
     }
 
-    componentWillReceiveProps(props) {
-        this.setState({
-            tags: this.convert(props),
-        });
-    }
-
-    render() {
-        const {tags} = this.state;
-        if (!tags.length) {
-            return null; // Hide
-        }
-        return (
-            <widget.Div style={_l(styles.vproxy)}>
-                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>
-                    <widget.Text style={[styles.flex1]}>Tags</widget.Text>
-                    <widget.IconBtn
-                        icon="refresh"
-                        onClick={this.props.onRefresh}
-                        title="Refresh list"
-                    />
-                </widget.Div>
-                {this.renderList(tags)}
-            </widget.Div>
-        );
-    }
-
 }
 
-export const ReportsList = React.createClass({
-    render() {
-        const reports = this.props.reports.map((item, idx) => {
-            const onClick = () => {
-                this.props.onClick(item);
-            };
-            return (
-                <widget.Div
-                    style={_l(styles.one_nav)}
-                    key={idx}
-                    onClick={onClick}
-                >
-                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
-                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.title}</widget.Text>
-                </widget.Div>
-            )
-        });
-        return (
-            <widget.Div style={_l(styles.vproxy)}>
-                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>
-                    <widget.Text style={[styles.flex1]}>Reports</widget.Text>
-                    <widget.IconBtn
-                        icon="refresh"
-                        onClick={this.props.onRefresh}
-                        title="Refresh list"
-                    />
-                </widget.Div>
-                <widget.Div style={_l(styles.flex1s)}>
-                    {reports}
-                </widget.Div>
-            </widget.Div>
-        );
-    },
-});
+export class ReportsList extends Navigation {
+    convert(props) {
+        return props.reports;
+    }
+}
 
-export const ContextsList = React.createClass({
-    render() {
-        const {contexts, onRefresh, onClick} = this.props;
-        if (!contexts) {
-            return null; // Hide
-        }
-        const list = contexts.map((item, idx) => {
-            const click = () => {
-                onClick(item.context);
-            };
-            return (
-                <widget.Div
-                    style={_l(styles.one_nav, item.selected? styles.hilite: null)}
-                    key={idx}
-                    onClick={click}
-                >
-                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
-                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.filter}</widget.Text>
-                </widget.Div>
-            )
-        });
-        return (
-            <widget.Div style={_l(styles.flex0, styles.vflex)}>
-                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar)}>
-                    <widget.Text style={[styles.flex1]}>Contexts</widget.Text>
-                    <widget.IconBtn
-                        icon="refresh"
-                        onClick={onRefresh}
-                        title="Refresh list"
-                    />
-                </widget.Div>
-                {list}
-            </widget.Div>
-        );
-    },
-});
+export class ContextsList extends Navigation {
+    convert(props) {
+        return props.contexts || []; // Can be empty
+    }
+}
+

@@ -115,109 +115,87 @@ class PaneCmp extends React.Component {
     }
 }
 
-class ProjectsNavigation extends common.ProjectsNavigation {
+const makeNavigation = (sup, renderOne) => {
+
+    class _Navigation extends sup {
     
-    constructor(props) {
-        super(props);
-        let ds = new ListView.DataSource({
-            rowHasChanged: (r1, r2) => true
-        });
-        this.state.dataSource = ds.cloneWithRows(this.state.list);
-    }
+        constructor(props) {
+            super(props);
+            let ds = new ListView.DataSource({
+                rowHasChanged: (r1, r2) => true
+            });
+            this.state.dataSource = ds.cloneWithRows(this.state.list);
+        }
 
-    componentWillReceiveProps(props) {
-        const {dataSource} = this.state;
-        const list = this.convert(props);
-        this.setState({
-            list,
-            dataSource: dataSource.cloneWithRows(list),
-        });
-    }
+        componentWillReceiveProps(props) {
+            const {dataSource} = this.state;
+            const list = this.convert(props);
+            this.setState({
+                list,
+                dataSource: dataSource.cloneWithRows(list),
+            });
+        }
 
-    renderList(list) {
-        const renderOne = (item) => {
-            let st = [styles.one_nav, styles.hflex, styles.hbar];
-            if (item.hilite) st.push(styles.hilite);
-            let prefix = '';
-            for (var i = 0; i < item.indent; i++) {
-                prefix += ' ';
-            }
+        renderList(list) {
+            const _renderOne = (item) => {
+                return renderOne(item, this.props);
+            };
             return (
-                <TouchableNativeFeedback
-                    key={item.name}
-                    onPress={() => {
-                        this.props.onClick(item, {});
-                    }}
-                >
-                    <View
-                        style={_l(st)}
-                    >
-                        <widget.Text style={[styles.flex1]}>{prefix+item.name}</widget.Text>
-                        <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
-                    </View>
-                </TouchableNativeFeedback>
+                <ListView
+                    style={_l(styles.flex1)}
+                    dataSource={this.state.dataSource}
+                    renderRow={_renderOne}
+                />
             );
-        };
-        return (
-            <ListView
-                style={_l(styles.flex1)}
-                dataSource={this.state.dataSource}
-                renderRow={renderOne}
-            />
-        );
+        }
     }
+    return _Navigation;
+};
 
-}
-
-class TagsNavigation extends common.TagsNavigation {
-
-    constructor(props) {
-        super(props);
-        let ds = new ListView.DataSource({
-            rowHasChanged: (r1, r2) => true
-        });
-        this.state.dataSource = ds.cloneWithRows(this.state.tags);
+const ProjectsNavigation = makeNavigation(common.ProjectsNavigation, (item, props) => {
+    let st = [styles.one_nav, styles.hflex, styles.hbar];
+    if (item.hilite) st.push(styles.hilite);
+    let prefix = '';
+    for (var i = 0; i < item.indent; i++) {
+        prefix += ' ';
     }
+    return (
+        <TouchableNativeFeedback
+            key={item.name}
+            onPress={() => {
+                props.onClick(item, {});
+            }}
+        >
+            <View
+                style={_l(st)}
+            >
+                <widget.Text style={[styles.flex1]}>{prefix+item.name}</widget.Text>
+                <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
+            </View>
+        </TouchableNativeFeedback>
+    );
 
+});
 
-    componentWillReceiveProps(props) {
-        const {dataSource} = this.state;
-        const tags = this.convert(props);
-        this.setState({
-            tags,
-            dataSource: dataSource.cloneWithRows(tags),
-        });
-    }
-
-    renderList(list) {
-        const renderOne = (item) => {
-            let st = [styles.one_nav, styles.hflex, styles.hbar];
-            if (item.hilite) st.push(styles.hilite);
-            return (
-                <TouchableNativeFeedback
-                    key={item.name}
-                    onPress={() => {
-                        this.props.onClick(item, {});
-                    }}
-                >
-                    <View
-                        style={_l(st)}
-                    >
-                        <widget.Text style={[styles.flex1]}>{item.name}</widget.Text>
-                        <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
-                    </View>
-                </TouchableNativeFeedback>
-            );
-        };
-        return (
-            <ListView
-                style={_l(styles.flex1)}
-                dataSource={this.state.dataSource}
-                renderRow={renderOne}
-            />
-        );
-    }
-}
+const TagsNavigation = makeNavigation(common.TagsNavigation, (item, props) => {
+    let st = [styles.one_nav, styles.hflex, styles.hbar];
+    if (item.hilite) st.push(styles.hilite);
+    return (
+        <TouchableNativeFeedback
+            key={item.name}
+            onPress={() => {
+                props.onClick(item, {});
+            }}
+        >
+            <View
+                style={_l(st)}
+            >
+                <widget.Text style={[styles.flex1]}>{item.name}</widget.Text>
+                <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
+            </View>
+        </TouchableNativeFeedback>
+    );
+});
 
 export class NavigationCmp extends PaneCmp {
     constructor(props) {
@@ -234,12 +212,16 @@ export class NavigationCmp extends PaneCmp {
         return (
             <View style={_l(st)}>
                 <ProjectsNavigation
+                    title="Projects"
+                    style={styles.flex1}
                     onRefresh={this.props.onRefreshProjects}
                     onClick={this.props.onProjectClick}
                     projects={this.props.projects || []}
                     info={this.props.info}
                 />
                 <TagsNavigation
+                    title="Tags"
+                    style={styles.flex1}
                     onRefresh={this.props.onRefreshTags}
                     onClick={this.props.onTagClick}
                     tags={this.props.tags || []}
@@ -249,6 +231,47 @@ export class NavigationCmp extends PaneCmp {
         );
     }
 }
+
+const ReportsNavigation = makeNavigation(common.ReportsList, (item, props) => {
+    let st = [styles.one_nav];
+    return (
+        <TouchableNativeFeedback
+            key={item.name}
+            onPress={() => {
+                props.onClick(item, {});
+            }}
+        >
+            <View
+                style={_l(st)}
+            >
+                <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
+                <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.title}</widget.Text>
+            </View>
+        </TouchableNativeFeedback>
+    );
+});
+
+const ContextsNavigation = makeNavigation(common.ContextsList, (item, props) => {
+    let st = [styles.one_nav];
+    if (item.selected) {
+        st.push(styles.hilite);
+    };
+    return (
+        <TouchableNativeFeedback
+            key={item.name}
+            onPress={() => {
+                props.onClick(item, {});
+            }}
+        >
+            <View
+                style={_l(st)}
+            >
+                <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
+                <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.filter}</widget.Text>
+            </View>
+        </TouchableNativeFeedback>
+    );
+});
 
 export class ReportsCmp extends React.Component {
     constructor(props) {
@@ -265,12 +288,16 @@ export class ReportsCmp extends React.Component {
         let st = [styles.right_pane, styles.right_pane_float, styles.reports, styles.vflex];
         return (
             <View style={_l(st)}>
-                <common.ReportsList
+                <ReportsNavigation
+                    title="Reports"
+                    style={styles.flex1}
                     reports={reports}
                     onRefresh={onReportsRefresh}
                     onClick={onReportClick}
                 />
                 <common.ContextsList
+                    title="Reports"
+                    style={styles.flex1}
                     contexts={contexts}
                     onRefresh={onContextsRefresh}
                     onClick={onContextClick}
