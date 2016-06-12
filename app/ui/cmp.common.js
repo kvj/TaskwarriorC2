@@ -483,12 +483,6 @@ export class ProjectsNavigation extends Navigation {
                 item.hilite = hilites[item.project];
                 item.index = idx;
                 return item;
-            }).sort((a, b) => {
-                if (!a.project && b.project) return -1;
-                if (!b.project && a.project) return  1;
-                if (a.hilite && !b.hilite) return -1;
-                if (!a.hilite && b.hilite) return 1;
-                return a.index-b.index;
             }).forEach((item, idx) => {
                 list.push(item);
                 transformProjects(item.children);
@@ -527,10 +521,6 @@ export class TagsNavigation extends Navigation {
             item.hilite = hilites[item.name];
             item.index = idx;
             return item;
-        }).sort((a, b) => {
-            if (a.hilite && !b.hilite) return -1;
-            if (!a.hilite && b.hilite) return 1;
-            return a.index-b.index;
         });
     }
 
