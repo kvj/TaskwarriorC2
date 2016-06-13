@@ -9,7 +9,7 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
 import com.taskwc2.App;
-import com.taskwc2.MainActivity;
+import com.taskwc2.AppActivity;
 import com.taskwc2.R;
 import com.taskwc2.controller.sync.SSLHelper;
 
@@ -267,7 +267,7 @@ public class AccountController {
 
     private boolean toggleSyncNotification(NotificationCompat.Builder n, NotificationType type) {
         if (notificationTypes.contains(type)) { // Have to show
-            Intent intent = new Intent(controller.context(), MainActivity.class);
+            Intent intent = new Intent(controller.context(), AppActivity.class);
             intent.putExtra(App.KEY_ACCOUNT, id);
             n.setContentIntent(PendingIntent.getActivity(controller.context(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
             controller.notify(Controller.NotificationType.Sync, accountName, n);
@@ -280,6 +280,7 @@ public class AccountController {
 
     public String taskSync() {
         NotificationCompat.Builder n = controller.newNotification(accountName);
+        n.setSmallIcon(R.drawable.ic_stat_logo);
         n.setOngoing(true);
         n.setContentText("Sync is in progress");
         n.setTicker("Sync is in progress");
@@ -295,7 +296,7 @@ public class AccountController {
         if (result) { // Success
             n.setContentText("Sync complete");
             n.setPriority(NotificationCompat.PRIORITY_MIN);
-//            n.addAction(R.drawable.ic_action_sync, "Sync again", syncIntent("notification"));
+            n.addAction(R.drawable.ic_sync, "Sync again", syncIntent("notification"));
             toggleSyncNotification(n, NotificationType.Success);
             scheduleSync(TimerType.Periodical);
             return null;
@@ -307,7 +308,7 @@ public class AccountController {
             n.setSubText(error);
             n.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
             n.setPriority(NotificationCompat.PRIORITY_DEFAULT);
-//            n.addAction(R.drawable.ic_action_sync, "Retry now", syncIntent("notification"));
+            n.addAction(R.drawable.ic_sync, "Retry now", syncIntent("notification"));
             toggleSyncNotification(n, NotificationType.Error);
             scheduleSync(TimerType.AfterError);
             return error;

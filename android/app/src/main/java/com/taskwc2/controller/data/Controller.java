@@ -141,10 +141,10 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
         int rawID = -1;
         switch (arch) {
             case Arm7:
-                rawID = Build.VERSION.SDK_INT >= 16 ? R.raw.task_arm7_16 : R.raw.task_arm7;
+                rawID = R.raw.task_arm7_16;
                 break;
             case X86:
-                rawID = Build.VERSION.SDK_INT >= 16? R.raw.task_x86_16: R.raw.task_x86;
+                rawID = R.raw.task_x86_16;
                 break;
         }
         try {

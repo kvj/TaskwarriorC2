@@ -14,6 +14,7 @@ public class App extends org.kvj.bravo7.ng.App<Controller> {
     public static final int SYNC_REQUEST = 1;
     public static final int EDIT_TASKRC_REQUEST = 2;
     public static final int PERMISSION_REQUEST = 3;
+    public static final int MAIN_ACTIVITY_REQUEST = 4;
 
     @Override
     protected Controller create() {
