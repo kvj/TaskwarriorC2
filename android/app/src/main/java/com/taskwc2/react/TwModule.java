@@ -1,5 +1,8 @@
 package com.taskwc2.react;
 
+import android.content.Intent;
+import android.net.Uri;
+
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.JavaScriptModule;
@@ -11,6 +14,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.uimanager.ViewManager;
+import com.taskwc2.App;
 import com.taskwc2.controller.data.AccountController;
 import com.taskwc2.react.views.viewpager.ReactViewPagerManager;
 
@@ -56,6 +60,24 @@ public class TwModule extends ReactContextBaseJavaModule {
     public void init(ReadableMap config, Promise promise) {
         promise.resolve(acc != null);
         return;
+    }
+
+    @ReactMethod
+    public void editTaskrc(Promise promise) {
+        if (null == acc) {
+            promise.reject("no_account", "Not configured");
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_EDIT);
+        Uri uri = Uri.parse(String.format("file://%s", acc.taskrc().getAbsolutePath()));
+        intent.setDataAndType(uri, "text/plain");
+        try {
+            getCurrentActivity().startActivityForResult(intent, App.EDIT_TASKRC_REQUEST);
+            promise.resolve(true);
+        } catch (Exception e) {
+            logger.e(e, "Failed to edit file");
+            promise.reject("no_editor", "No editor app is associated with plain-text files. Install one");
+        }
     }
 
     abstract class ArrayEater implements AccountController.StreamConsumer {

@@ -15,6 +15,9 @@ export class TaskProvider {
 
     async init() {
         // console.log('Init:', app);
+        if (!app) { // Not initialized
+            return false;
+        };
         const result = await app.init(this.config);
         AppState.addEventListener('change', (state) => {
             this.config.onState(state);
@@ -24,6 +27,10 @@ export class TaskProvider {
             this.config.onState(state == 'NONE'? 'offline': 'online', state.toLowerCase());
         });
         return result;
+    }
+
+    async editConfig() {
+        return await app.editTaskrc();
     }
 
     configurePanes(conf) {

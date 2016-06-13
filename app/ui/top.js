@@ -305,6 +305,11 @@ export class AppPane extends React.Component {
         }
     }
 
+    async onEditConfig() {
+        const {controller} = this.props;
+        await controller.editConfig();
+    }
+
     render() {
         if (!this.state) return (
             <cmp.AppCmp />
@@ -318,6 +323,7 @@ export class AppPane extends React.Component {
                     onTogglePane={this.togglePane.bind(this)}
                     onUndo={this.onUndo.bind(this)}
                     onSync={this.onSync.bind(this)}
+                    onEditConfig={this.onEditConfig.bind(this)}
                 />
                 <CenterPane>
                     <MainPane

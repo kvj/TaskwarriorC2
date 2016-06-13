@@ -585,4 +585,20 @@ export class TaskController {
         processOne(0, roots, 0, '');
         return roots;
     }
+
+    async editConfig() {
+        if (!this.provider.editConfig) { // Not available
+            this.err('Not available on this platform');
+            return;
+        };
+        try {
+            await this.provider.editConfig();
+        } catch (e) {
+            console.log('Error:', e);
+            if (e.code == 'no_editor') { // Show message
+                return this.err('No editor app associated with plain-text files. Install one');
+            };
+            this.err('Edit error');
+        }
+    }
 }

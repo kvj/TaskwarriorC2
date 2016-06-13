@@ -43,7 +43,8 @@ export class ToolbarCmp extends React.Component {
             onCommand,
             onTogglePane,
             onSync,
-            onUndo
+            onUndo,
+            onEditConfig,
         } = this.props;
         const actions = [{
             title: 'Run command',
@@ -67,6 +68,12 @@ export class ToolbarCmp extends React.Component {
             onAction: () => {
                 onTogglePane('right');
             },
+        }, {
+            title: 'Edit .taskrc',
+            show: 'never',
+            onAction: () => {
+                onEditConfig();
+            }
         }];
         return (
             <ToolbarAndroid
