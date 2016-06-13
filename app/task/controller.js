@@ -54,6 +54,7 @@ export class TaskController {
         this.fixParams = ['rc.confirmation=off', 'rc.color=off', 'rc.verbose=nothing'];
         this.events = new EventEmitter();
         this.timers = {};
+        this.netConfig = {};
     }
 
     async call(args, out, err, options) {
@@ -110,10 +111,21 @@ export class TaskController {
                 };
             };
         };
-        config.onState = (state) => {
+        config.onState = async (state, mode) => {
             // console.log('State change:', state);
             if (state == 'active') { // Refresh everything
                 this.notifyChange();
+            };
+            if (state == 'online') { // Sync
+                const {online} = this.netConfig;
+                console.log('Online config:', online, mode);
+                if (online && (online == 'on' || online == mode)) {
+                    // Only when enabled
+                    const success = await this.sync();
+                    if (success) { // Show info
+                        this.info('Automatically synchronized')
+                    };
+                };
             };
         };
         const provider = new TaskProvider(config);
@@ -138,6 +150,9 @@ export class TaskController {
             normal: parseInt(timers['periodical'] || 120, 10) || 0,
             error: parseInt(timers['error'] || 30, 10) || 0,
             commit: parseInt(timers['commit'] || 10, 10) || 0,
+        };
+        this.netConfig = {
+            online: timers['online'] || 'off',
         };
         console.log('setupSync:', this.timers);
     }

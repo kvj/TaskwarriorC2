@@ -13,6 +13,13 @@ export class TaskProvider {
         ipcRenderer.on('state', (evt, state) => {
             this.config.onState(state);
         });
+        window.addEventListener('online', (e) => {
+            // console.log('Changed state:', navigator.onLine);
+            if (navigator.onLine) { // Send event
+                this.config.onState('online');
+            };
+        });
+        // console.log('State now:', navigator.onLine);
         return true;
     }
 

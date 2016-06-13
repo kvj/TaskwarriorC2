@@ -2,6 +2,7 @@ import {
     NativeModules,
     InteractionManager,
     AppState,
+    NetInfo,
 } from 'react-native';
 
 const app = NativeModules.TwModule;
@@ -12,14 +13,16 @@ export class TaskProvider {
         this.config = config;
     }
 
-    handleAppStateChange(state) {
-        this.config.onState(state);
-    }
-
     async init() {
         // console.log('Init:', app);
         const result = await app.init(this.config);
-        AppState.addEventListener('change', this.handleAppStateChange.bind(this));
+        AppState.addEventListener('change', (state) => {
+            this.config.onState(state);
+        });
+        NetInfo.addEventListener('change', (state) => {
+            // console.log('Network state:', state);
+            this.config.onState(state == 'NONE'? 'offline': 'online', state.toLowerCase());
+        });
         return result;
     }
 
