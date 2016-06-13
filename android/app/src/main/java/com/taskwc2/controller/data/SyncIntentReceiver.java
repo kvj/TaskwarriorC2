@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
-import android.text.TextUtils;
 
 import com.taskwc2.App;
 
@@ -27,9 +26,6 @@ public class SyncIntentReceiver extends BroadcastReceiver {
             @Override
             protected String doInBackground() {
                 String account = intent.getStringExtra(App.KEY_ACCOUNT);
-                if (TextUtils.isEmpty(account)) {
-                    account = controller.defaultAccount();
-                }
                 AccountController acc = controller.accountController(account, false);
                 if (null == acc) return "Invalid account";
                 return acc.taskSync();
