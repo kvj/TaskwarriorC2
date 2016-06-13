@@ -12,10 +12,12 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.uimanager.ViewManager;
 import com.taskwc2.controller.data.AccountController;
+import com.taskwc2.react.views.viewpager.ReactViewPagerManager;
 
 import org.kvj.bravo7.log.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -134,7 +136,9 @@ public class TwModule extends ReactContextBaseJavaModule {
 
         @Override
         public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-            return Collections.emptyList();
+            return Arrays.<ViewManager>asList(
+                new ReactViewPagerManager()
+            );
         }
     }
 }
