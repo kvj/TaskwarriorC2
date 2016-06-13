@@ -83,7 +83,7 @@ android {
     defaultConfig {
         applicationId "com.taskwc2"
         minSdkVersion 16
-        targetSdkVersion 22
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
         ndk {
@@ -104,7 +104,11 @@ android {
         }
     }
     buildTypes {
+        debug {
+            manifestPlaceholders = [excludeSystemAlertWindowPermission: "false"]
+        }
         release {
+            manifestPlaceholders = [excludeSystemAlertWindowPermission: "true"]
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             signingConfig signingConfigs.release

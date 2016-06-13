@@ -1,8 +1,12 @@
 package com.taskwc2;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
 import com.facebook.react.ReactActivity;
@@ -16,6 +20,7 @@ import org.kvj.bravo7.form.FormController;
 import org.kvj.bravo7.form.impl.ViewFinder;
 import org.kvj.bravo7.form.impl.bundle.StringBundleAdapter;
 import org.kvj.bravo7.form.impl.widget.TransientAdapter;
+import org.kvj.bravo7.log.Logger;
 import org.kvj.bravo7.util.DataUtil;
 import org.kvj.bravo7.widget.Dialogs;
 
@@ -25,8 +30,10 @@ import java.util.List;
 
 public class MainActivity extends ReactActivity implements Controller.TaskListener {
 
+    Logger logger = Logger.forInstance(this);
     Controller controller = App.controller();
     FormController form = new FormController(new ViewFinder.ActivityViewFinder(this));
+    private boolean allGranted = false;
 
     /**
      * Returns the name of the main component registered from JavaScript.
@@ -52,9 +59,10 @@ public class MainActivity extends ReactActivity implements Controller.TaskListen
      */
     @Override
     protected List<ReactPackage> getPackages() {
-        AccountController acc = controller.accountController(form, true);
         List<ReactPackage> list = new ArrayList<>();
         list.add(new MainReactPackage());
+        if (!allGranted) return list;
+        AccountController acc = controller.accountController(form, true);
         if (null == acc) { // Ask about new profile
             Dialogs.questionDialog(this, "Create new Profile?", null, new Dialogs.Callback<Integer>() {
                 @Override
@@ -72,17 +80,38 @@ public class MainActivity extends ReactActivity implements Controller.TaskListen
                     finish();
                 }
             });
+            return list;
         }
         list.add(new TwModule.TwPackage(acc));
         return list;
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        finish();
+        startActivity(new Intent(MainActivity.this, MainActivity.class));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.allGranted =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
         controller.listeners().add(this);
         form.add(new TransientAdapter<>(new StringBundleAdapter(), controller.defaultAccount()), App.KEY_ACCOUNT);
         form.load(this, savedInstanceState);
+        if (!allGranted) {
+            ActivityCompat
+                .requestPermissions(this, new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, App.PERMISSION_REQUEST);
+        }
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     @Override
