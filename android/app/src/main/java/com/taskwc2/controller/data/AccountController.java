@@ -9,7 +9,7 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
 import com.taskwc2.App;
-import com.taskwc2.AppActivity;
+import com.taskwc2.MainActivity;
 import com.taskwc2.R;
 import com.taskwc2.controller.sync.SSLHelper;
 
@@ -257,7 +257,7 @@ public class AccountController {
 
     public void scheduleSync(final TimerType type) {
         int normal = controller.settings().settingsInt(TimerType.Periodical.type, 0);
-        int seconds = controller.settings().settingsInt(type.type, normal);
+        int seconds = controller.settings().settingsInt(type.type, normal) * 60;
         scheduleSync(seconds);
     }
 
@@ -267,7 +267,7 @@ public class AccountController {
 
     private boolean toggleSyncNotification(NotificationCompat.Builder n, NotificationType type) {
         if (notificationTypes.contains(type)) { // Have to show
-            Intent intent = new Intent(controller.context(), AppActivity.class);
+            Intent intent = new Intent(controller.context(), MainActivity.class);
             intent.putExtra(App.KEY_ACCOUNT, id);
             n.setContentIntent(PendingIntent.getActivity(controller.context(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
             controller.notify(Controller.NotificationType.Sync, accountName, n);
@@ -280,7 +280,6 @@ public class AccountController {
 
     public String taskSync() {
         NotificationCompat.Builder n = controller.newNotification(accountName);
-        n.setSmallIcon(R.drawable.ic_stat_logo);
         n.setOngoing(true);
         n.setContentText("Sync is in progress");
         n.setTicker("Sync is in progress");
@@ -474,11 +473,16 @@ public class AccountController {
 //            debug("Execute:", args);
             Thread outThread = readStream(p.getInputStream(), question? p.getOutputStream(): null, out);
             Thread errThread = readStream(p.getErrorStream(), null, err);
+            Thread killThread = null;
+            if (!question) {
+                killThread = killAfter(30, p);
+            }
             int exitCode = p.waitFor();
             logger.d("Exit code:", exitCode, args);
 //            debug("Execute result:", exitCode);
             if (null != outThread) outThread.join();
             if (null != errThread) errThread.join();
+            if (null != killThread) killThread.interrupt();
             return exitCode;
         } catch (Exception e) {
             logger.e(e, "Failed to execute task");
@@ -489,6 +493,21 @@ public class AccountController {
         } finally {
             active = false;
         }
+    }
+
+    private Thread killAfter(final int seconds, final Process p) {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(seconds * 1000);
+                    p.destroy();
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+        thread.start();
+        return thread;
     }
 
     private boolean callTask(StreamConsumer out, StreamConsumer err, String... arguments) {

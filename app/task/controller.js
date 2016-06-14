@@ -363,7 +363,7 @@ export class TaskController {
             slow: true,
             question: true,
         });
-        console.log('Undo:', code);
+        // console.log('Undo:', code);
         if (code == 0) { // Success
             this.notifyChange();
             this.scheduleSync('commit');
@@ -424,7 +424,10 @@ export class TaskController {
 
     async sync() {
         this.events.emit('sync:start');
-        const code = await this.call(['sync'], null, this.streamNotify(), {slow: true});
+        const code = await this.call(['sync'], null, this.streamNotify(), {
+            slow: true,
+            question: true,
+        });
         this.events.emit('sync:finish');
         if (code == 0) {
             this.notifyChange();

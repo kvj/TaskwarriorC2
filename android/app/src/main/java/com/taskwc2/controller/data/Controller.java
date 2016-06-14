@@ -276,7 +276,7 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
     public NotificationCompat.Builder newNotification(String account) {
         NotificationCompat.Builder n = new NotificationCompat.Builder(context);
         n.setContentTitle(account);
-//        n.setSmallIcon(R.drawable.ic_stat_logo);
+        n.setSmallIcon(R.drawable.ic_stat_logo);
         n.setWhen(System.currentTimeMillis());
         return n;
     }
