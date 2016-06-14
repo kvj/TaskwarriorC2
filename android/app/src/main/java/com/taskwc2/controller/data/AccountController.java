@@ -469,7 +469,7 @@ public class AccountController {
             pb.environment().put("TASKRC", new File(tasksFolder, TASKRC).getAbsolutePath());
             pb.environment().put("TASKDATA", new File(tasksFolder, DATA_FOLDER).getAbsolutePath());
             Process p = pb.start();
-            logger.d("Calling now:", tasksFolder, args, question);
+//            logger.d("Calling now:", tasksFolder, args, question);
 //            debug("Execute:", args);
             Thread outThread = readStream(p.getInputStream(), question? p.getOutputStream(): null, out);
             Thread errThread = readStream(p.getErrorStream(), null, err);
@@ -478,7 +478,7 @@ public class AccountController {
                 killThread = killAfter(30, p);
             }
             int exitCode = p.waitFor();
-            logger.d("Exit code:", exitCode, args);
+//            logger.d("Exit code:", exitCode, args);
 //            debug("Execute result:", exitCode);
             if (null != outThread) outThread.join();
             if (null != errThread) errThread.join();
