@@ -19,6 +19,7 @@ import com.taskwc2.controller.data.AccountController;
 import com.taskwc2.react.views.viewpager.ReactViewPagerManager;
 
 import org.kvj.bravo7.log.Logger;
+import org.kvj.bravo7.util.Tasks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,19 +106,19 @@ public class TwModule extends ReactContextBaseJavaModule {
             linesEater.invoke("error", "Profile not configured");
             return;
         }
-        ArrayEater out = new ArrayEater(){
+        final ArrayEater out = new ArrayEater(){
 
             @Override
             public void flush() {
             }
         };
-        ArrayEater err = new ArrayEater(){
+        final ArrayEater err = new ArrayEater(){
 
             @Override
             public void flush() {
             }
         };
-        String[] arguments = new String[args.size()];
+        final String[] arguments = new String[args.size()];
         for (int i = 0; i < args.size(); i++) {
             arguments[i] = args.getString(i);
         }
@@ -125,15 +126,26 @@ public class TwModule extends ReactContextBaseJavaModule {
         if (config.hasKey("question")) { // Expect question in response
             question = config.getBoolean("question");
         }
-        int code = acc.callTask(out, err, question, false, arguments);
-        Object[] result = new Object[out.size()+err.size()+4];
-        result[0] = "success";
-        result[1] = code;
-        result[2] = out.size();
-        result[3] = err.size();
-        System.arraycopy(out.array(), 0, result, 4, out.size());
-        System.arraycopy(err.array(), 0, result, 4+out.size(), err.size());
-        linesEater.invoke(result);
+        final boolean finalQuestion = question;
+        Tasks.SimpleTask<Integer> task = new Tasks.SimpleTask<Integer>() {
+            @Override
+            protected Integer doInBackground() {
+                return acc.callTask(out, err, finalQuestion, false, arguments);
+            }
+
+            @Override
+            protected void onPostExecute(Integer code) {
+                Object[] result = new Object[out.size()+err.size()+4];
+                result[0] = "success";
+                result[1] = code;
+                result[2] = out.size();
+                result[3] = err.size();
+                System.arraycopy(out.array(), 0, result, 4, out.size());
+                System.arraycopy(err.array(), 0, result, 4+out.size(), err.size());
+                linesEater.invoke(result);
+            }
+        };
+        task.exec();
     }
 
     public static class TwPackage implements ReactPackage {
