@@ -3,7 +3,8 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+  Image,
 } from 'react-native';
 
 import {TaskController} from './app/task/controller';
@@ -34,9 +35,7 @@ class taskwc2 extends Component {
         };
         return (
             <View style={styles.container}>
-                <Text style={styles.loading}>
-                    Loading...
-                </Text>
+                <Image style={styles.logo} source={{uri: 'ic_logo'}} />
             </View>
         );
     }
@@ -48,9 +47,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loading: {
-    fontSize: 20,
-    textAlign: 'center',
+  logo: {
+    width: 72,
+    height: 72,
   },
 });
 
