@@ -3,6 +3,7 @@ const {
     BrowserWindow,
     ipcMain,
 } = require('electron');
+const path = require('path');
 
 var mainWindow = null;
 
@@ -20,6 +21,7 @@ app.on('ready', () => {
         width: 800,
         height: 600,
         title: 'Taskwarrior',
+        icon: path.join(__dirname, 'desktop', 'res', 'icon.png')
     });
     mainWindow.loadURL('file://' + __dirname + '/desktop.html');
     // mainWindow.openDevTools();
