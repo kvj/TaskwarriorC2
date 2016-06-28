@@ -2,6 +2,8 @@ const spawn = require('child_process').spawn;
 const readline = require('readline');
 const {ipcRenderer} = require('electron');
 
+const fs = require('fs');
+
 export class TaskProvider {
 
     constructor(config) {
@@ -9,7 +11,66 @@ export class TaskProvider {
         this.timerIDs = {};
     }
 
-    init() {
+    async readConfig(filename, key) {
+        return new Promise((rsp, rej) => {
+            let home = process.env.HOME;
+            if (home) home += '/';
+            fs.readFile(home+filename, {encoding: 'utf8'}, (err, data) => {
+                if (err) { // No data
+                    console.log('readConfig:', err);
+                    // return rej(err);
+                    return rsp(undefined);
+                };
+                let value;
+                data.split('\n').forEach((line) => {
+                    const eq = line.indexOf('=');
+                    if (eq>0 && line.substr(0, eq).trim() == key) { // Found
+                        value = line.substr(eq+1).trim();
+                    };
+                });
+                return rsp(value);
+            });
+        });
+    }
+
+    async checkTask() {
+        try {
+            const code = await this.call(['--version']);
+            if (code != 0) {
+                console.log('Task is not good', code);
+                return false;
+            };
+        } catch (e) {
+            console.log('Task is not available', e);
+            return false;
+        };
+        return true;
+    }
+
+    async findBinary() {
+        if (await this.checkTask()) {
+            return true;
+        }
+        if (process.platform == 'darwin') { // Try /usr/local/bin/task
+            this.config.task = '/usr/local/bin/task';
+            if (await this.checkTask()) {
+                return true;
+            }
+        };
+        const taskPath = await this.readConfig('.taskrc', 'ui.task');
+        if (taskPath) { // Found
+            this.config.task = taskPath;
+            if (await this.checkTask()) {
+                return true;
+            }
+        };
+        return false;
+    }
+
+    async init() {
+        if (! await this.findBinary()) {
+            return false;
+        }
         ipcRenderer.on('state', (evt, state) => {
             this.config.onState(state);
         });
@@ -19,7 +80,6 @@ export class TaskProvider {
                 this.config.onState('online');
             };
         });
-        // console.log('State now:', navigator.onLine);
         return true;
     }
 
@@ -80,8 +140,8 @@ export class TaskProvider {
                 }
                 arr.push.apply(arr, s.split(' '));
             }
-            // console.log('Run:', arr, args);
-            const task = spawn(this.config.task || 'task', arr);
+            let task;
+            task = spawn(this.config.task || 'task', arr);
             stream2out(task.stdout, out, options.question);
             stream2out(task.stderr, err, false);
             task.on('close', (code) => {
@@ -93,13 +153,9 @@ export class TaskProvider {
                     resp(code);
                 }
             });
-            task.on('err', (err) => {
+            task.on('error', (err) => {
                 rej(err);
             });
-        }).then((code) => {
-            return code;
-        }, (err) => {
-            console.log('Error:', err);
         });
     }
 

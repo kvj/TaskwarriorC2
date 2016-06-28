@@ -23,6 +23,9 @@ export const start = () => {
     smooth(async () => {
         if (await controller.init({})) { // OK
             ReactDOM.render(React.createElement(DesktopMain, {controller}), domNode);
-        };
+        } else {
+            window.alert("'task' binary is not available. Exiting");
+            window.close();
+        }
     });
 };

@@ -58,10 +58,15 @@ export class TaskController {
     }
 
     async call(args, out, err, options) {
-        const result = await this.provider.call(this.fixParams.concat(args), out, err, options);
-        if (out && out.end) out.end(result);
-        if (err && err.end) err.end(result);
-        return result;
+        try {
+            const result = await this.provider.call(this.fixParams.concat(args), out, err, options);
+            if (out && out.end) out.end(result);
+            if (err && err.end) err.end(result);
+            return result;
+        } catch (e) {
+            console.log('Error calling task:', e);
+            return -1;
+        };
     }
 
     err(message) {
@@ -270,7 +275,7 @@ export class TaskController {
             }
         }, this.streamNotify());
         if (code != 0) {
-            console.log('Failure:', cmd);
+            console.log('Failure:', cmd, code);
             return undefined;
         }
         return result;
@@ -405,13 +410,19 @@ export class TaskController {
                 };
             });
         };
-        const code = await this.provider.call([cmd], out, err, {
-            slow: true,
-            question: true,
-            flush: () => {
-                handler && handler({lines: stream2result(out, 'out')});
-            },
-        });
+        let code;
+        try {
+            code = await this.provider.call([cmd], out, err, {
+                slow: true,
+                question: true,
+                flush: () => {
+                    handler && handler({lines: stream2result(out, 'out')});
+                },
+            });
+        } catch (e) {
+            console.log('Error:', e);
+            code = -1;
+        };
         let result = stream2result(out, 'out').concat(stream2result(err, 'error'));
         result.push({
             type: 'info',
@@ -436,12 +447,6 @@ export class TaskController {
             this.scheduleSync('error');
         }
         return code == 0;
-    }
-
-    async version() {
-        const out = new ToStringEater();
-        const code = await this.provider.call(['--version'], out, this.streamNotify());
-        return out.str();
     }
 
     async config(prefix, strip_prefix) {

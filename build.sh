@@ -3,7 +3,7 @@
 platform=${1-"linux"}
 version=${2-"SNAPSHOT"}
 
-rm -r out/ .desktop/
+rm -rf out/ .desktop/
 npm run dist
 cp desktop.js index.js
 node_modules/.bin/electron-packager ./ --platform=$platform --arch=all \

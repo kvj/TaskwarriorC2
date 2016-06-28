@@ -18,8 +18,8 @@ app.on('ready', () => {
         };
     };
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1000,
+        height: 640,
         title: 'Taskwarrior',
         icon: path.join(__dirname, 'desktop', 'res', 'icon.png')
     });
