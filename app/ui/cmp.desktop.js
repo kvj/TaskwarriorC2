@@ -118,6 +118,7 @@ class PaneCmp extends React.Component {
 class ProjectsNavigation extends common.ProjectsNavigation {
 
     renderList(list) {
+        const {onClick, onEdit} = this.props;
         const projects = list.map((item, idx) => {
             let prefix = '';
             for (var i = 0; i < item.indent; i++) {
@@ -135,10 +136,19 @@ class ProjectsNavigation extends common.ProjectsNavigation {
                     }}
                     draggable
                     onClick={(e) => {
-                        this.props.onClick(item, e);
+                        onClick(item, e);
                     }}
                 >
-                    <widget.Text style={[styles.flex1]}>{prefix+item.name}</widget.Text>
+                    <widget.Text
+                        style={[styles.flex1]}
+                        editable
+                        onEdit={(e) => {
+                            e.stop();
+                            onEdit(item);
+                        }}
+                    >
+                        {prefix+item.name}
+                    </widget.Text>
                     <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
                 </div>
             );
@@ -154,6 +164,7 @@ class ProjectsNavigation extends common.ProjectsNavigation {
 class TagsNavigation extends common.TagsNavigation {
 
     renderList(list) {
+        const {onClick, onEdit} = this.props;
         const tags = list.map((item, idx) => {
             let st = [styles.one_nav, styles.hflex, styles.hbar];
             if (item.hilite) st.push(styles.hilite);
@@ -162,7 +173,7 @@ class TagsNavigation extends common.TagsNavigation {
                     key={item.name}
                     style={_l(st)}
                     onClick={(e) => {
-                        this.props.onClick(item, e);
+                        onClick(item, e);
                     }}
                     onDragStart={(e) => {
                         e.dataTransfer.setData('text/plain', `+${item.name}`);
@@ -170,7 +181,16 @@ class TagsNavigation extends common.TagsNavigation {
                     }}
                     draggable
                 >
-                    <widget.Text style={[styles.flex1]}>{item.name}</widget.Text>
+                    <widget.Text
+                        style={[styles.flex1]}
+                        editable
+                        onEdit={(e) => {
+                            e.stop();
+                            onEdit(item);
+                        }}
+                    >
+                        {item.name}
+                    </widget.Text>
                     <widget.Text style={[styles.flex0]}>{item.count}</widget.Text>
                 </div>
             );
@@ -202,6 +222,7 @@ export class NavigationCmp extends PaneCmp {
                     style={styles.flex1}
                     onRefresh={this.props.onRefreshProjects}
                     onClick={this.props.onProjectClick}
+                    onEdit={this.props.onProjectEdit}
                     projects={this.props.projects || []}
                     info={this.props.info}
                 />
@@ -210,6 +231,7 @@ export class NavigationCmp extends PaneCmp {
                     style={styles.flex1}
                     onRefresh={this.props.onRefreshTags}
                     onClick={this.props.onTagClick}
+                    onEdit={this.props.onTagEdit}
                     tags={this.props.tags || []}
                     info={this.props.info}
                 />

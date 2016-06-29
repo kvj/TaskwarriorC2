@@ -82,7 +82,7 @@ export class AppPane extends React.Component {
     }
 
     onEdit(key, cmd, tasks, input, unint) {
-        if (unint) { // Uninitended - run
+        if (unint) { // Unintended - run
             return this.processInput(input, {
                 cmd: cmd,
                 tasks: tasks,
@@ -295,6 +295,20 @@ export class AppPane extends React.Component {
         this.hidePane('left');
     }
 
+    onTagEdit(tag) {
+        const title = `+${tag.name} modify`;
+        this.refs.main.showInput(title, `-${tag.name} +${tag.name}`, {
+            cmd: title,
+        });
+    }
+
+    onProjectEdit(project) {
+        const title = `pro:${project.project} modify`;
+        this.refs.main.showInput(title, `pro:${project.project}`, {
+            cmd: title,
+        });
+    }
+
     async onUndo() {
         return await this.props.controller.undo();
     }
@@ -341,6 +355,8 @@ export class AppPane extends React.Component {
                         controller={controller}
                         onTagClick={this.onTagClick.bind(this)}
                         onProjectClick={this.onProjectClick.bind(this)}
+                        onTagEdit={this.onTagEdit.bind(this)}
+                        onProjectEdit={this.onProjectEdit.bind(this)}
                         ref="navigation"
                         mode={panes.left}
                         onHide={this.hidePane.bind(this)}
