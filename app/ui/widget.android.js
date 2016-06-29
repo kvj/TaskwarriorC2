@@ -172,6 +172,7 @@ export class TaskPageInput extends React.Component {
         const {
             onPin,
             onRefresh,
+            onAdd,
         } = this.props;
         const line1 = (
             <View style={_l(styles.flex0, styles.hflex, styles.wflex, styles.hbar)}>
@@ -184,7 +185,9 @@ export class TaskPageInput extends React.Component {
                 />
                 <IconBtn
                     icon="plus"
-                    onClick={this.props.onAdd}
+                    onClick={(e) => {
+                        onAdd(e.longTap);
+                    }}
                     title="Add new"
                 />
                 <IconBtn icon="refresh" onClick={this.props.onRefresh} />

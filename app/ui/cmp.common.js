@@ -259,7 +259,7 @@ export class TaskPageCmp extends React.Component {
                 if (e.field == 'id') {
                     addCmd = `depends:${item.id || item.uuid}`;
                 }
-                onAdd(e, addCmd);
+                onAdd(false, addCmd);
                 e.stop();
                 return;
             }

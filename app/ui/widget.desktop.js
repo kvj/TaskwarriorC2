@@ -313,7 +313,7 @@ export class TaskPageInput extends React.Component {
     }
 
     render() {
-        const {onPin} = this.props;
+        const {onPin, onAdd} = this.props;
         const line1 = (
             <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
                 <input
@@ -326,7 +326,9 @@ export class TaskPageInput extends React.Component {
                 />
                 <IconBtn
                     icon="plus"
-                    onClick={this.props.onAdd}
+                    onClick={(e) => {
+                        onAdd(e.meta);
+                    }}
                     title="Add new"
                 />
                 <IconBtn icon="refresh" onClick={this.props.onRefresh} />

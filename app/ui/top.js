@@ -72,11 +72,12 @@ export class AppPane extends React.Component {
         });
     }
 
-    onAdd(key, filter) {
+    onAdd(key, filter, completed) {
+        let cmd = completed? 'log': 'add';
         let input = '';
         if (filter) input = `${filter} `;
-        this.refs.main.showInput('add', input, {
-            cmd: 'add',
+        this.refs.main.showInput(cmd, input, {
+            cmd: cmd,
         });
     }
 
@@ -528,14 +529,14 @@ class TasksPagePane extends PagePane {
         this.setState({selection});
     }
 
-    onAdd(e, ...cmds) {
+    onAdd(completed, ...cmds) {
         let cmd = [];
         const input = this.input().filter;
         if (input) cmd.push(input);
         cmds.forEach((item) => {
             if (item) cmd.push(item);
         });
-        this.props.onAdd(this.props.id, cmd.join(' '));
+        this.props.onAdd(this.props.id, cmd.join(' '), completed);
     }
 
     onEdit(task, cmd, input, unint=false) {
