@@ -149,6 +149,12 @@ export class TaskController {
         return true;
     }
 
+    async specialList(type) {
+        let report = await this.config(`ui.report.${type}`, true);
+        if (!report) report = {};
+        return report[''] || this.defaultCmd;
+    }
+
     async setupSync() {
         const timers = await this.config('ui.sync.', true);
         this.timers = {
@@ -173,6 +179,7 @@ export class TaskController {
         let result = {
             sort: [],
             cols: [],
+            report: report,
             filter: '',
             precedence: [],
         };
@@ -282,7 +289,7 @@ export class TaskController {
     }
 
     async filter(report, filter, info) {
-        if (!info) {
+        if (!info || info.report != report) {
             info = await this.reportInfo(report);
         }
         if (!info) {

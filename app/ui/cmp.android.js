@@ -171,7 +171,10 @@ const ProjectsNavigation = makeNavigation(common.ProjectsNavigation, (item, prop
         <TouchableNativeFeedback
             key={item.name}
             onPress={() => {
-                props.onClick(item, {});
+                props.onClick(item, false);
+            }}
+            onLongPress={() => {
+                props.onClick(item, true);
             }}
         >
             <View
@@ -192,7 +195,10 @@ const TagsNavigation = makeNavigation(common.TagsNavigation, (item, props) => {
         <TouchableNativeFeedback
             key={item.name}
             onPress={() => {
-                props.onClick(item, {});
+                props.onClick(item, false);
+            }}
+            onLongPress={() => {
+                props.onClick(item, true);
             }}
         >
             <View

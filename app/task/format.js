@@ -258,7 +258,7 @@ const coloring = {
         if (task.recur) return ['recurring'];
     },
     blocked: (task) => {
-        if (task.depends && task.depends.length) return ['blocked'];
+        if (task.depends && task.depends_title) return ['blocked'];
     },
     due: (task) => {
         if (task.due) return ['due'];

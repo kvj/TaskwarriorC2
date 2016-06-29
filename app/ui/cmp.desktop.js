@@ -135,8 +135,9 @@ class ProjectsNavigation extends common.ProjectsNavigation {
                         e.dataTransfer.setData('tw/project', item.project);
                     }}
                     draggable
-                    onClick={(e) => {
-                        onClick(item, e);
+                    onClick={(evt) => {
+                        const e = widget.eventInfo(evt);
+                        onClick(item, e.meta);
                     }}
                 >
                     <widget.Text
@@ -172,8 +173,9 @@ class TagsNavigation extends common.TagsNavigation {
                 <div
                     key={item.name}
                     style={_l(st)}
-                    onClick={(e) => {
-                        onClick(item, e);
+                    onClick={(evt) => {
+                        const e = widget.eventInfo(evt);
+                        onClick(item, e.meta);
                     }}
                     onDragStart={(e) => {
                         e.dataTransfer.setData('text/plain', `+${item.name}`);

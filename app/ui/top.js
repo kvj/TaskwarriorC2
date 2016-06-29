@@ -279,20 +279,37 @@ export class AppPane extends React.Component {
         });
     }
 
-    onTagClick(tag) {
+    async openReport(type, filter) {
+        const name = await this.props.controller.specialList(type);
+        if (name) { // Open
+            this.showPage({
+                report: name,
+                filter: filter,
+                type: 'list',
+            });
+        };
+    }
+
+    onTagClick(tag, special) {
+        this.hidePane('left');
+        if (special) { // Open new pane
+            return this.openReport('tag', `+${tag.name}`);
+        };
         const page = this.current();
         if (page && page.ref) {
             page.ref.filter(`+${tag.name}`);
         }
-        this.hidePane('left');
     }
 
-    onProjectClick(project) {
+    onProjectClick(project, special) {
+        this.hidePane('left');
+        if (special) { // Open new pane
+            return this.openReport('project', `pro:${project.project}`);
+        };
         const page = this.current();
         if (page && page.ref) {
             page.ref.filter(`pro:${project.project}`);
         }
-        this.hidePane('left');
     }
 
     onTagEdit(tag) {
@@ -531,6 +548,7 @@ class TasksPagePane extends PagePane {
         super(props);
         this.state = {
             selection: {},
+            filter: props.filter,
         };
     }
 
@@ -617,7 +635,7 @@ class TasksPagePane extends PagePane {
         const {controller, onRefreshed, id} = this.props;
         let data = this.input();
         smooth(async () => {
-            let info = await controller.filter(data.report, data.filter);
+            let info = await controller.filter(data.report, data.filter, this.state.info);
             let newState = {
                 loading: false,
             };
