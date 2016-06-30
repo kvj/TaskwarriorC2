@@ -635,7 +635,8 @@ class TasksPagePane extends PagePane {
         const {controller, onRefreshed, id} = this.props;
         let data = this.input();
         smooth(async () => {
-            let info = await controller.filter(data.report, data.filter, this.state.info);
+            const oldInfo = reset? undefined: this.state.info;
+            let info = await controller.filter(data.report, data.filter, oldInfo);
             let newState = {
                 loading: false,
             };

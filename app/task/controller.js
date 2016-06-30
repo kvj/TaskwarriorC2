@@ -193,6 +193,9 @@ export class TaskController {
             result.precedence = ruleConf[''].split(',').reverse();
         };
         const ctxConf = await this.config('context');
+        if (ctxConf.context) {
+            result.context = ctxConf[`context.${ctxConf.context}`];
+        }
         const config = await this.config(`report.${report}.`, true);
         for (let key in config) {
             if (key == 'sort') {
@@ -237,9 +240,6 @@ export class TaskController {
             }
             if (key == 'filter') {
                 result.filter = config[key];
-                if (ctxConf.context) {
-                    result.context = ctxConf[`context.${ctxConf.context}`];
-                }
             }
         }
         result.sort.push({
@@ -401,7 +401,7 @@ export class TaskController {
             slow: true,
             question: true,
         });
-        console.log('cmd result', cmds, code);
+        // console.log('cmd result', cmds, code);
         if (code === 0) {
             this.notifyChange();
             this.scheduleSync('commit');
