@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.facebook.react.ReactPackage;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
@@ -13,6 +14,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.ViewManager;
 import com.taskwc2.App;
 import com.taskwc2.controller.data.AccountController;
@@ -29,7 +32,7 @@ import java.util.List;
 /**
  * Created by kvorobyev on 6/1/16.
  */
-public class TwModule extends ReactContextBaseJavaModule {
+public class TwModule extends ReactContextBaseJavaModule implements AccountController.AccountControllerListener {
 
     Logger logger = Logger.forInstance(this);
     private AccountController acc;
@@ -37,6 +40,17 @@ public class TwModule extends ReactContextBaseJavaModule {
     public TwModule(ReactApplicationContext reactContext, AccountController acc) {
         super(reactContext);
         this.acc = acc;
+        if (null != acc) { // Subscribe
+            acc.listeners().add(this);
+        }
+    }
+
+    @Override
+    public void onCatalystInstanceDestroy() {
+        super.onCatalystInstanceDestroy();
+        if (null != acc) { // Un-Subscribe
+            acc.listeners().remove(this);
+        }
     }
 
     @Override
@@ -79,6 +93,23 @@ public class TwModule extends ReactContextBaseJavaModule {
             logger.e(e, "Failed to edit file");
             promise.reject("no_editor", "No editor app is associated with plain-text files. Install one");
         }
+    }
+
+    @Override
+    public void onSync(final boolean finish) {
+        new Tasks.VerySimpleTask(){
+
+            @Override
+            protected void doInBackground() {
+                DeviceEventManagerModule.RCTDeviceEventEmitter jsModule =
+                        getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+                if (null != jsModule) { // Send notification
+                    WritableMap params = Arguments.createMap();
+                    params.putBoolean("finish", finish);
+                    jsModule.emit("sync", params);
+                }
+            }
+        }.exec();
     }
 
     abstract class ArrayEater implements AccountController.StreamConsumer {

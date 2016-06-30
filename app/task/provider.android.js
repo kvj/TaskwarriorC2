@@ -3,6 +3,7 @@ import {
     InteractionManager,
     AppState,
     NetInfo,
+    DeviceEventEmitter,
 } from 'react-native';
 
 const app = NativeModules.TwModule;
@@ -25,6 +26,9 @@ export class TaskProvider {
         NetInfo.addEventListener('change', (state) => {
             // console.log('Network state:', state);
             this.config.onState(state == 'NONE'? 'offline': 'online', state.toLowerCase());
+        });
+        DeviceEventEmitter.addListener('sync', (e) => {
+            this.config.onState('sync', e.finish);
         });
         return result;
     }

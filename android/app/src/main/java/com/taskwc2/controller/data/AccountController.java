@@ -51,6 +51,17 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class AccountController {
 
+
+    public Listeners<AccountControllerListener> listeners() {
+        return listeners;
+    }
+
+    public interface AccountControllerListener {
+        public void onSync(boolean finish);
+    }
+
+    private final Listeners<AccountControllerListener> listeners = new Listeners<>();
+
     private static final Pattern QUESTION_PARSE = Pattern.compile("^(.+\\?)\\s\\((\\S+)\\)\\s$");
 
     public void scheduleSync(int seconds) {
@@ -279,6 +290,13 @@ public class AccountController {
     }
 
     public String taskSync() {
+        listeners.emit(new Listeners.ListenerEmitter<AccountControllerListener>() {
+            @Override
+            public boolean emit(AccountControllerListener listener) {
+                listener.onSync(false);
+                return true;
+            }
+        });
         NotificationCompat.Builder n = controller.newNotification(accountName);
         n.setOngoing(true);
         n.setContentText("Sync is in progress");
@@ -292,6 +310,13 @@ public class AccountController {
         logger.d("Sync result:", result, "ERR:", err.text(), "OUT:", out.text());
         n = controller.newNotification(accountName);
         n.setOngoing(false);
+        listeners.emit(new Listeners.ListenerEmitter<AccountControllerListener>() {
+            @Override
+            public boolean emit(AccountControllerListener listener) {
+                listener.onSync(true);
+                return true;
+            }
+        });
         if (result) { // Success
             n.setContentText("Sync complete");
             n.setPriority(NotificationCompat.PRIORITY_MIN);

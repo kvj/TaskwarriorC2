@@ -121,9 +121,12 @@ export class TaskController {
             if (state == 'active') { // Refresh everything
                 this.notifyChange();
             };
+            if (state == 'sync' && mode) { // Sync finish
+                this.notifyChange();
+            };
             if (state == 'online') { // Sync
                 const {online} = this.netConfig;
-                console.log('Online config:', online, mode);
+                // console.log('Online config:', online, mode);
                 if (online && (online == 'on' || online == mode)) {
                     // Only when enabled
                     const success = await this.sync();
