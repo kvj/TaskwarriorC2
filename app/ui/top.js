@@ -549,7 +549,16 @@ class TasksPagePane extends PagePane {
         this.state = {
             selection: {},
             filter: props.filter,
+            sortMode: 'list',
         };
+    }
+
+    toggleSort() {
+        const {sortMode} = this.state;
+        this.setState({
+            sortMode: sortMode == 'list'? 'tree': 'list',
+        });
+        this.refresh();
     }
 
     select(task) {
@@ -617,6 +626,8 @@ class TasksPagePane extends PagePane {
                 info={this.state.info}
                 selection={this.state.selection}
                 loading={this.state.loading}
+                sortMode={this.state.sortMode}
+                onToggleSort={this.toggleSort.bind(this)}
                 onRefresh={() => {
                     this.refresh(true);
                 }}
@@ -636,7 +647,7 @@ class TasksPagePane extends PagePane {
         let data = this.input();
         smooth(async () => {
             const oldInfo = reset? undefined: this.state.info;
-            let info = await controller.filter(data.report, data.filter, oldInfo);
+            let info = await controller.filter(data.report, data.filter, oldInfo, this.state.sortMode);
             let newState = {
                 loading: false,
             };

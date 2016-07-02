@@ -227,8 +227,8 @@ export const formatters = {
 
 };
 
-export const sortTasks = (info) => {
-    return info.tasks.sort((a, b) => {
+export const sortTasks = (info, mode) => {
+    let tasks = info.tasks.sort((a, b) => {
         for (let item of info.sort) {
             const mul = item.asc? 1: -1;
             const _a = a[`${item.field}_sort`] || a[item.field];
@@ -246,6 +246,39 @@ export const sortTasks = (info) => {
         }
         return 0;
     });
+    if (mode == 'tree') { // Build dependency tree
+        let result = [];
+        const addAll = (task, level) => {
+            task.level = level;
+            result.push(task);
+            task.sub.forEach((t) => {
+                addAll(t, level+1);
+            });
+        };
+        tasks.forEach((task) => {
+            task.sub = []; // Put chidren here
+            if (task.depends) { // Have
+                task.depends.findIndex((uuid) => {
+                    const t = tasks.find((t) => {
+                        return t.uuid == uuid;
+                    });
+                    if (t) {
+                        t.sub.push(task);
+                        task.child = true;
+                        return true;
+                    }
+                    return false;
+                });
+            };
+        });
+        tasks.forEach((task) => {
+            if (!task.child) { // First level task
+                addAll(task, 0);
+            }
+        });
+        return result;
+    };
+    return tasks;
 };
 
 const coloring = {

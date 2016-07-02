@@ -149,6 +149,11 @@ class Task extends widget.DnD {
            taskStyles.push(styles.task_drop);
         };
         taskStyles = taskStyles.concat(style);
+        if (task.level > 0) { // Add margin
+            taskStyles.push({
+                marginLeft: task.level * 20,
+            });
+        };
         return (
             <widget.Div
                 style={_l(taskStyles)}

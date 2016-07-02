@@ -291,7 +291,7 @@ export class TaskController {
         return result;
     }
 
-    async filter(report, filter, info) {
+    async filter(report, filter, info, sortMode='list') {
         if (!info || info.report != report) {
             info = await this.reportInfo(report);
         }
@@ -364,7 +364,7 @@ export class TaskController {
                 // console.log('Will display:', item.label, item.width);
             };
         });
-        info.tasks = sortTasks(info);
+        info.tasks = sortTasks(info, sortMode);
         // console.log('Precedence:', info.precedence);
         info.tasks.forEach((task) => {
             task.styles = calcColorStyles(task, info.precedence);
