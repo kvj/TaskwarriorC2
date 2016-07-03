@@ -151,7 +151,7 @@ class Task extends widget.DnD {
         taskStyles = taskStyles.concat(style);
         if (task.level > 0) { // Add margin
             taskStyles.push({
-                marginLeft: task.level * 20,
+                marginLeft: task.level * 15,
             });
         };
         return (

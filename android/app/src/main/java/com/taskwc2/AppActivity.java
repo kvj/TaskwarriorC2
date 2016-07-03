@@ -59,16 +59,22 @@ public class AppActivity extends ReactActivity implements Controller.TaskListene
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        form.save(outState);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         form.add(new TransientAdapter<>(new StringBundleAdapter(), null), App.KEY_ACCOUNT);
         form.load(this, savedInstanceState);
         acc = controller.accountController(form, true);
+        super.onCreate(savedInstanceState);
         if (null == acc) { // Invalid
             finish();
             return;
         }
         controller.listeners().add(this);
-        super.onCreate(savedInstanceState);
     }
 
     @Override

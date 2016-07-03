@@ -173,6 +173,8 @@ export class TaskPageInput extends React.Component {
             onPin,
             onRefresh,
             onAdd,
+            onToggleSort,
+            sortMode,
         } = this.props;
         const line1 = (
             <View style={_l(styles.flex0, styles.hflex, styles.wflex, styles.hbar)}>
@@ -194,16 +196,18 @@ export class TaskPageInput extends React.Component {
                 <IconBtn icon="close" onClick={this.props.onClose} />
             </View>
         );
+        const sortIcon = sortMode == 'tree'? 'tasks_tree': 'tasks_list';
         const line2 = (
-            <View style={_l(styles.flex0, styles.vflex)}>
+            <View style={_l(styles.flex0, styles.hflex, styles.wflex, styles.hbar)}>
                 <TextInput
-                    style={_l(styles.inp)}
+                    style={_l(styles.inp, styles.flex1)}
                     ref="filter"
                     value={this.state.filter}
                     onChangeText={this.onFilterChange.bind(this)}
                     onSubmitEditing={onRefresh}
                     placeholder="Filter"
                 />
+                <IconBtn icon={sortIcon} onClick={onToggleSort} />
             </View>
         );
 
