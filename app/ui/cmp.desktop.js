@@ -534,7 +534,7 @@ export class TaskPageCmp extends common.TaskPageCmp {
             return item.visible;
         });
         const _tasks = info.tasks.map((item, idx) => {
-            return this.renderTask(item, idx, cols);
+            return this.renderTask(item, idx, cols, info);
         });
         return (
             <div style={_l(styles.vproxy)}>

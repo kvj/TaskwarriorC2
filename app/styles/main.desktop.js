@@ -202,7 +202,8 @@ export const init = () => {
         },
 
         task_drop: {
-            transform: "translateX(15px)",
+            fontWeight: 'bold',
+            // transform: "translateX(15px)",
         },
 
         one_nav: {

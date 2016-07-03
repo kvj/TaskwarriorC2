@@ -233,13 +233,16 @@ export class TaskPageCmp extends React.Component {
         this.refs.input.filter(filter);
     }
 
-    renderTask(item, idx, cols) {
+    renderTask(item, idx, cols, info) {
         const {
             selection,
             onEdit,
             onSelect,
             onAdd,
         } = this.props;
+        const findTask = (uuid) => {
+            return info.tasks.find((t) => t.uuid == uuid);
+        };
         const running = item.start? true: false;
         const onDone = (e) => {
             if (e.longTap || e.meta) { // Do as select
@@ -288,12 +291,14 @@ export class TaskPageCmp extends React.Component {
                 onEdit(item, 'modify', `pro:${data}`, true);
             };
             if (type == 'tw/task') { // Drop task - add dependency
-                let uuids = item.depends || [];
-                if (uuids.indexOf(data) != -1 || item.uuid == data) { // Already or invalid
+                const t = findTask(data);
+                if (!t) return;
+                let uuids = t.depends || [];
+                if (uuids.indexOf(item.uuid) != -1 || item.uuid == data) { // Already or invalid
                     return;
                 };
-                uuids.push(data);
-                onEdit(item, 'modify', `depends:${uuids.join(',')}`, true);
+                uuids.push(item.uuid);
+                onEdit(t, 'modify', `depends:${uuids.join(',')}`, true);
             };
         };
         let style = [styles.one_item];

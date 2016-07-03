@@ -535,7 +535,7 @@ export class TaskPageCmp extends common.TaskPageCmp {
 
     renderBody(header, info) {
         const renderOne = (task, sid, idx) => {
-            return this.renderTask(task, idx, cols);
+            return this.renderTask(task, idx, cols, info);
         };
         const cols = info.cols.filter((item) => {
             return item.visible;
