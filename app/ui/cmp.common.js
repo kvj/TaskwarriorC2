@@ -457,11 +457,22 @@ class Navigation extends React.Component {
             // No items
             return null;
         }
-        const {title, onRefresh, style} = this.props;
+        const {title, onRefresh, onExpand, style, expanded} = this.props;
+        let expandBtn;
+        if (expanded === false || expanded === true) { // Toggle
+            expandBtn = (
+                <widget.IconBtn
+                    icon={expanded? 'compress': 'expand'}
+                    title="Collapse/expand list"
+                    onClick={onExpand}
+                />
+            );
+        };
         return (
             <widget.Div style={_l(styles.vflex, style)}>
                 <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>
                     <widget.Text style={[styles.flex1]}>{title}</widget.Text>
+                    {expandBtn}
                     <widget.IconBtn
                         icon="refresh"
                         title="Refresh list"

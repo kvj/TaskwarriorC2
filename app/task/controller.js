@@ -495,23 +495,40 @@ export class TaskController {
         return result;
     }
 
-    async tags() {
+    async tags(expanded) {
         const reg = /^(.+)\s(\d+)$/;
         let result = []; // List
-        await this.call(['tags'], {
-            eat(line) {
-                const m = line.match(reg);
-                if (m) {
-                    result.push({
-                        name: m[1].trim(),
-                        count: parseInt(m[2], 10),
-                    });
+        let added = {};
+        if (expanded) { // All unique tags
+            await this.call(['_unique', 'tag'], {
+                eat(line) {
+                    if (line) {
+                        const tag = line.split(',')[0];
+                        if (added[tag]) return;
+                        added[tag] = true;
+                        result.push({
+                            name: tag,
+                        });
+                    }
                 }
-            }
-        }, this.streamNotify());
-        return result.sort((a, b) => {
-            return b.count - a.count;
-        });
+            }, this.streamNotify());
+            return result;
+        } else {
+            await this.call(['tags'], {
+                eat(line) {
+                    const m = line.match(reg);
+                    if (m) {
+                        result.push({
+                            name: m[1].trim(),
+                            count: parseInt(m[2], 10),
+                        });
+                    }
+                }
+            }, this.streamNotify());
+            return result.sort((a, b) => {
+                return b.count - a.count;
+            });
+        }
     }
 
     async setContext(context) {
@@ -574,22 +591,42 @@ export class TaskController {
         });
     }
 
-    async projects() {
+    async projects(expanded) {
         const reg = /^(\s*)(.+)\s(\d+)$/;
         let result = []; // List
-        await this.call(['projects'], {
-            eat(line) {
-                const m = line.match(reg);
-                if (m) {
-                    result.push({
-                        name: m[2].trim(),
-                        indent: m[1].length,
-                        count: parseInt(m[3], 10),
-                        children: [],
+        if (expanded) {
+            let added = {};
+            await this.call(['_unique', 'project'], {
+                eat(line) {
+                    const parts = line.split('.');
+                    let full = '';
+                    parts.forEach((p, idx) => {
+                        full += `.${p}`;
+                        if (added[full]) return;
+                        result.push({
+                            name: p,
+                            indent: idx*2,
+                            children: [],
+                        });
+                        added[full] = true;
                     });
                 }
-            }
-        }, this.streamNotify());
+            }, this.streamNotify());
+        } else {
+            await this.call(['projects'], {
+                eat(line) {
+                    const m = line.match(reg);
+                    if (m) {
+                        result.push({
+                            name: m[2].trim(),
+                            indent: m[1].length,
+                            count: parseInt(m[3], 10),
+                            children: [],
+                        });
+                    }
+                }
+            }, this.streamNotify());
+        }
         const processOne = (from, arr, indent, prefix) => {
             for (var i = from; i < result.length; i++) {
                 let item = result[i];

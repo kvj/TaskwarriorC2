@@ -691,6 +691,8 @@ class NavigationPane extends React.Component {
         this.state = {
             tags: [],
             projects: [],
+            tagsExpanded: false,
+            projectsExpanded: false,
         }
     }
 
@@ -704,16 +706,22 @@ class NavigationPane extends React.Component {
         this.refreshTags();
     }
 
-    async refreshProjects() {
-        return smooth(async () => {
-            const tags = await this.props.controller.tags();
-            if (tags) this.setState({tags});
-        });
+    toggleExpand(prop) {
+        let state = {};
+        state[prop] = !this.state[prop];
+        this.setState(state);
     }
 
     async refreshTags() {
         return smooth(async () => {
-            const projects = await this.props.controller.projects();
+            const tags = await this.props.controller.tags(this.state.tagsExpanded);
+            if (tags) this.setState({tags});
+        });
+    }
+
+    async refreshProjects() {
+        return smooth(async () => {
+            const projects = await this.props.controller.projects(this.state.projectsExpanded);
             if (projects) this.setState({projects});
         });
     }
@@ -729,10 +737,20 @@ class NavigationPane extends React.Component {
             <cmp.NavigationCmp
                 {...this.props}
                 tags={this.state.tags}
+                tagsExpanded={this.state.tagsExpanded}
+                projectsExpanded={this.state.projectsExpanded}
                 projects={this.state.projects}
                 info={this.state.info}
                 onRefreshProjects={this.refreshProjects.bind(this)}
                 onRefreshTags={this.refreshTags.bind(this)}
+                onExpandProjects={() => {
+                    this.toggleExpand('projectsExpanded');
+                    this.refreshProjects();
+                }}
+                onExpandTags={() => {
+                    this.toggleExpand('tagsExpanded');
+                    this.refreshTags();
+                }}
             />
         );
     }

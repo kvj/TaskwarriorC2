@@ -226,6 +226,8 @@ export class NavigationCmp extends PaneCmp {
                     onClick={this.props.onProjectClick}
                     onEdit={this.props.onProjectEdit}
                     projects={this.props.projects || []}
+                    expanded={this.props.projectsExpanded}
+                    onExpand={this.props.onExpandProjects}
                     info={this.props.info}
                 />
                 <TagsNavigation
@@ -235,6 +237,8 @@ export class NavigationCmp extends PaneCmp {
                     onClick={this.props.onTagClick}
                     onEdit={this.props.onTagEdit}
                     tags={this.props.tags || []}
+                    expanded={this.props.tagsExpanded}
+                    onExpand={this.props.onExpandTags}
                     info={this.props.info}
                 />
             </div>
