@@ -149,7 +149,20 @@ export class TaskController {
         let conf = await this.config('default.command');
         this.defaultCmd = conf['default.command'] || 'next';
         this.panesConfig = await this.provider.configurePanes(await this.config('ui.pane.', true));
+        await this.loadUDAs();
         return true;
+    }
+
+    async loadUDAs() {
+        const conf = await this.config('uda.', true);
+        this.udas = {};
+        for (let key in conf) {
+            if (key.lastIndexOf('.type') == key.length-5) {
+                this.udas[key.substr(0, key.length-5)] = {
+                    type: conf[key],
+                };
+            }
+        }
     }
 
     async specialList(type) {
@@ -342,16 +355,17 @@ export class TaskController {
             if (item.field == 'depends') { // Need a list
                 hasDepends = true;
             };
-            const handler = formatters[item.field];
+            let handler = formatters[item.field];
             if (!handler) { // Not supported
-                // TODO: support UDA
-                // return;
+                if (this.udas[item.field]) {
+                    handler = formatters.uda;
+                }
             };
             // Colled max size
             let max = 0;
             // console.log('Col:', item.field);
             info.tasks.forEach((task) => {
-                const val = handler? handler(task, item.display): (task[item.field] || '');
+                const val = handler? handler(task, item.display, item, this): (task[item.field] || '');
                 if (val.length > max) {
                     max = val.length;
                 };
@@ -367,7 +381,7 @@ export class TaskController {
         info.tasks = sortTasks(info, sortMode);
         // console.log('Precedence:', info.precedence);
         info.tasks.forEach((task) => {
-            task.styles = calcColorStyles(task, info.precedence);
+            task.styles = calcColorStyles(task, info.precedence, this);
         });
         // console.log('Filter:', info, cmd);
         return info;

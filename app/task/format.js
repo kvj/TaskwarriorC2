@@ -45,6 +45,8 @@ const formatDate = (obj, format, name, editable) => {
         return number;
     };
     if (!dt) { // Invalid
+        if (editable) 
+            obj[`${name}_edit`] = `${name}:`;
         return '';
     };
     obj[`${name}_date`] = dt;
@@ -224,6 +226,22 @@ export const formatters = {
         obj.depends_sort = 0;
         return '';
     },
+    uda(obj, format, item, controller) {
+        const val = obj[item.field] || '';
+        obj[`${item.field}_edit`] = `${item.field}:${val}`;
+        if (!val) return '';
+        if (format == 'indicator' && val) {
+            return '*';
+        };
+        const type = controller.udas[item.field].type;
+        if (type == 'date') { // As date
+            return formatDate(obj, format, item.field, true);
+        };
+        if (type == 'numeric') { // As number
+            return ''+Math.round(10*val)/10;
+        };
+        return val;
+    },
 
 };
 
@@ -347,8 +365,24 @@ const coloring = {
             }
         }
         if (tags.length && !cls.length) {
-            // Only project present
+            // Only tag
             return ['tag.'];
+        }
+        return cls;
+    },
+    'uda.': (task, colors, controller) => {
+        let cls = [];
+        for (let key in controller.udas) {
+            const val = task[key];
+            if (val && colors[`uda.${key}`]) {
+                cls.push(`uda.${key}`);
+            }
+            if (val && colors[`uda.${key}.${val}`.toLowerCase()]) {
+                cls.push(`uda.${key}.${val}`.toLowerCase());
+            }
+            if (!val && colors[`uda.${key}.none`]) {
+                cls.push(`uda.${key}.none`);
+            }
         }
         return cls;
     },
@@ -363,12 +397,12 @@ const coloring = {
     },
 };
 
-export const calcColorStyles = (task, precedence) => {
+export const calcColorStyles = (task, precedence, controller) => {
     const clrDef = colors();
     let result = [];
     for (let rule of precedence) {
         if (!coloring[rule]) continue;
-        const sts = coloring[rule](task, clrDef);
+        const sts = coloring[rule](task, clrDef, controller);
         if (!sts) continue;
         for (let st of sts) {
             if (styles[`color_${st}_bg`]) { // Only background
