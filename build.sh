@@ -8,6 +8,7 @@ npm run dist
 cp desktop.js index.js
 node_modules/.bin/electron-packager ./ --platform=$platform --arch=all \
 	--out=out/ --prune --asar \
+	--icon=images/app_icon \
 	--ignore="android($|/)" \
 	--ignore="ios($|/)" \
 	--ignore="app($|/)" \
