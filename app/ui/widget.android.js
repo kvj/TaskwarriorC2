@@ -9,13 +9,13 @@ import {
   TouchableNativeFeedback,
   Image,
   TextInput,
-  ProgressBarAndroid,
+  ActivityIndicator,
 } from 'react-native';
 
 export const LoadingIndicator = (props) => {
     return (
         <View style={_l(styles.loadingIndicator)}>
-            <ProgressBarAndroid styleAttr="Normal" />
+            <ActivityIndicator size="small" />
         </View>
     );
 };
