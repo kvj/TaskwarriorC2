@@ -1,5 +1,6 @@
 import React from 'react';
 import {styles, _l} from '../styles/main';
+import {smooth} from '../tool/ui';
 
 import {
   View,
@@ -478,37 +479,43 @@ class ProfilesDialog extends ModalDialog {
         };
     }
 
-    async refresh() {
+    refresh() {
         const {provider} = this.props;
         const {dataSource} = this.state;
-        const profiles = await provider.profiles();
-        // console.log('Profiles:', profiles);
-        this.setState({
-            dataSource: dataSource.cloneWithRows(profiles),
+        smooth(async () => {
+            const profiles = await provider.profiles();
+            // console.log('Profiles:', profiles);
+            this.setState({
+                dataSource: dataSource.cloneWithRows(profiles),
+            });
         });
     }
 
-    async add() {
+    add() {
         const {provider} = this.props;
-        const err = await provider.addProfile();
-        if (!err) { // Added
-            this.refresh();
-        } else {
-            ToastAndroid.show(err, ToastAndroid.LONG);
-        }
+        smooth(async () => {
+            const err = await provider.addProfile();
+            if (!err) { // Added
+                this.refresh();
+            } else {
+                ToastAndroid.show(err, ToastAndroid.LONG);
+            }
+        });
     }
 
-    async star(id) {
+    star(id) {
         const {provider} = this.props;
-        const success = await provider.profileDefault(id);
-        if (success) { // Starred
-            this.refresh();
-        };
+        smooth(async () => {
+            const success = await provider.profileDefault(id);
+            if (success) { // Starred
+                this.refresh();
+            };
+        });
     }
 
     remove(item) {
         const {provider} = this.props;
-        Alert.alert('Remove profile', `Remove profile '${item.title}'`, [{
+        Alert.alert('Remove profile', `Remove profile '${item.title}'?`, [{
             text: 'Cancel',
         }, {
             text: 'Remove',
@@ -557,7 +564,7 @@ class ProfilesDialog extends ModalDialog {
             };
             const starIcon = item['default']? 'starred': 'star';
             return (
-                <View style={_l(styles.hflex, styles.hbox, styles.profile_item)}>
+                <View style={_l(styles.hflex, styles.hbar, styles.profile_item, styles.one_nav)}>
                     <View style={_l(styles.flex1, styles.vflex)}>
                         <Text
                             style={_l(styles.text)}
@@ -574,7 +581,9 @@ class ProfilesDialog extends ModalDialog {
                         this.remove(item);
                     }}/>
                     <widget.IconBtn icon="link" onClick={(e) => {
-                        provider.openProfile(item.id);
+                        smooth(() => {
+                            provider.openProfile(item.id);
+                        });
                     }}/>
                 </View>
             );

@@ -194,7 +194,6 @@ export const init = () => {
             backgroundColor: '#88888822',
         },
         profile_item: {
-            margin: 3,
         },
     };
     let __styles = makeCommon({});
