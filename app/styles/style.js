@@ -56,10 +56,10 @@ export const layers = () => {
     }
     result.panes = {
         left: {
-            width: style['pane.left.width'] || 150,
+            width: style['pane.left.width'] || 180,
         },
         right: {
-            width: style['pane.right.width'] || 150,
+            width: style['pane.right.width'] || 180,
         },
     };
     colorDefs = {
