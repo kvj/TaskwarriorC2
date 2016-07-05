@@ -153,6 +153,10 @@ export class TaskController {
         return true;
     }
 
+    providerInfo() {
+        return this.provider.info || {};
+    }
+
     async loadUDAs() {
         const conf = await this.config('uda.', true);
         this.udas = {};

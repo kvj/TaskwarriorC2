@@ -20,6 +20,8 @@ export class TaskProvider {
             return false;
         };
         const result = await app.init(this.config);
+        if (!result) return false;
+        this.info = result;
         AppState.addEventListener('change', (state) => {
             this.config.onState(state);
         });
@@ -30,11 +32,35 @@ export class TaskProvider {
         DeviceEventEmitter.addListener('sync', (e) => {
             this.config.onState('sync', e.finish);
         });
-        return result;
+        return true;
     }
 
     async editConfig() {
         return await app.editTaskrc();
+    }
+
+    async profiles() {
+        return await app.profiles();
+    }
+
+    async addProfile() {
+        return await app.addProfile();
+    }
+
+    async removeProfile(id) {
+        return await app.removeProfile(id);
+    }
+
+    async profileDefault(id) {
+        return await app.profileDefault(id);
+    }
+
+    openProfile(id) {
+        return app.openProfile(id);
+    }
+
+    finish() {
+        return app.finish();
     }
 
     configurePanes(conf) {

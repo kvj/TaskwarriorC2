@@ -4,7 +4,9 @@ import {styles, _l} from '../styles/main';
 import {
   View,
   ToolbarAndroid,
+  Alert,
   TextInput,
+  Text,
   Image,
   ToastAndroid,
   ViewPagerAndroid,
@@ -45,7 +47,13 @@ export class ToolbarCmp extends React.Component {
             onSync,
             onUndo,
             onEditConfig,
+            onManageProfiles,
+            info,
         } = this.props;
+        let subTitle;
+        if (info.id != info.title) { // Special title
+            subTitle = info.title;
+        };
         const actions = [{
             title: 'Run command',
             icon: {uri: 'ic_cmd'},
@@ -74,11 +82,18 @@ export class ToolbarCmp extends React.Component {
             onAction: () => {
                 onEditConfig();
             }
+        }, {
+            title: 'Manage profiles',
+            show: 'never',
+            onAction: () => {
+                onManageProfiles();
+            }
         }];
         return (
             <ToolbarAndroid
                 style={_l(styles.flex0, styles.toolbar)}
                 title="Taskwarrior"
+                subtitle={subTitle}
                 actions={actions}
                 navIcon={{uri: 'ic_menu'}}
                 onIconClicked={() => {
@@ -429,10 +444,175 @@ export class PopupEditor extends React.Component {
     }
 }
 
+class ModalDialog extends React.Component {
+
+    render(body) {
+        const windowSize = Dimensions.get('window');
+        const large = windowSize.width > 480 && windowSize.height > 480;
+        const st = [
+            styles.modal_inner, 
+            large? styles.modal_large: styles.modal_small, 
+            styles.vflex
+        ];
+        return (
+            <View style={_l(styles.modal_dialog)}>
+                <View style={_l(st)}>
+                    {body}
+                </View>
+            </View>
+        )
+    }
+}
+
+class ProfilesDialog extends ModalDialog {
+
+    constructor(props) {
+        super(props);
+        let ds = new ListView.DataSource({
+            rowHasChanged: (r1, r2) => {
+                return true;
+            }
+        });
+        this.state = {
+            dataSource: ds,
+        };
+    }
+
+    async refresh() {
+        const {provider} = this.props;
+        const {dataSource} = this.state;
+        const profiles = await provider.profiles();
+        // console.log('Profiles:', profiles);
+        this.setState({
+            dataSource: dataSource.cloneWithRows(profiles),
+        });
+    }
+
+    async add() {
+        const {provider} = this.props;
+        const err = await provider.addProfile();
+        if (!err) { // Added
+            this.refresh();
+        } else {
+            ToastAndroid.show(err, ToastAndroid.LONG);
+        }
+    }
+
+    async star(id) {
+        const {provider} = this.props;
+        const success = await provider.profileDefault(id);
+        if (success) { // Starred
+            this.refresh();
+        };
+    }
+
+    remove(item) {
+        const {provider} = this.props;
+        Alert.alert('Remove profile', `Remove profile '${item.title}'`, [{
+            text: 'Cancel',
+        }, {
+            text: 'Remove',
+            onPress: async () => {
+                const success = await provider.removeProfile(item.id);
+                if (success) {
+                    this.refresh();
+                    provider.finish();
+                }
+            },
+        }]);
+    }
+
+    componentDidMount() {
+        this.refresh();
+    }
+
+    render() {
+        const {provider} = this.props;
+        const actions = [{
+            title: 'New profile',
+            icon: {uri: 'ic_plus'},
+            show: 'always',
+            onAction: () => {
+                this.add();
+            },
+        }, {
+            title: 'Reload',
+            icon: {uri: 'ic_refresh'},
+            show: 'always',
+            onAction: () => {
+                this.refresh();
+            },
+        }];
+        const renderOne = (item) => {
+            let subText;
+            if (item.id != item.title) { // Show id
+                subText = (
+                    <Text
+                        style={_l(styles.text, styles.textSmall)}
+                        numberOfLines={1}
+                    >
+                        {item.id}
+                    </Text>
+                );
+            };
+            const starIcon = item['default']? 'starred': 'star';
+            return (
+                <View style={_l(styles.hflex, styles.hbox, styles.profile_item)}>
+                    <View style={_l(styles.flex1, styles.vflex)}>
+                        <Text
+                            style={_l(styles.text)}
+                            numberOfLines={1}
+                        >
+                            {item.title}
+                        </Text>
+                        {subText}
+                    </View>
+                    <widget.IconBtn icon={starIcon} onClick={(e) => {
+                        this.star(item.id);
+                    }}/>
+                    <widget.IconBtn icon="close" onClick={(e) => {
+                        this.remove(item);
+                    }}/>
+                    <widget.IconBtn icon="link" onClick={(e) => {
+                        provider.openProfile(item.id);
+                    }}/>
+                </View>
+            );
+        };
+        return super.render(
+            <View>
+                <ToolbarAndroid
+                    style={_l(styles.flex0, styles.toolbar)}
+                    title="Profiles"
+                    actions={actions}
+                    onActionSelected={(idx) => {
+                        actions[idx].onAction();
+                    }}
+                />
+                <ListView
+                    enableEmptySections={true}
+                    style={_l(styles.flex1)}
+                    dataSource={this.state.dataSource}
+                    renderRow={renderOne}
+                />
+            </View>
+        );
+    }
+}
+
 export class MainCmp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
+    }
+
+    showProfiles(provider) {
+        if (this.state.dialog) return;
+        this.setState({
+            dialog: (
+                <ProfilesDialog provider={provider} />
+            )
+        });
     }
 
     showInput(title, input, context) {
@@ -463,7 +643,7 @@ export class MainCmp extends React.Component {
 
     render() {
         const {pages, pins, page, onNavigation, panes} = this.props;
-        const {input} = this.state;
+        const {input, dialog} = this.state;
         const {pager} = this.refs;
         const pageCmps = pages.map((pageCmp, idx) => {
             return (
@@ -497,6 +677,7 @@ export class MainCmp extends React.Component {
                 >
                     {pageCmps}
                 </ViewPagerAndroid>
+                {dialog}
                 {inputCmp}
             </View>
         );
@@ -510,6 +691,17 @@ export class MainCmp extends React.Component {
                 pager.setPage(idx);
             };
         })
+    }
+
+    onBack(e) {
+        if (this.state.dialog) {
+            this.setState({dialog: undefined});
+            return true;
+        }
+    }
+
+    componentDidMount() {
+        BackAndroid.addEventListener('hardwareBackPress', this.onBack.bind(this));
     }
 }
 

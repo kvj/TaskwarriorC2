@@ -56,6 +56,34 @@ export const init = () => {
             backgroundColor: _layers.bg.bg,
             padding: 3,
         },
+        modal_dialog: {
+            position: 'absolute',
+            flexDirection: 'column',
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#88888822',
+        },
+        modal_small: {
+            position: 'absolute',
+            left: 7,
+            right: 7,
+            top: 7,
+            bottom: 7,
+        },
+        modal_large: {
+            width: 400,
+            height: 400,
+        },
+        modal_inner: {
+            borderWidth: 2,
+            borderStyle: 'solid',
+            borderColor: _layers.bg.br,
+            backgroundColor: _layers.bg.bg,
+        },
         input_text: {
             margin: 3,
         },
@@ -164,6 +192,9 @@ export const init = () => {
         },
         float_space: {
             backgroundColor: '#88888822',
+        },
+        profile_item: {
+            margin: 3,
         },
     };
     let __styles = makeCommon({});

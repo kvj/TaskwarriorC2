@@ -15,10 +15,14 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeArray;
+import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.ViewManager;
 import com.taskwc2.App;
+import com.taskwc2.MainActivity;
 import com.taskwc2.controller.data.AccountController;
+import com.taskwc2.controller.data.Controller;
 import com.taskwc2.react.views.viewpager.ReactViewPagerManager;
 
 import org.kvj.bravo7.log.Logger;
@@ -35,6 +39,7 @@ import java.util.List;
 public class TwModule extends ReactContextBaseJavaModule implements AccountController.AccountControllerListener {
 
     Logger logger = Logger.forInstance(this);
+    Controller controller = App.controller();
     private AccountController acc;
 
     public TwModule(ReactApplicationContext reactContext, AccountController acc) {
@@ -73,8 +78,13 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
 
     @ReactMethod
     public void init(ReadableMap config, Promise promise) {
-        promise.resolve(acc != null);
-        return;
+        if (null == acc) {
+            promise.resolve(null);
+        };
+        WritableNativeMap map = new WritableNativeMap();
+        map.putString("id", acc.id());
+        map.putString("title", acc.name());
+        promise.resolve(map);
     }
 
     @ReactMethod
@@ -93,6 +103,96 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
             logger.e(e, "Failed to edit file");
             promise.reject("no_editor", "No editor app is associated with plain-text files. Install one");
         }
+    }
+
+    @ReactMethod
+    public void addProfile(final Promise promise) {
+        new Tasks.SimpleTask<String>() {
+
+            @Override
+            protected String doInBackground() {
+                return controller.createAccount(null);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                promise.resolve(s);
+            }
+        }.exec();
+    }
+
+    @ReactMethod
+    public void removeProfile(final String id, final Promise promise) {
+        new Tasks.SimpleTask<Boolean>() {
+
+            @Override
+            protected Boolean doInBackground() {
+                return controller.removeAccount(id);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean aBoolean) {
+                promise.resolve(aBoolean);
+            }
+        }.exec();
+    }
+
+    @ReactMethod
+    public void finish() {
+        getCurrentActivity().finish();
+    }
+
+    @ReactMethod
+    public void profileDefault(final String id, final Promise promise) {
+        new Tasks.SimpleTask<Boolean>() {
+
+            @Override
+            protected Boolean doInBackground() {
+                return controller.setDefault(id);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean aBoolean) {
+                promise.resolve(aBoolean);
+            }
+        }.exec();
+    }
+
+    @ReactMethod
+    public void openProfile(String id) {
+        Intent intent = new Intent(controller.context(), MainActivity.class);
+        intent.putExtra(App.KEY_ACCOUNT, id);
+        getCurrentActivity().startActivity(intent);
+    }
+
+
+    @ReactMethod
+    public void profiles(final Promise promise) {
+        new Tasks.SimpleTask<WritableNativeArray>() {
+
+            @Override
+            protected WritableNativeArray doInBackground() {
+                List<String> folders = controller.accountFolders();
+                WritableNativeArray arr = new WritableNativeArray();
+                String defaultAccount = controller.defaultAccount();
+                for (String folder : folders) {
+                    AccountController ac = controller.accountController(folder, false);
+                    if (null != ac) {
+                        WritableNativeMap map = new WritableNativeMap();
+                        map.putString("id", ac.id());
+                        map.putString("title", ac.name());
+                        map.putBoolean("default", ac.id().equals(defaultAccount));
+                        arr.pushMap(map);
+                    }
+                }
+                return arr;
+            }
+
+            @Override
+            protected void onPostExecute(WritableNativeArray data) {
+                promise.resolve(data);
+            }
+        }.exec();
     }
 
     @Override

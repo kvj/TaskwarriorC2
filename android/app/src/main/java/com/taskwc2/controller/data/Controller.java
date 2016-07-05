@@ -295,6 +295,31 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
         });
     }
 
+    private static boolean removeFile(File file) {
+        if (file.isFile()) {
+            return file.delete();
+        }
+        File[] files = file.listFiles();
+        for (File f : files) {
+            if (".".equals(f.getName()) || "..".equals(f.getName())) continue;
+            boolean result = removeFile(f);
+            if (!result) return false;
+        }
+        return file.delete();
+    }
+
+    public boolean removeAccount(String id) {
+        AccountController controller = accountController(id, false);
+        if (null == controller) {
+            return true;
+        }
+        if (!removeFile(controller.folder())) {
+            return false;
+        }
+        controllerMap.remove(id);
+        return true;
+    }
+
     public Listeners<TaskListener> listeners() {
         return taskListeners;
     }

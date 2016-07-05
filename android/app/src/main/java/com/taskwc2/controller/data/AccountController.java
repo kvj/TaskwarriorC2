@@ -85,13 +85,17 @@ public class AccountController {
     }
 
     private Thread acceptThread = null;
-    private final String accountName;
+    private String accountName;
     private Set<NotificationType> notificationTypes = new HashSet<>();
 
     FileLogger fileLogger = null;
 
     public File taskrc() {
         return new File(tasksFolder, TASKRC);
+    }
+
+    public File folder() {
+        return tasksFolder;
     }
 
     public String name() {
@@ -162,6 +166,14 @@ public class AccountController {
         syncSocket = openLocalSocket(socketName);
         scheduleSync(TimerType.Periodical); // Schedule on start
         loadNotificationTypes();
+        loadName();
+    }
+
+    private void loadName() {
+        String value = taskSetting("title");
+        if (!TextUtils.isEmpty(value)) {
+            accountName = value;
+        }
     }
 
     private void initLogger() {

@@ -342,6 +342,11 @@ export class AppPane extends React.Component {
         await controller.editConfig();
     }
 
+    onManageProfiles() {
+        const {controller} = this.props;
+        this.refs.main.showProfiles(controller.provider);
+    }
+
     render() {
         if (!this.state) return (
             <cmp.AppCmp />
@@ -354,8 +359,10 @@ export class AppPane extends React.Component {
                     onCommand={this.onCommand.bind(this)}
                     onTogglePane={this.togglePane.bind(this)}
                     onUndo={this.onUndo.bind(this)}
+                    info={controller.providerInfo()}
                     onSync={this.onSync.bind(this)}
                     onEditConfig={this.onEditConfig.bind(this)}
+                    onManageProfiles={this.onManageProfiles.bind(this)}
                 />
                 <CenterPane>
                     <MainPane
@@ -670,6 +677,10 @@ class MainPane extends React.Component {
 
     showInput(...args) {
         return this.refs.cmp.showInput.apply(this.refs.cmp, args);
+    }
+
+    showProfiles(...args) {
+        return this.refs.cmp.showProfiles.apply(this.refs.cmp, args);
     }
 
     render() {
