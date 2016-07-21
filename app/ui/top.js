@@ -94,13 +94,22 @@ export class AppPane extends React.Component {
         };
         this.refs.main.showInput(title, input, {
             cmd: cmd,
+            input: input,
             tasks: tasks,
         });
     }
 
     async processInput(input, ctx) {
+        let cmd = ctx.cmd;
+        if (cmd == 'reannotate') { // Special case
+            const denotateResult = await this.props.controller.cmd('denotate', ctx.input, ctx.tasks, true);
+            if (!denotateResult) { // Failed
+                return false;
+            };
+            cmd = 'annotate';
+        };
         return smooth(async () => {
-            return await this.props.controller.cmd(ctx.cmd, input, ctx.tasks);
+            return await this.props.controller.cmd(cmd, input, ctx.tasks);
         });
     }
 

@@ -119,9 +119,6 @@ export const formatters = {
         const lines = ann.map((line) => {
             const dt = parseDate(line.entry);
             let outp = '';
-            if (dt) {
-                outp += `${dt.toLocaleDateString()} `;
-            };
             outp += line.description;
             return {
                 text: outp,

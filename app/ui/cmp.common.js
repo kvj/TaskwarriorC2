@@ -32,6 +32,7 @@ class Task extends widget.DnD {
             onClick,
             onDelete,
             onAnnDelete,
+            onAnnModify,
             onDepDelete,
             onAnnAdd,
             onStartStop,
@@ -115,7 +116,11 @@ class Task extends widget.DnD {
                         <widget.Text
                             title={item.title}
                             style={[styles.flex1, styles.description, styles.textSmall]}
-                            >
+                            editable
+                            onEdit={(e) => {
+                                onAnnModify(item.origin, e);
+                            }}
+                        >
                             {item.text}
                         </widget.Text>
                         <widget.IconMenu style={style}>
@@ -261,6 +266,9 @@ export class TaskPageCmp extends React.Component {
         const onAnnDelete = (text, e) => {
             onEdit(item, 'denotate', text, true);
         };
+        const onAnnModify = (text, e) => {
+            onEdit(item, 'reannotate', text);
+        };
         const onClick = (e, data, cmd='modify') => {
             if (e.meta) {
                 let addCmd = data;
@@ -319,6 +327,7 @@ export class TaskPageCmp extends React.Component {
                 onClick={onClick}
                 onDelete={onDelete}
                 onAnnDelete={onAnnDelete}
+                onAnnModify={onAnnModify}
                 onAnnAdd={onAnnAdd}
                 onTap={onTap}
                 onStartStop={(e) => {

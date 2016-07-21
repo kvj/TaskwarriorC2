@@ -56,14 +56,13 @@ export const init = () => {
             border: 0,
             borderRadius: 0,
             margin: 3,
-            padding: 5,
+            padding: 0,
             textAlign: "center",
             fontSize: "1em",
             backgroundColor: 'transparent',
             color: _layers.bg.fg,
             outline: "none",
         },
-
         "btn_a": {
             padding: 5,
             color: _layers.bg.fg,
@@ -134,6 +133,7 @@ export const init = () => {
 
         toolbar: {
             borderBottom: `1px solid ${_layers.bg.br}`,
+            padding: "5px 0",
         },
 
         statusbar: {

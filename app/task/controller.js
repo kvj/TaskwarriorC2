@@ -404,7 +404,7 @@ export class TaskController {
         return code;
     }
 
-    async cmd(cmd, input, tasks=[]) {
+    async cmd(cmd, input, tasks=[], silent=false) {
         let cmds = [];
         const ids = tasks.map((task) => {
             return task.id || task.uuid_ || task.uuid;
@@ -421,8 +421,10 @@ export class TaskController {
         });
         // console.log('cmd result', cmds, code);
         if (code === 0) {
-            this.notifyChange();
-            this.scheduleSync('commit');
+            if (!silent) {
+                this.notifyChange();
+                this.scheduleSync('commit');
+            };
             return true;
         };
         return false;
