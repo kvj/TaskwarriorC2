@@ -233,7 +233,7 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
     }
 
     public synchronized AccountController accountController(String id, boolean reload) {
-        logger.d("accountController:", id, reload);
+//        logger.d("accountController:", id, reload);
         if (TextUtils.isEmpty(id)) {
             return null; // Will create later
         }

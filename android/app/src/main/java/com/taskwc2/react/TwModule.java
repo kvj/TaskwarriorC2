@@ -2,6 +2,7 @@ package com.taskwc2.react;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.Arguments;
@@ -40,19 +41,27 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
 
     Logger logger = Logger.forInstance(this);
     Controller controller = App.controller();
-    private AccountController acc;
 
-    public TwModule(ReactApplicationContext reactContext, AccountController acc) {
-        super(reactContext);
-        this.acc = acc;
-        if (null != acc) { // Subscribe
-            acc.listeners().add(this);
+    private AccountController accountController() {
+        if (null == getCurrentActivity()) return null;
+        String id = controller.defaultAccount();
+        if (null != getCurrentActivity().getIntent()) { // Have intent
+            String _id = getCurrentActivity().getIntent().getStringExtra(App.KEY_ACCOUNT);
+            if (!TextUtils.isEmpty(_id)) {
+                id = _id;
+            }
         }
+        return controller.accountController(id, false);
+    };
+
+    public TwModule(ReactApplicationContext reactContext) {
+        super(reactContext);
     }
 
     @Override
     public void onCatalystInstanceDestroy() {
         super.onCatalystInstanceDestroy();
+        AccountController acc = accountController();
         if (null != acc) { // Un-Subscribe
             acc.listeners().remove(this);
         }
@@ -71,6 +80,7 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
 
     @ReactMethod
     public void scheduleSync(int seconds, ReadableMap timers) {
+        AccountController acc = accountController();
         if (null == acc) return;
         acc.rememberTimers(fromMap(timers, "normal"), fromMap(timers, "error"));
         acc.scheduleSync(seconds);
@@ -78,17 +88,23 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
 
     @ReactMethod
     public void init(ReadableMap config, Promise promise) {
+        AccountController acc = accountController();
         if (null == acc) {
             promise.resolve(null);
+            return;
         };
         WritableNativeMap map = new WritableNativeMap();
         map.putString("id", acc.id());
         map.putString("title", acc.name());
         promise.resolve(map);
+        if (null != acc) { // Subscribe
+            acc.listeners().add(this);
+        }
     }
 
     @ReactMethod
     public void editTaskrc(Promise promise) {
+        AccountController acc = accountController();
         if (null == acc) {
             promise.reject("no_account", "Not configured");
             return;
@@ -233,6 +249,7 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
     @ReactMethod
     public void call(ReadableArray args, ReadableMap config, final Callback linesEater) {
 //        logger.d("Call:", args, linesEater, acc);
+        final AccountController acc = accountController();
         if (null == acc) { // Invalid
             linesEater.invoke("error", "Profile not configured");
             return;
@@ -281,16 +298,13 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
 
     public static class TwPackage implements ReactPackage {
 
-        private final AccountController acc;
-
-        public TwPackage(AccountController acc) {
-            this.acc = acc;
+        public TwPackage() {
         }
 
         @Override
         public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
             List<NativeModule> modules = new ArrayList<>();
-            modules.add(new TwModule(reactContext, acc));
+            modules.add(new TwModule(reactContext));
             return modules;
         }
 
