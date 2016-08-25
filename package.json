@@ -6,8 +6,8 @@
   "dependencies": {
     "babel-polyfill": "^6.9.0",
     "electron-prebuilt": "^1.2.4",
-    "react": "^15.2.0",
-    "react-dom": "^15.2.0"
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0"
   },
   "devDependencies": {
     "babel-plugin-syntax-async-functions": "^6.8.0",
@@ -18,10 +18,10 @@
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-rename": "^1.2.2",
-    "react-native": "^0.30.0"
+    "react-native": "^0.31.0"
   },
   "scripts": {
-    "desktop": "node_modules/.bin/electron _desktop.js",
+    "desktop": "node_modules/.bin/electron desktop.js",
     "dev": "node_modules/.bin/gulp",
     "dist": "node_modules/.bin/gulp dist"
   }
