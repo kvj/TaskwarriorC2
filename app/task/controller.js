@@ -179,8 +179,8 @@ export class TaskController {
         const timers = await this.config('ui.sync.', true);
         this.timers = {
             normal: parseInt(timers['periodical'] || 120, 10) || 0,
-            error: parseInt(timers['error'] || 30, 10) || 0,
-            commit: parseInt(timers['commit'] || 10, 10) || 0,
+            error: parseInt(timers['error'] || 0, 10) || 0,
+            commit: parseInt(timers['commit'] || 0, 10) || 0,
         };
         this.netConfig = {
             online: timers['online'] || 'off',
