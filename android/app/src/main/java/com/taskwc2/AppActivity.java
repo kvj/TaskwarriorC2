@@ -3,11 +3,8 @@ package com.taskwc2;
 import android.os.Bundle;
 
 import com.facebook.react.ReactActivity;
-import com.facebook.react.ReactPackage;
-import com.facebook.react.shell.MainReactPackage;
 import com.taskwc2.controller.data.AccountController;
 import com.taskwc2.controller.data.Controller;
-import com.taskwc2.react.TwModule;
 
 import org.kvj.bravo7.form.FormController;
 import org.kvj.bravo7.form.impl.ViewFinder;
@@ -17,7 +14,6 @@ import org.kvj.bravo7.log.Logger;
 import org.kvj.bravo7.util.DataUtil;
 import org.kvj.bravo7.widget.Dialogs;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,27 +31,6 @@ public class AppActivity extends ReactActivity implements Controller.TaskListene
     @Override
     protected String getMainComponentName() {
         return "taskwc2";
-    }
-
-    /**
-     * Returns whether dev mode should be enabled.
-     * This enables e.g. the dev menu.
-     */
-    @Override
-    protected boolean getUseDeveloperSupport() {
-        return BuildConfig.DEBUG;
-    }
-
-    /**
-     * A list of packages used by the app. If the app uses additional views
-     * or modules besides the default ones, add more packages here.
-     */
-    @Override
-    protected List<ReactPackage> getPackages() {
-        List<ReactPackage> list = new ArrayList<>();
-        list.add(new MainReactPackage());
-        list.add(new TwModule.TwPackage(acc));
-        return list;
     }
 
     @Override

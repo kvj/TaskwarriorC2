@@ -179,6 +179,7 @@ export class AppPane extends React.Component {
                         filter={page.filter}
                         onAdd={this.onAdd.bind(this)}
                         onEdit={this.onEdit.bind(this)}
+                        onSync={this.onSync.bind(this)}
                     />
                 );
             };

@@ -1,12 +1,20 @@
 package com.taskwc2;
 
 
+import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactNativeHost;
+import com.facebook.react.ReactPackage;
+import com.facebook.react.shell.MainReactPackage;
 import com.taskwc2.controller.data.Controller;
+import com.taskwc2.react.TwModule;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by vorobyev on 10/4/15.
  */
-public class App extends org.kvj.bravo7.ng.App<Controller> {
+public class App extends org.kvj.bravo7.ng.App<Controller> implements ReactApplication {
 
     public static final String ACCOUNT_TYPE = "kvj.task.account";
     public static final String KEY_ACCOUNT = "account";
@@ -27,5 +35,26 @@ public class App extends org.kvj.bravo7.ng.App<Controller> {
         for (String acc : controller.accountFolders()) {
             controller.accountController(acc, true); // This will schedule sync
         }
+    }
+
+    private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+        @Override
+        protected boolean getUseDeveloperSupport() {
+            return BuildConfig.DEBUG;
+        }
+
+        @Override
+        protected List<ReactPackage> getPackages() {
+            List<ReactPackage> list = new ArrayList<>();
+            list.add(new MainReactPackage());
+            list.add(new TwModule.TwPackage());
+            return list;
+        }
+    };
+
+
+    @Override
+    public ReactNativeHost getReactNativeHost() {
+        return mReactNativeHost;
     }
 }

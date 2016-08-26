@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   BackAndroid,
   Dimensions,
+  RefreshControl,
 } from 'react-native';
 import * as widget from './widget';
 import * as common from './cmp.common';
@@ -725,6 +726,7 @@ export class TaskPageCmp extends common.TaskPageCmp {
         });
         this.state = {
             dataSource: ds,
+            refreshing: false,
         };
     }
 
@@ -738,6 +740,12 @@ export class TaskPageCmp extends common.TaskPageCmp {
         };
     }
 
+    async onPull() {
+        this.setState({refreshing: true});
+        await this.props.onSync();
+        this.setState({refreshing: false});
+    }
+
     renderBody(header, info) {
         const renderOne = (task, sid, idx) => {
             return this.renderTask(task, idx, cols, info);
@@ -745,6 +753,12 @@ export class TaskPageCmp extends common.TaskPageCmp {
         const cols = info.cols.filter((item) => {
             return item.visible;
         });
+        const refreshToSync = (
+            <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this.onPull.bind(this)}
+            />
+        );
         return (
             <View style={_l(styles.vproxy)}>
                 <View style={_l(styles.flex0, styles.hflex, styles.wflex)}>{header}</View>
@@ -753,6 +767,7 @@ export class TaskPageCmp extends common.TaskPageCmp {
                     style={_l(styles.flex1)}
                     dataSource={this.state.dataSource}
                     renderRow={renderOne}
+                    refreshControl={refreshToSync}
                 />
             </View>
         );
