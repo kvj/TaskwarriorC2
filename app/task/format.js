@@ -272,6 +272,8 @@ export const sortTasks = (info, mode) => {
         };
         tasks.forEach((task) => {
             task.sub = []; // Put chidren here
+        });
+        tasks.forEach((task) => {
             if (task.depends) { // Have
                 task.depends.findIndex((uuid) => {
                     const t = tasks.find((t) => {
