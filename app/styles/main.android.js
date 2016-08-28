@@ -7,7 +7,7 @@ import {
 
 export let styles = {};
 
-export const init = () => {
+export const init = (config) => {
     const [_layers, _colorDefs] = layers();
     const _fontFamily = 'monospace';
     const _styles = {
@@ -112,6 +112,9 @@ export const init = () => {
             height: 32,
             padding: 3,
             margin: 3,
+        },
+        multiline: {
+            rows: config['multiline.rows'] || '3',
         },
         description: {
             alignSelf: 'center',

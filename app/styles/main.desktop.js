@@ -3,7 +3,7 @@ import {makeCommon} from './main.common';
 
 export let styles = {};
 
-export const init = () => {
+export const init = (config) => {
     const [_layers, _colorDefs] = layers();
     const _fontFamily = fontFamily();
     const _styles = {
@@ -81,6 +81,9 @@ export const init = () => {
             fontFamily: _fontFamily,
             minWidth: 150,
             borderLeft: `4px solid ${_layers.l2.br}`,
+        },
+        multiline: {
+            rows: config['multiline.rows'] || '5',
         },
         "oneLine": {
             whiteSpace: "nowrap",
@@ -298,7 +301,6 @@ export const init = () => {
     for (var key in _styles) {
         styles[key] = _styles[key];
     };
-    console.log('Styles total:', styles);
 };
 
 export const _l = (...args) => {

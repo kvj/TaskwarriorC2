@@ -138,6 +138,10 @@ export class TaskProvider {
                     arr.push(s);
                     continue;
                 }
+                if (s[0] == '"' && s[s.length-1] == '"') {
+                    arr.push(s.substr(1, s.length-2));
+                    continue;
+                }
                 arr.push.apply(arr, s.split(' '));
             }
             let task;

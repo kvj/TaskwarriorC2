@@ -398,24 +398,55 @@ class PopupEditor extends React.Component {
         }
     }
 
+    onTAKey(evt) {
+        const e = widget.eventInfo(evt);
+        if (e.key == 13 && e.ctrl) { // Enter
+            this.finish(true, {});
+        }
+        if (e.key == 27 && e.ctrl) { // Ctrl+Escape
+            this.finish(false, {});
+        }
+    }
+
     componentDidMount() {
         this.refs.input.focus();
     }
 
     render() {
+        let input;
+        let lineStyle;
+        const {title, multiline} = this.props;
+        if (multiline) { // Textarea
+            lineStyle = [styles.hflex, styles.wflex];
+            input = (
+                <textarea
+                    style={_l(styles.inp, styles.flex1)}
+                    value={this.state.input}
+                    onChange={this.onChange.bind(this)}
+                    rows={styles.multiline.rows}
+                    onKeyDown={this.onTAKey.bind(this)}
+                    ref="input"
+                ></textarea>
+            );
+        } else { // input
+            lineStyle = [styles.hflex, styles.hbar, styles.wflex];
+            input = (
+                <input
+                    style={_l(styles.inp, styles.flex1)}
+                    type="search"
+                    value={this.state.input}
+                    onChange={this.onChange.bind(this)}
+                    onKeyDown={this.onKey.bind(this)}
+                    ref="input"
+                />
+            );
+        };
         return (
             <div style={_l(styles.floatCenter)}>
                 <div style={_l(styles.input_box)}>
-                    <div style={_l(styles.hflex, styles.hbar, styles.wflex)}>
+                    <div style={_l(lineStyle)}>
                         <widget.Text>{this.props.title}</widget.Text>
-                        <input
-                            style={_l(styles.inp, styles.flex1)}
-                            type="search"
-                            value={this.state.input}
-                            onChange={this.onChange.bind(this)}
-                            onKeyDown={this.onKey.bind(this)}
-                            ref="input"
-                        />
+                        {input}
                     </div>
                     <div style={_l(styles.hflex)}>
                         <div style={_l(styles.spacer)}></div>
@@ -492,6 +523,7 @@ export class MainCmp extends React.Component {
                 <PopupEditor
                     input={input.input}
                     title={input.title}
+                    multiline={input.context.multiline}
                     onDone={this.onInputDone.bind(this)}
                     onCancel={this.onInputCancel.bind(this)}
                     ref="popup_input"

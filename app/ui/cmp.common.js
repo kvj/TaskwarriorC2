@@ -30,6 +30,7 @@ class Task extends widget.DnD {
             running,
             onDone,
             onClick,
+            onMultiEdit,
             onDelete,
             onAnnDelete,
             onAnnModify,
@@ -39,12 +40,46 @@ class Task extends widget.DnD {
             onTap,
         } = this.props;
         const {dragTarget, dependsVisible} = this.state;
-        let desc_field = 'description'
+        let desc_field = 'description';
+        let multiline = [];
+        let multilineBtn = [];
         const fields = cols.map((item, idx) => {
             if (item.field == 'description') { // Separator
                 desc_field = item.full;
                 return (<widget.Div key={idx} style={_l(styles.spacer)}></widget.Div>);
             }
+            if (item.multiline) { // Render as multiline field
+                const lines = task[`${item.full}_lines`];
+                multilineBtn.push(
+                    <widget.IconBtn
+                        icon="pencil"
+                        key={`${item.full}-btn`}
+                        onClick={(e) => {
+                            onMultiEdit(item.field, task[item.field], e);
+                        }}
+                        title={item.label}
+                    />
+                );
+                const _lines = lines.map((l, lidx) => {
+                    let editBtn = null;
+                    return (
+                        <widget.Div
+                            style={_l(styles.hflex, styles.annotation_line)}
+                            key={`${item.full}-${lidx}`}
+                        >
+                            <widget.Text
+                                title={l}
+                                style={[styles.flex1, styles.description, styles.textSmall]}
+                            >
+                                {l}
+                            </widget.Text>
+                        </widget.Div>
+                    );
+                });
+                // console.log('Multi:', lines, item);
+                multiline.push(_lines);
+                return null;
+            };
             const val = task[`${item.full}_`] || '';
             const editable = task[`${item.field}_ro`]? false: true;
             const onFieldClick = (e) => {
@@ -210,11 +245,13 @@ class Task extends widget.DnD {
                             }}
                             title={running? "Stop task": "Start task"}
                         />
+                        {multilineBtn}
                     </widget.IconMenu>
                 </widget.Div>
                 <widget.Div style={_l(styles.hflex, styles.wflex)}>
                     {fields}
                 </widget.Div>
+                {multiline}
                 {depends}
                 {annotations}
             </widget.Div>
@@ -309,6 +346,9 @@ export class TaskPageCmp extends React.Component {
                 onEdit(t, 'modify', `depends:${uuids.join(',')}`, true);
             };
         };
+        const onMultiEdit = (field, lines) => {
+            onEdit(item, `${field}:`, lines, false, true);
+        };
         let style = [styles.one_item];
         if (item.styles) { // Append
             style.push.apply(style, item.styles);
@@ -325,6 +365,7 @@ export class TaskPageCmp extends React.Component {
                 cols={cols}
                 onDone={onDone}
                 onClick={onClick}
+                onMultiEdit={onMultiEdit}
                 onDelete={onDelete}
                 onAnnDelete={onAnnDelete}
                 onAnnModify={onAnnModify}
@@ -356,6 +397,9 @@ export class TaskPageCmp extends React.Component {
                 return item.visible;
             });
             const header_items = cols.map((item, idx) => {
+                if (item.multiline) { // Skip
+                    return null;
+                };
                 if (item.field == 'description') {
                     // Insert spacer
                     return (<widget.Div key={idx} style={_l(styles.spacer)}></widget.Div>);

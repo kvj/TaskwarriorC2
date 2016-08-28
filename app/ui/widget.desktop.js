@@ -350,13 +350,11 @@ export class TaskPageInput extends React.Component {
                     value={this.state.filter}
                     onChange={this.onFilterChange.bind(this)}
                     onKeyPress={this.onKey.bind(this)}
-                    onSearch={this.onSearch.bind(this)}
                     placeholder="Filter"
                 />
                 <IconBtn icon={sortIcon} onClick={onToggleSort} />
             </div>
         );
-
         return (
             <div style={_l(styles.flex0)}>
                 {line1}

@@ -413,19 +413,26 @@ export class PopupEditor extends React.Component {
 
     render() {
         const windowSize = Dimensions.get('window');
-        let lineStyle = [styles.hflex, styles.hbar];
+        let lineStyle = [styles.hflex];
         if (windowSize.width < 600) { // Smaller than Nexus 7
             lineStyle = styles.vflex;
         };
+        const {title, multiline} = this.props;
+        let lineStyle;
+        if (multiline) {
+        } else {
+            lineStyle.push(styles.hbar);
+        }
         return (
             <View style={_l(styles.input_box, styles.vflex)}>
                 <View style={_l(lineStyle)}>
-                    <widget.Text style={_l(styles.input_text)}>{this.props.title}</widget.Text>
+                    <widget.Text style={_l(styles.input_text)}>{title}</widget.Text>
                     <TextInput
                         style={_l(styles.inp, styles.flex1)}
                         ref="input"
                         onChangeText={this.onChange.bind(this)}
-                        multiline={false}
+                        multiline={multiline || false}
+                        numberOfLines={styles.multiline.rows}
                         value={this.state.input}
                         onSubmitEditing={() => {
                             this.finish(true);

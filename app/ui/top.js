@@ -81,7 +81,7 @@ export class AppPane extends React.Component {
         });
     }
 
-    onEdit(key, cmd, tasks, input, unint) {
+    onEdit(key, cmd, tasks, input, unint, multiline) {
         if (unint) { // Unintended - run
             return this.processInput(input, {
                 cmd: cmd,
@@ -92,10 +92,15 @@ export class AppPane extends React.Component {
         if (tasks.length) { // Prepend number of tasks
             title = `{${tasks.length}} ${cmd}`;
         };
+        let inp = input;
+        if (multiline && inp) { // Split
+            inp = input.split(this.props.controller.multilineSep).join('\n');
+        };
         this.refs.main.showInput(title, input, {
             cmd: cmd,
-            input: input,
+            input: inp,
             tasks: tasks,
+            multiline: multiline
         });
     }
 
@@ -107,6 +112,10 @@ export class AppPane extends React.Component {
                 return false;
             };
             cmd = 'annotate';
+        };
+        if (ctx.multiline) { // Multiline mode
+            input = `"${cmd}${input.split('\n').join(this.props.controller.multilineSep)}"`;
+            cmd = 'modify';
         };
         return smooth(async () => {
             return await this.props.controller.cmd(cmd, input, ctx.tasks);
@@ -599,7 +608,7 @@ class TasksPagePane extends PagePane {
         this.props.onAdd(this.props.id, cmd.join(' '), completed);
     }
 
-    onEdit(task, cmd, input, unint=false) {
+    onEdit(task, cmd, input, unint=false, multiline=false) {
         const {selection, info} = this.state;
         let tasks = [];
         if (info && info.tasks) {
@@ -608,7 +617,7 @@ class TasksPagePane extends PagePane {
         if (!tasks.length || tasks.indexOf(task) == -1) {
             if (task) tasks = [task]; // Current
         }
-        this.props.onEdit(this.props.id, cmd, tasks, input, unint);
+        this.props.onEdit(this.props.id, cmd, tasks, input, unint, multiline);
     }
 
     filter(filter) {

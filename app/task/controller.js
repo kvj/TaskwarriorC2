@@ -141,15 +141,21 @@ export class TaskController {
             return false;
         };
         this.provider = provider;
-        const css = await this.config('ui.style.', true);
-        styleInit(css);
-        stylesInit();
         await this.setupSync();
         this.scheduleSync();
         let conf = await this.config('default.command');
         this.defaultCmd = conf['default.command'] || 'next';
         this.panesConfig = await this.provider.configurePanes(await this.config('ui.pane.', true));
         await this.loadUDAs();
+        this.multiline = {};
+        conf = await this.config('ui.multiline');
+        (conf['ui.multiline'] || '').split(',').map((item) => item.trim()).forEach((item) => {
+            if (item) this.multiline[item] = true;
+        });
+        this.multilineSep = conf['ui.multiline.separator'] || '\\n';
+        const css = await this.config('ui.style.', true);
+        styleInit(css);
+        stylesInit(css, this);
         return true;
     }
 
@@ -353,9 +359,14 @@ export class TaskController {
         };
         info.cols.forEach((item) => {
             item.visible = false;
+            item.multiline = false;
             if ('status' == item.field) {
                 return;
             }
+            if (this.multiline[item.field]) { // Multi - skip
+                item.multiline = true;
+                item.visible = true;
+            };
             if (item.field == 'depends') { // Need a list
                 hasDepends = true;
             };
@@ -370,10 +381,18 @@ export class TaskController {
             // console.log('Col:', item.field);
             info.tasks.forEach((task) => {
                 const val = handler? handler(task, item.display, item, this): (task[item.field] || '');
+                task[`${item.full}_`] = val;
+                if (item.multiline) {
+                    let lines = [''];
+                    if (val) { // Split
+                        lines = val.split(this.multilineSep);
+                    };
+                    task[`${item.full}_lines`] = lines;
+                    return;
+                };
                 if (val.length > max) {
                     max = val.length;
                 };
-                task[`${item.full}_`] = val;
                 // console.log('Format:', item.field, val, item.display);
             });
             if (max > 0 || ['id', 'uuid', 'description'].indexOf(item.field) != -1) { // Visible
