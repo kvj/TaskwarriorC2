@@ -187,7 +187,6 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
                 }
             }
         }
-        logger.d("Folders:", result);
         return result;
     }
 
@@ -205,10 +204,9 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
             }
             File taskrc = new File(folder, AccountController.TASKRC);
             if (!taskrc.exists()) {
-                if (!taskrc.createNewFile()) {
-                    logger.w("Failed to create folder", folderName);
-                    return "Storage access error";
-                }
+                FileOutputStream fos = new FileOutputStream(taskrc);
+                fos.write(context.getString(R.string.default_taskrc).trim().getBytes("utf-8"));
+                fos.close();
             }
             File dataFolder = new File(folder, AccountController.DATA_FOLDER);
             if (!dataFolder.exists()) {
