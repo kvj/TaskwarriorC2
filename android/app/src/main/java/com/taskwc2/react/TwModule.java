@@ -24,13 +24,11 @@ import com.taskwc2.App;
 import com.taskwc2.MainActivity;
 import com.taskwc2.controller.data.AccountController;
 import com.taskwc2.controller.data.Controller;
-import com.taskwc2.react.views.viewpager.ReactViewPagerManager;
 
 import org.kvj.bravo7.log.Logger;
 import org.kvj.bravo7.util.Tasks;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -315,9 +313,7 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
 
         @Override
         public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-            return Arrays.<ViewManager>asList(
-                new ReactViewPagerManager()
-            );
+            return Collections.emptyList();
         }
     }
 }
