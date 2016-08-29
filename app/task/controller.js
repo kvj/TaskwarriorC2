@@ -153,6 +153,7 @@ export class TaskController {
             if (item) this.multiline[item] = true;
         });
         this.multilineSep = conf['ui.multiline.separator'] || '\\n';
+        this.reportExtra = await this.config('ui.report.extra.', true) || {};
         const css = await this.config('ui.style.', true);
         styleInit(css);
         stylesInit(css, this);
@@ -238,7 +239,9 @@ export class TaskController {
                 };
             };
             if (key == 'columns') {
-                for (let s of config[key].split(',')) {
+                let columnsStr = config[key];
+                if (this.reportExtra.columns) columnsStr += `,${this.reportExtra.columns}`;
+                for (let s of columnsStr.split(',')) {
                     let cm = s.indexOf('.');
                     if (cm == -1) {
                         result.cols.push({
@@ -256,7 +259,9 @@ export class TaskController {
                 }
             }
             if (key == 'labels') {
-                desc = config[key].split(',');
+                let labelsStr = config[key];
+                if (this.reportExtra.labels) labelsStr += `,${this.reportExtra.labels}`;
+                desc = labelsStr.split(',');
             }
             if (key == 'description') {
                 result.description = config[key];
@@ -265,6 +270,7 @@ export class TaskController {
                 result.filter = config[key];
             }
         }
+        if (!result.description) result.description = result.filter;
         result.sort.push({
             field: 'id',
             asc: true,
