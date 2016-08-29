@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.common.SystemClock;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
 import com.facebook.react.uimanager.events.NativeGestureUtil;
@@ -96,14 +95,14 @@ import java.util.List;
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
       mEventDispatcher.dispatchEvent(
-          new PageScrollEvent(getId(), SystemClock.nanoTime(), position, positionOffset));
+          new PageScrollEvent(getId(), position, positionOffset));
     }
 
     @Override
     public void onPageSelected(int position) {
       if (!mIsCurrentItemFromJs) {
         mEventDispatcher.dispatchEvent(
-            new PageSelectedEvent(getId(), SystemClock.nanoTime(), position));
+            new PageSelectedEvent(getId(), position));
       }
     }
 
@@ -124,7 +123,7 @@ import java.util.List;
           throw new IllegalStateException("Unsupported pageScrollState");
       }
       mEventDispatcher.dispatchEvent(
-        new PageScrollStateChangedEvent(getId(), SystemClock.nanoTime(), pageScrollState));
+        new PageScrollStateChangedEvent(getId(), pageScrollState));
     }
   }
 
