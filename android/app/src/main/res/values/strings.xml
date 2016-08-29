@@ -3,22 +3,22 @@
     <string name="pref_account_id">pref_account_id</string>
     <string name="pref_sync_normal">pref_sync_normal</string>
     <string name="pref_sync_error">pref_sync_error</string>
-    <string name="default_taskrc">
-# Default configuration file
-
-# Certificates, key and identity
-#taskd.certificate = change-me.cert.pem
-#taskd.key = change-me.key.pem
-#taskd.ca = change-me.cert.pem
-#taskd.credentials = change-me/change-me/change-me
-
-# Taskd server host and port
-#taskd.server = change-me:53589
-
-# Optional include
-#include change-me
-
-# Sync configuration (periodical/error/commit)
-#ui.sync.periodical = 120
-    </string>
+    <string-array name="default_taskrc">
+        <item># Default configuration file</item>
+        <item></item>
+        <item># Certificates, key and identity</item>
+        <item>#taskd.certificate = change-me.cert.pem</item>
+        <item>#taskd.key = change-me.key.pem</item>
+        <item>#taskd.ca = change-me.cert.pem</item>
+        <item>#taskd.credentials = change-me/change-me/change-me</item>
+        <item></item>
+        <item># Taskd server host and port</item>
+        <item>#taskd.server = change-me:53589</item>
+        <item></item>
+        <item># Optional include</item>
+        <item>#include change-me</item>
+        <item></item>
+        <item># Sync configuration (periodical/error/commit)</item>
+        <item>#ui.sync.periodical = 120</item>
+    </string-array>
 </resources>

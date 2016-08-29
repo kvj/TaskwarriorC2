@@ -205,7 +205,11 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
             File taskrc = new File(folder, AccountController.TASKRC);
             if (!taskrc.exists()) {
                 FileOutputStream fos = new FileOutputStream(taskrc);
-                fos.write(context.getString(R.string.default_taskrc).trim().getBytes("utf-8"));
+                String[] lines = context.getResources().getStringArray(R.array.default_taskrc);
+                for (String line : lines) {
+                    fos.write(line.getBytes("utf-8"));
+                    fos.write('\n');
+                }
                 fos.close();
             }
             File dataFolder = new File(folder, AccountController.DATA_FOLDER);
@@ -218,6 +222,7 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
             logger.i("Created new profile:", folder);
             return null;
         } catch (Exception e) {
+            logger.e(e, "Profile create error:");
             return e.getMessage();
         }
     }
