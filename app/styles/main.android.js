@@ -46,7 +46,7 @@ export const init = (config) => {
         },
         input_box: {
             position: 'absolute',
-            marginTop: 100,
+            marginTop: 70,
             left: 3,
             right: 3,
             top: 0,
@@ -84,6 +84,9 @@ export const init = (config) => {
             borderColor: _layers.bg.br,
             backgroundColor: _layers.bg.bg,
         },
+        input_narrow: {
+            alignItems: 'stretch',
+        },
         input_text: {
             margin: 3,
         },
@@ -110,11 +113,10 @@ export const init = (config) => {
             backgroundColor: _layers.l2.bg,
             color: _layers.l2.fg,
             height: 32,
+            lineHeight: 32,
             padding: 3,
             margin: 3,
-        },
-        multiline: {
-            rows: config['multiline.rows'] || '3',
+            alignSelf: 'stretch',
         },
         description: {
             alignSelf: 'center',
@@ -204,6 +206,9 @@ export const init = (config) => {
         __styles[key] = _styles[key];
     };
     styles = StyleSheet.create(__styles);
+    styles.multiline = {
+        rows: parseInt(config['multiline.rows'] || '3'),
+    };
 };
 
 export const _l = (...args) => {

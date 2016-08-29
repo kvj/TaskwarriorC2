@@ -414,28 +414,35 @@ export class PopupEditor extends React.Component {
     render() {
         const windowSize = Dimensions.get('window');
         let lineStyle = [styles.hflex];
-        if (windowSize.width < 600) { // Smaller than Nexus 7
-            lineStyle = styles.vflex;
-        };
         const {title, multiline} = this.props;
-        let lineStyle;
-        if (multiline) {
+        if (windowSize.width < 600) { // Smaller than Nexus 7
+            lineStyle = [styles.vflex, styles.input_narrow];
         } else {
-            lineStyle.push(styles.hbar);
+            if (!multiline) {
+                lineStyle.push(styles.hbar);
+            };
+        }
+        let extraStyle = {};
+        let rows = styles.multiline.rows;
+        if (multiline) {
+            extraStyle = {
+                height: styles.inp.height * rows,
+                textAlignVertical: 'top',
+            };
         }
         return (
             <View style={_l(styles.input_box, styles.vflex)}>
                 <View style={_l(lineStyle)}>
                     <widget.Text style={_l(styles.input_text)}>{title}</widget.Text>
                     <TextInput
-                        style={_l(styles.inp, styles.flex1)}
+                        style={_l(styles.inp, styles.flex1, extraStyle)}
                         ref="input"
                         onChangeText={this.onChange.bind(this)}
-                        multiline={multiline || false}
-                        numberOfLines={styles.multiline.rows}
+                        multiline={multiline? true: false}
+                        numberOfLines={rows}
                         value={this.state.input}
                         onSubmitEditing={() => {
-                            this.finish(true);
+                            if (!multiline) this.finish(true);
                         }}
                     />
                 </View>
@@ -673,6 +680,7 @@ export class MainCmp extends React.Component {
                 <PopupEditor
                     input={input.input}
                     title={input.title}
+                    multiline={input.context.multiline}
                     onDone={this.onInputDone.bind(this)}
                     onCancel={this.onInputCancel.bind(this)}
                     ref="popup_input"
