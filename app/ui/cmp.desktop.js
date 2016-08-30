@@ -282,6 +282,37 @@ class ContextsList extends common.ContextsList {
     }
 }
 
+class ReportsListItem extends widget.DnD {
+
+    constructor(props) {
+        super(props);
+        this.dropTypes.push('tw/tag', 'tw/project');
+        this.state = {};
+    }
+
+    onDropHandler(type, data) {
+        this.props.onDrop(type, data);
+    }
+
+    render () {
+        const {onClick, item} = this.props;
+        const {dragTarget} = this.state;
+        return (
+            <widget.Div
+                onDragEnter={this.onDragStart}
+                onDragLeave={this.onDragFinish}
+                onDragOver={this.onDragOver}
+                onDrop={this.onDrop}
+                style={_l(styles.one_nav, dragTarget? styles.task_drop: null)}
+                onClick={onClick}
+            >
+                <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
+                <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.title}</widget.Text>
+            </widget.Div>
+        );
+    }
+}
+
 class ReportsList extends common.ReportsList {
 
     renderList(list) {
@@ -289,15 +320,16 @@ class ReportsList extends common.ReportsList {
             const onClick = () => {
                 this.props.onClick(item);
             };
+            const onDrop = (type, data) => {
+                this.props.onClick(item, type, data);
+            };
             return (
-                <widget.Div
-                    style={_l(styles.one_nav)}
+                <ReportsListItem
                     key={idx}
+                    onDrop={onDrop}
                     onClick={onClick}
-                >
-                    <widget.Text style={[styles.oneLine]}>{item.name}</widget.Text>
-                    <widget.Text style={[styles.oneLine, styles.textSmall]}>{item.title}</widget.Text>
-                </widget.Div>
+                    item={item}
+                />
             )
         });
         return (
@@ -329,6 +361,16 @@ export class ReportsCmp extends PaneCmp {
             return null; // No render
         };
         let st = [styles.right_pane, styles.reports, styles.vflex, styles.flex0];
+        const onClick = (item, type, data) => {
+            let filter = '';
+            if (type == 'tw/tag' && data) { // Drop
+                filter = `+${data}`;
+            };
+            if (type == 'tw/project' && data) { // Drop
+                filter = `pro:${data}`;
+            };
+            onReportClick(item, filter);
+        };
         const pane = (
             <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
                 <ReportsList
@@ -336,7 +378,7 @@ export class ReportsCmp extends PaneCmp {
                     style={styles.flex1}
                     reports={reports}
                     onRefresh={onReportsRefresh}
-                    onClick={onReportClick}
+                    onClick={onClick}
                 />
                 <ContextsList
                     title="Contexts"

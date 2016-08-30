@@ -272,16 +272,20 @@ export class AppPane extends React.Component {
         this.refs.reports.refreshContexts();
     }
 
-    onReportClick(report) {
-        if (report.special) { //
+    onReportClick(report, filter='') {
+        if (report.special) { // Show cmd window
+            let cmd = report.name;
+            if (filter) { // Append
+                cmd += ` ${filter}`;
+            };
             this.showPage({
-                cmd: report.name,
+                cmd: cmd,
                 type: 'cmd',
             });
         } else {
             this.showPage({
                 report: report.name,
-                filter: '',
+                filter: filter,
                 type: 'list',
             });
         }
