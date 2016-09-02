@@ -3,6 +3,7 @@
     <string name="pref_account_id">pref_account_id</string>
     <string name="pref_sync_normal">pref_sync_normal</string>
     <string name="pref_sync_error">pref_sync_error</string>
+    <string name="pref_sync_extra">pref_sync_extra</string>
     <string-array name="default_taskrc">
         <item># Default configuration file</item>
         <item></item>
@@ -20,5 +21,8 @@
         <item></item>
         <item># Sync configuration (periodical/error/commit)</item>
         <item>#ui.sync.periodical = 120</item>
+        <item></item>
+        <item># Enable sync debug (check taskw.log.txt file contents in profile folder)</item>
+        <item>#android.debug = y</item>
     </string-array>
 </resources>
