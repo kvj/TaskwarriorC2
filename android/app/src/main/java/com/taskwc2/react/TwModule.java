@@ -15,6 +15,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
+import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
@@ -25,6 +27,8 @@ import com.taskwc2.MainActivity;
 import com.taskwc2.controller.data.AccountController;
 import com.taskwc2.controller.data.Controller;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.kvj.bravo7.log.Logger;
 import org.kvj.bravo7.util.Tasks;
 
@@ -76,11 +80,29 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
         return value;
     }
 
+    private JSONObject objectFromMap(ReadableMap map, String attr) {
+        JSONObject result = new JSONObject();
+        try {
+            if (map.hasKey(attr) && map.getType(attr).equals(ReadableType.Map)) {
+                ReadableMap data = map.getMap(attr);
+                for (ReadableMapKeySetIterator it = data.keySetIterator();it.hasNextKey();) {
+                    String key = it.nextKey();
+                    if (data.getType(key).equals(ReadableType.String)) {
+                            result.put(key, data.getString(key));
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     @ReactMethod
     public void scheduleSync(int seconds, ReadableMap timers) {
         AccountController acc = accountController();
         if (null == acc) return;
-        acc.rememberTimers(fromMap(timers, "normal"), fromMap(timers, "error"));
+        acc.rememberTimers(fromMap(timers, "normal"), fromMap(timers, "error"), objectFromMap(timers, "extra"));
         acc.scheduleSync(seconds);
     }
 

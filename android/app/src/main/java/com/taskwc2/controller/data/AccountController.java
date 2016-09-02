@@ -1,10 +1,15 @@
 package com.taskwc2.controller.data;
 
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
@@ -13,6 +18,7 @@ import com.taskwc2.MainActivity;
 import com.taskwc2.R;
 import com.taskwc2.controller.sync.SSLHelper;
 
+import org.json.JSONObject;
 import org.kvj.bravo7.log.Logger;
 import org.kvj.bravo7.util.Compat;
 import org.kvj.bravo7.util.DataUtil;
@@ -79,9 +85,10 @@ public class AccountController {
         logger.d("Scheduled:", c.getTime(), socketName);
     }
 
-    public void rememberTimers(int normal, int error) {
-        controller.settings().intSettings(R.string.pref_sync_normal, normal);
-        controller.settings().intSettings(R.string.pref_sync_error, error);
+    public void rememberTimers(int normal, int error, JSONObject extra) {
+        controller.settings(id()).intSettings(R.string.pref_sync_normal, normal);
+        controller.settings(id()).intSettings(R.string.pref_sync_error, error);
+        controller.settings(id()).objectSettings(R.string.pref_sync_extra, extra);
     }
 
     private Thread acceptThread = null;
@@ -186,6 +193,7 @@ public class AccountController {
     }
 
     private void debug(Object... params) {
+        logger.d(params);
         if (null != fileLogger) { // Enabled
             fileLogger.log(params);
         }
@@ -279,8 +287,8 @@ public class AccountController {
     }
 
     public void scheduleSync(final TimerType type) {
-        int normal = controller.settings().settingsInt(TimerType.Periodical.type, 0);
-        int seconds = controller.settings().settingsInt(type.type, normal) * 60;
+        int normal = controller.settings(id()).settingsInt(TimerType.Periodical.type, 0);
+        int seconds = controller.settings(id()).settingsInt(type.type, normal) * 60;
         scheduleSync(seconds);
     }
 
@@ -301,7 +309,88 @@ public class AccountController {
         }
     }
 
+    private List<String> configList(String value) {
+        if (!TextUtils.isEmpty(value)) {
+            List<String> result = new ArrayList<>();
+            for (String s : value.toLowerCase().split(",")) {
+                result.add(s.trim());
+            }
+            return result;
+        }
+        return null;
+    }
+
+    private Boolean configBoolean(String value) {
+        if (!TextUtils.isEmpty(value)) {
+            if (value.equalsIgnoreCase("y") || value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("1") || value.equalsIgnoreCase("true"))
+                return true;
+            return false;
+        }
+        return null;
+    }
+
+    public boolean syncOnConnection(NetworkInfo net) {
+        JSONObject extra = controller.settings(id()).settingsObject(R.string.pref_sync_extra, new JSONObject());
+        Boolean autoSync = configBoolean(extra.optString("auto"));
+        if (null != autoSync && autoSync) {
+            List<String> types = configList(extra.optString("type"));
+            if (null != types && !types.contains(net.getTypeName().toLowerCase())) {
+                debug("Auto-sync is on but type is invalid:", types, net.getTypeName(), id(), extra);
+                return false;
+            }
+            debug("Connected to configured network", net, autoSync, types);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean okSync() {
+        ConnectivityManager cm =
+            (ConnectivityManager) controller.context().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo net = cm.getActiveNetworkInfo();
+        if (null == net || !net.isConnected()) {
+            // No network
+            debug("Skip sync: no network or network is not connected:", net);
+            return false;
+        }
+        JSONObject extra = controller.settings(id()).settingsObject(R.string.pref_sync_extra, new JSONObject());
+        Boolean roaming = configBoolean(extra.optString("roaming"));
+        if (null != roaming && roaming != net.isRoaming()) {
+            debug("Skip sync: roaming:", roaming, net.isRoaming(), extra);
+            return false;
+        }
+        List<String> types = configList(extra.optString("type"));
+        if (null != types && !types.contains(net.getTypeName().toLowerCase())) {
+            debug("Skip sync: invalid network type:", net.getTypeName(), net.getSubtypeName(), types, extra);
+            return false;
+        }
+        Boolean metered = configBoolean("metered");
+        if (null != metered && metered != cm.isActiveNetworkMetered()) {
+            debug("Skip sync: metered:", metered, cm.isActiveNetworkMetered(), extra);
+            return false;
+        }
+        List<String> ssids = configList(extra.optString("ssid"));
+        if (null != ssids && net.getType() == ConnectivityManager.TYPE_WIFI) {
+            WifiManager wm =
+                (WifiManager) controller.context().getSystemService(Context.WIFI_SERVICE);
+            WifiInfo wifiInfo = wm.getConnectionInfo();
+            if (null == wifiInfo) {
+                debug("Skip sync: no wifi:", ssids, extra, net);
+                return false;
+            }
+            if (!ssids.contains(wifiInfo.getSSID().toLowerCase())) {
+                debug("Skip sync: not allowed SSID:", ssids, wifiInfo.getSSID());
+                return false;
+            }
+        }
+        return true;
+    }
+
     public String taskSync() {
+        if (!okSync()) {
+            scheduleSync(TimerType.Periodical);
+            return "Skipping sync";
+        }
         listeners.emit(new Listeners.ListenerEmitter<AccountControllerListener>() {
             @Override
             public boolean emit(AccountControllerListener listener) {
@@ -506,8 +595,6 @@ public class AccountController {
             pb.environment().put("TASKRC", new File(tasksFolder, TASKRC).getAbsolutePath());
             pb.environment().put("TASKDATA", new File(tasksFolder, DATA_FOLDER).getAbsolutePath());
             Process p = pb.start();
-//            logger.d("Calling now:", tasksFolder, args, question);
-//            debug("Execute:", args);
             Thread outThread = readStream(p.getInputStream(), question? p.getOutputStream(): null, out);
             Thread errThread = readStream(p.getErrorStream(), null, err);
             Thread killThread = null;
@@ -515,14 +602,15 @@ public class AccountController {
                 killThread = killAfter(30, p);
             }
             int exitCode = p.waitFor();
-//            logger.d("Exit code:", exitCode, args);
 //            debug("Execute result:", exitCode);
             if (null != outThread) outThread.join();
             if (null != errThread) errThread.join();
-            if (null != killThread) killThread.interrupt();
+            if (null != killThread && killThread.isAlive()) {
+                killThread.interrupt();
+            }
+//            debug("All threads done");
             return exitCode;
         } catch (Exception e) {
-            logger.e(e, "Failed to execute task");
             err.eat(e.getMessage());
             debug("Execute failure:");
             debug(e);
@@ -538,6 +626,7 @@ public class AccountController {
             public void run() {
                 try {
                     Thread.sleep(seconds * 1000);
+                    debug("Will destroy process by timeout");
                     p.destroy();
                 } catch (InterruptedException e) {
                 }
@@ -590,7 +679,6 @@ public class AccountController {
                     new FileInputStream(fileFromConfig(config.get("taskd.certificate"))),
                     new FileInputStream(fileFromConfig(config.get("taskd.key"))), trustType);
             debug("Credentials loaded");
-            logger.d("Connecting to:", this.host, this.port);
             this.socket = new LocalServerSocket(name);
         }
 
@@ -654,14 +742,11 @@ public class AccountController {
                     OutputStream localOutput = socket.getOutputStream();
                     InputStream remoteInput = remoteSocket.getInputStream();
                     OutputStream remoteOutput = remoteSocket.getOutputStream();
-                    debug("Connected to taskd server");
-                    logger.d("Connected, will read first piece", remoteSocket.getSession().getCipherSuite());
+                    debug("Connected to taskd server", remoteSocket.getSession().getCipherSuite());
                     long bread = recvSend(localInput, remoteOutput);
                     long bwrite = recvSend(remoteInput, localOutput);
-                    logger.d("Sync success");
                     debug("Transfer complete. Bytes sent:", bread, "Bytes received:", bwrite);
                 } catch (Exception e) {
-                    logger.e(e, "Failed to transfer data");
                     debug("Transfer failure");
                     debug(e);
                 } finally {
@@ -684,11 +769,9 @@ public class AccountController {
     private LocalServerSocket openLocalSocket(String name) {
         try {
             final Map<String, String> config = taskSettings("taskd.ca", "taskd.certificate", "taskd.key", "taskd.server", "taskd.trust");
-            logger.d("Will run with config:", config);
             debug("taskd.* config:", config);
             if (!config.containsKey("taskd.server")) {
                 // Not configured
-                logger.d("Sync not configured - give up");
                 controller.toastMessage("Sync disabled: no taskd.server value", true);
                 debug("taskd.server is empty: sync disabled");
                 return null;
@@ -697,7 +780,6 @@ public class AccountController {
             try {
                 runner = new LocalSocketRunner(name, config);
             } catch (Exception e) {
-                logger.e(e, "Error opening socket");
                 debug(e);
                 controller.toastMessage("Sync disabled: certificate load failure", true);
                 return null;
@@ -707,7 +789,6 @@ public class AccountController {
                 public void run() {
                     while (true) {
                         try {
-//                            debug("Incoming connection: task binary -> android");
                             runner.accept();
                         } catch (IOException e) {
                             debug("Socket accept failed");

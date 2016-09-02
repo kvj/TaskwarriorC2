@@ -1,43 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
           package="com.taskwc2"
           android:versionCode="1"
           android:versionName="1.0">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"
-                     tools:remove="${excludeSystemAlertWindowPermission}"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission
+            android:name="android.permission.SYSTEM_ALERT_WINDOW"
+            tools:remove="${excludeSystemAlertWindowPermission}"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
-
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="22" />
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
             android:name=".App"
             android:allowBackup="true"
-            android:label="@string/app_name"
             android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
             android:theme="@style/AppTheme">
         <activity
-            android:name=".AppActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
+                android:name=".AppActivity"
+                android:configChanges="keyboard|keyboardHidden|orientation|screenSize">
         </activity>
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name">
+                android:name=".MainActivity"
+                android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-      <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
+        <activity android:name="com.facebook.react.devsupport.DevSettingsActivity"/>
+
         <receiver
                 android:name=".controller.data.SyncIntentReceiver"
                 android:enabled="true"
@@ -46,9 +47,17 @@
                 <action android:name="taskw.SYNC"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".controller.data.BootReceiver" >
+        <receiver android:name=".controller.data.BootReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+                android:name=".controller.data.NetworkChangeReceiver"
+                android:enabled="true"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
     </application>

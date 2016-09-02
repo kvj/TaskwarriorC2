@@ -54,7 +54,6 @@ export class TaskController {
         this.fixParams = ['rc.confirmation=off', 'rc.color=off', 'rc.verbose=nothing'];
         this.events = new EventEmitter();
         this.timers = {};
-        this.netConfig = {};
     }
 
     async call(args, out, err, options) {
@@ -125,9 +124,9 @@ export class TaskController {
                 this.notifyChange();
             };
             if (state == 'online') { // Sync
-                const {online} = this.netConfig;
+                const {auto} = this.timers.extra;
                 // console.log('Online config:', online, mode);
-                if (online && (online == 'on' || online == mode)) {
+                if (auto) {
                     // Only when enabled
                     const success = await this.sync();
                     if (success) { // Show info
@@ -188,9 +187,7 @@ export class TaskController {
             normal: parseInt(timers['periodical'] || 120, 10) || 0,
             error: parseInt(timers['error'] || 0, 10) || 0,
             commit: parseInt(timers['commit'] || 0, 10) || 0,
-        };
-        this.netConfig = {
-            online: timers['online'] || 'off',
+            extra: await this.config('ui.sync.extra.', true) || {},
         };
         console.log('setupSync:', this.timers);
     }
