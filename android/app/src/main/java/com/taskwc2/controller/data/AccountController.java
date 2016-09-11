@@ -364,7 +364,7 @@ public class AccountController {
             debug("Skip sync: invalid network type:", net.getTypeName(), net.getSubtypeName(), types, extra);
             return false;
         }
-        Boolean metered = configBoolean("metered");
+        Boolean metered = configBoolean(extra.optString("metered"));
         if (null != metered && metered != cm.isActiveNetworkMetered()) {
             debug("Skip sync: metered:", metered, cm.isActiveNetworkMetered(), extra);
             return false;
