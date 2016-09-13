@@ -376,6 +376,21 @@ export class AppPane extends React.Component {
         );
         const {panes, pages, pins, page} = this.state;
         const {controller} = this.props;
+        let leftExtra = [];
+        let rightExtra = [];
+        if (['left', 'right'].includes(controller.calendarConfig.pane)) {
+            const cal = (
+                <cmp.CalendarCmp
+                    data={controller.calendar()}
+                />
+            );
+            if ('left' == controller.calendarConfig.pane) {
+                leftExtra.push(cal);
+            }
+            if ('right' == controller.calendarConfig.pane) {
+                rightExtra.push(cal);
+            }
+        }
         return (
             <cmp.AppCmp>
                 <ToolbarPane
@@ -407,6 +422,7 @@ export class AppPane extends React.Component {
                         ref="navigation"
                         mode={panes.left}
                         onHide={this.hidePane.bind(this)}
+                        extra={leftExtra}
                     />
                     <ReportsPane
                         ref="reports"
@@ -415,6 +431,7 @@ export class AppPane extends React.Component {
                         onContextClick={this.onContextClick.bind(this)}
                         mode={panes.right}
                         onHide={this.hidePane.bind(this)}
+                        extra={rightExtra}
                     />
                 </CenterPane>
                 <StatusbarPane

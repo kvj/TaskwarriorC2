@@ -773,3 +773,10 @@ export class StatusbarCmp extends React.Component {
         );
     }
 }
+
+export class CalendarCmp extends React.Component {
+
+    render() {
+        return (<div></div>);
+    }
+}

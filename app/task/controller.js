@@ -30,6 +30,8 @@ const specialReports = [
     "tags",
 ];
 
+const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
 class ToArrayEater extends StreamEater {
 
     constructor() {
@@ -156,11 +158,34 @@ export class TaskController {
         const css = await this.config('ui.style.', true);
         styleInit(css);
         stylesInit(css, this);
+        this.calendarConfig = await this.loadCalendar();
         return true;
     }
 
     providerInfo() {
         return this.provider.info || {};
+    }
+
+    async loadCalendar() {
+        const dayNo = (name, def=-1) => {
+            const index = dayNames.indexOf(name);
+            if (index == -1) return def;
+            return index;
+        };
+        const conf = await this.config('ui.calendar.', true);
+        let result = {
+            start: dayNo(conf['weekstart'], 0),
+            pane: conf['pane'] || 'left',
+            weekends: [0, 6],
+        };
+        if (conf['weekends']) {
+            result.weekends = [];
+            conf['weekends'].split(',').forEach((item) => {
+                const num = dayNo(item.trim());
+                if (num != -1) result.weekends.push(num);
+            });
+        }
+        return result;
     }
 
     async loadUDAs() {
@@ -190,6 +215,16 @@ export class TaskController {
             extra: await this.config('ui.sync.extra.', true) || {},
         };
         console.log('setupSync:', this.timers);
+    }
+
+    confBool(value) {
+        if (value === undefined || value === '') { // Empty
+            return undefined;
+        };
+        if (['on', 'y', 'yes', 'true', 't', '1'].includes(value)) { // True
+            return true;
+        };
+        return false;
     }
 
     scheduleSync(type='normal') {
@@ -697,5 +732,36 @@ export class TaskController {
             };
             this.err('Edit error');
         }
+    }
+
+    calendar (from) {
+        let dt;
+        if (!from) { // First day
+            dt = new Date();
+        } else {
+            dt = new Date(from.getTime());
+        }
+        dt.setDate(1);
+        const m = dt.getMonth();
+        const start = 1;
+        const weekends = [0, 6];
+        if (dt.getDay() - start) {
+            dt.setDate(start  - dt.getDay() -7);
+        } else {
+            dt.setDate(start - dt.getDay());
+        }
+        let result = []; // weeks
+        do {
+            let week = []; // days
+            for (let i = 0; i < 7; i++) {
+                week.push({
+                    day: dt.getDate(),
+                    active: dt.getMonth() === m,
+                    weekend: weekends.includes(dt.getDay()),
+                });
+            };
+            result.push(week);
+        } while (dt.getMonth() == m);
+        return result;
     }
 }
