@@ -271,6 +271,7 @@ export class AppPane extends React.Component {
     async onContextClick(context) {
         await this.props.controller.setContext(context);
         this.refs.reports.refreshContexts();
+        this.hidePane('right');
     }
 
     onReportClick(report, filter='') {

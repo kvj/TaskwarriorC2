@@ -113,6 +113,7 @@ android {
     buildTypes {
         debug {
             manifestPlaceholders = [excludeSystemAlertWindowPermission: "false"]
+            signingConfig signingConfigs.release
         }
         release {
             manifestPlaceholders = [excludeSystemAlertWindowPermission: "true"]

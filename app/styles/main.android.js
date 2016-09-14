@@ -200,6 +200,20 @@ export const init = (config) => {
         },
         profile_item: {
         },
+        calendar_week: {
+            justifyContent: 'space-between',
+            marginLeft: 3,
+        },
+        calendar_day: {
+            padding: 3,
+        },
+        calendar_passive: {
+            opacity: 0.3,
+        },
+        calendar_weekend: {
+            backgroundColor: _layers.l2.bg,
+            color: _layers.l2.fg,
+        },
     };
     let __styles = makeCommon({});
     for (var key in _styles) {

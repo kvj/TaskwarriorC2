@@ -132,6 +132,16 @@ class PaneCmp extends React.Component {
         this.name = name;
     }
 
+    renderExtra() {
+        return this.props.extra.map((item, idx) => {
+            return (
+                <View key={idx} style={_l(styles.flex0)}>
+                    {item}
+                </View>
+            );
+        });
+    }
+
     hide(e) {
         const {mode, onHide} = this.props;
         if (mode == 'float') {
@@ -162,6 +172,7 @@ const makeNavigation = (sup, renderOne) => {
         }
 
         renderList(list) {
+            const {compact} = this.props;
             const _renderOne = (item) => {
                 return renderOne(item, this.props);
             };
@@ -242,6 +253,7 @@ export class NavigationCmp extends PaneCmp {
         let st = [styles.left_pane, styles.navigation, styles.vflex];
         const pane = (
             <View style={_l(st)}>
+                {this.renderExtra()}
                 <ProjectsNavigation
                     title="Projects"
                     style={styles.flex1}
@@ -286,7 +298,7 @@ const ReportsNavigation = makeNavigation(common.ReportsList, (item, props) => {
         <TouchableNativeFeedback
             key={item.name}
             onPress={() => {
-                props.onClick(item, {});
+                props.onClick(item);
             }}
         >
             <View
@@ -308,7 +320,7 @@ const ContextsNavigation = makeNavigation(common.ContextsList, (item, props) => 
         <TouchableNativeFeedback
             key={item.name}
             onPress={() => {
-                props.onClick(item, {});
+                props.onClick(item.context, {});
             }}
         >
             <View
@@ -336,6 +348,7 @@ export class ReportsCmp extends PaneCmp {
         let st = [styles.right_pane, styles.reports, styles.vflex];
         const pane = (
             <View style={_l(st)}>
+                {this.renderExtra()}
                 <ReportsNavigation
                     title="Reports"
                     style={styles.flex1}
@@ -343,8 +356,8 @@ export class ReportsCmp extends PaneCmp {
                     onRefresh={onReportsRefresh}
                     onClick={onReportClick}
                 />
-                <common.ContextsList
-                    title="Reports"
+                <ContextsNavigation
+                    title="Contexts"
                     style={styles.flex1}
                     contexts={contexts}
                     onRefresh={onContextsRefresh}
@@ -865,6 +878,17 @@ export class StatusbarCmp extends React.Component {
     render() {
         return (
             <View />
+        );
+    }
+}
+
+export class CalendarCmp extends React.Component {
+
+    render() {
+        return (
+            <common.CalendarPane
+                {...this.props}
+            />
         );
     }
 }

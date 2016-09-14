@@ -289,3 +289,24 @@ export class CmdPageInput extends React.Component {
     }
 
 }
+
+export class CalendarItem extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {};
+    }
+
+    render() {
+        const {style, children, value, onClick} = this.props;
+        return (
+            <Text
+                style={style}
+                onClick={onClick}
+            >
+                {children}
+            </Text>
+        );
+    };
+}
+
