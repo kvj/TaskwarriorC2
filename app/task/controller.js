@@ -1,5 +1,5 @@
 import {TaskProvider} from './provider';
-import {formatters, parseDate, sortTasks, calcColorStyles} from './format';
+import {formatters, parseDate, sortTasks, calcColorStyles, isoDate} from './format';
 import {EventEmitter} from '../tool/events';
 import {init as styleInit} from '../styles/style';
 import {init as stylesInit} from '../styles/main';
@@ -766,7 +766,7 @@ export class TaskController {
             for (let i = 0; i < 7; i++) {
                 week.push({
                     day: dt.getDate(),
-                    msec: dt.getTime(),
+                    date: isoDate(dt),
                     active: dt.getMonth() === m,
                     weekend: weekends.includes(dt.getDay()),
                 });

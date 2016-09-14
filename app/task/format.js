@@ -36,14 +36,18 @@ const dateRelative = (dt, now=new Date()) => {
     return [mul*Math.ceil(days/36)/10, 'y'];
 };
 
-const formatDate = (obj, format, name, editable) => {
-    const dt = parseDate(obj[name]);
+export const isoDate = (dt) => {
     const pad = (number) => {
         if (number < 10) {
             return '0'+number;
         }
         return number;
     };
+    return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+};
+
+const formatDate = (obj, format, name, editable) => {
+    const dt = parseDate(obj[name]);
     if (!dt) { // Invalid
         if (editable) 
             obj[`${name}_edit`] = `${name}:`;
@@ -52,7 +56,7 @@ const formatDate = (obj, format, name, editable) => {
     obj[`${name}_date`] = dt;
     obj[`${name}_title`] = dt.toLocaleString();
     if (editable) {
-        const dt_iso = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+        const dt_iso = isoDate(dt);
         obj[`${name}_edit`] = `${name}:${dt_iso}`;
     }
     if (format == 'iso') { // as is

@@ -301,9 +301,10 @@ export const init = (config) => {
         },
         calendar_day: {
             width: '16%',
+            padding: 3,
         },
         calendar_passive: {
-            opacity: 0.4,
+            opacity: 0.3,
         },
         calendar_weekend: {
             backgroundColor: _layers.l2.bg,

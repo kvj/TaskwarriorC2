@@ -386,6 +386,24 @@ export class AppPane extends React.Component {
         this.setState({calendarDate: date});
     }
 
+    onCalendarClick(date, special) {
+        // Apply filter
+        const {calendarConfig} = this.props.controller;
+        const cmd = special? calendarConfig.filterAlt: calendarConfig.filter;
+        const filter = `${cmd}:${date}`;
+        const page = this.current();
+        if (page && page.ref) {
+            page.ref.filter(filter);
+        }
+        this.hidePane(calendarConfig.pane);
+    }
+
+    onCalendarDrag(date, special) {
+        const {calendarConfig} = this.props.controller;
+        const cmd = special? calendarConfig.commandAlt: calendarConfig.command;
+        return `${cmd}:${date}`;
+    }
+
     render() {
         if (!this.state) return (
             <cmp.AppCmp />
@@ -397,7 +415,9 @@ export class AppPane extends React.Component {
         if (['left', 'right'].includes(controller.calendarConfig.pane)) {
             const cal = (
                 <cmp.CalendarCmp
-                    onCalendarChange={this.onCalendarChange.bind(this)}
+                    onChange={this.onCalendarChange.bind(this)}
+                    onClick={this.onCalendarClick.bind(this)}
+                    onDrag={this.onCalendarDrag.bind(this)}
                     date={calendarDate}
                     data={controller.calendar(calendarDate)}
                 />

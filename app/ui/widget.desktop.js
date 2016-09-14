@@ -397,16 +397,17 @@ export class CalendarItem extends DnD {
     }
 
     render() {
-        const {style, children} = this.props;
+        const {style, children, value, onClick, onDrag} = this.props;
         return (
             <Text
                 style={style}
                 onDrag={(e) => {
-                    return ['tw/command', 'xxx', 'yyy'];
+                    return ['tw/date', onDrag(value, e.meta), value];
                 }}
                 onDragEnter={this.onDragStart}
                 onDragLeave={this.onDragFinish}
                 onDragOver={this.onDragOver}
+                onClick={onClick}
             >
                 {children}
             </Text>
