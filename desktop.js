@@ -28,9 +28,9 @@ app.on('ready', () => {
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
-    mainWindow.on('focus', () => {
-        sendState('active');
-    });
+    //mainWindow.on('focus', () => {
+    //    sendState('active');
+    //});
     mainWindow.on('blur', () => {
         sendState('background');
     });
