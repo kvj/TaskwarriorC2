@@ -295,6 +295,20 @@ export const init = (config) => {
             backgroundColor: _layers.bg.bg,
             opacity: 0.2,
         },
+        calendar_week: {
+            justifyContent: 'space-between',
+            marginLeft: 3,
+        },
+        calendar_day: {
+            width: '16%',
+        },
+        calendar_passive: {
+            opacity: 0.4,
+        },
+        calendar_weekend: {
+            backgroundColor: _layers.l2.bg,
+            color: _layers.l2.fg,
+        },
 
     };
     makeCommon(styles);

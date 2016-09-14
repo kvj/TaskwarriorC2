@@ -18,6 +18,7 @@ export class AppPane extends React.Component {
                 right: controller.panesConfig.right || controller.panesConfig._default,
             },
             pins: [],
+            calendarDate: controller.fromCalendar(),
         };
     }
 
@@ -370,18 +371,35 @@ export class AppPane extends React.Component {
         this.refs.main.showProfiles(controller.provider);
     }
 
+    onCalendarChange(dir, special) {
+        let date = this.state.calendarDate;
+        if (dir === 0) {
+            date = new Date();
+            date.setDate(1);
+        } else {
+            if (special) {
+                date.setFullYear(date.getFullYear() + dir);
+            } else {
+                date.setMonth(date.getMonth() + dir);
+            };
+        }
+        this.setState({calendarDate: date});
+    }
+
     render() {
         if (!this.state) return (
             <cmp.AppCmp />
         );
-        const {panes, pages, pins, page} = this.state;
+        const {panes, pages, pins, page, calendarDate} = this.state;
         const {controller} = this.props;
         let leftExtra = [];
         let rightExtra = [];
         if (['left', 'right'].includes(controller.calendarConfig.pane)) {
             const cal = (
                 <cmp.CalendarCmp
-                    data={controller.calendar()}
+                    onCalendarChange={this.onCalendarChange.bind(this)}
+                    date={calendarDate}
+                    data={controller.calendar(calendarDate)}
                 />
             );
             if ('left' == controller.calendarConfig.pane) {

@@ -126,7 +126,7 @@ export const Text = (props) => {
     let draggable = false;
     if (props.onDrag) { // Enable drag
         onDrag = (e) => {
-            const [type, value, text] = props.onDrag(e);
+            const [type, value, text] = props.onDrag(eventInfo(e));
             if (type && value) { // Start drag
                 e.dataTransfer.setData('text/plain', text || value);
                 e.dataTransfer.setData(type, value);
@@ -206,7 +206,7 @@ export class DnD extends React.Component {
         this.setState({
             dragTarget: false,
         });
-        this.onDropHandler(type, e.dataTransfer.getData(type), e);
+        this.onDropHandler(type, e.dataTransfer.getData(type), eventInfo(e));
         e.preventDefault();
     }
 
@@ -388,3 +388,29 @@ export class TaskPageInput extends React.Component {
     }
 
 }
+
+export class CalendarItem extends DnD {
+
+    constructor(props) {
+        super(props);
+        this.state = {};
+    }
+
+    render() {
+        const {style, children} = this.props;
+        return (
+            <Text
+                style={style}
+                onDrag={(e) => {
+                    return ['tw/command', 'xxx', 'yyy'];
+                }}
+                onDragEnter={this.onDragStart}
+                onDragLeave={this.onDragFinish}
+                onDragOver={this.onDragOver}
+            >
+                {children}
+            </Text>
+        );
+    };
+}
+

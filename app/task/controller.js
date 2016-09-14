@@ -166,6 +166,12 @@ export class TaskController {
         return this.provider.info || {};
     }
 
+    fromCalendar() {
+        let dt = new Date();
+        dt.setDate(1);
+        return dt;
+    }
+
     async loadCalendar() {
         const dayNo = (name, def=-1) => {
             const index = dayNames.indexOf(name);
@@ -175,7 +181,11 @@ export class TaskController {
         const conf = await this.config('ui.calendar.', true);
         let result = {
             start: dayNo(conf['weekstart'], 0),
-            pane: conf['pane'] || 'left',
+            pane: conf['pane'] || 'right',
+            command: conf['cmd'] || 'due',
+            commandAlt: conf['cmd.alt'] || 'wait',
+            filter: conf['filter'] || 'due.after',
+            filterAlt: conf['filter.alt'] || 'due.before',
             weekends: [0, 6],
         };
         if (conf['weekends']) {
@@ -743,12 +753,12 @@ export class TaskController {
         }
         dt.setDate(1);
         const m = dt.getMonth();
-        const start = 1;
-        const weekends = [0, 6];
-        if (dt.getDay() - start) {
-            dt.setDate(start  - dt.getDay() -7);
+        const start = this.calendarConfig.start;
+        const weekends = this.calendarConfig.weekends;
+        if (dt.getDay() < start) {
+            dt.setDate(1 + start  - dt.getDay() -7);
         } else {
-            dt.setDate(start - dt.getDay());
+            dt.setDate(1 + start - dt.getDay());
         }
         let result = []; // weeks
         do {
@@ -756,9 +766,11 @@ export class TaskController {
             for (let i = 0; i < 7; i++) {
                 week.push({
                     day: dt.getDate(),
+                    msec: dt.getTime(),
                     active: dt.getMonth() === m,
                     weekend: weekends.includes(dt.getDay()),
                 });
+                dt.setDate(dt.getDate()+1); // Next date
             };
             result.push(week);
         } while (dt.getMonth() == m);

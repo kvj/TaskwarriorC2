@@ -113,6 +113,16 @@ class PaneCmp extends React.Component {
             onHide(this.name);
         };
     }
+
+    renderExtra() {
+        return this.props.extra.map((item, idx) => {
+            return (
+                <div key={idx} style={_l(styles.flex0)}>
+                    {item}
+                </div>
+            );
+        });
+    }
 }
 
 class ProjectsNavigation extends common.ProjectsNavigation {
@@ -219,6 +229,7 @@ export class NavigationCmp extends PaneCmp {
         };
         const pane = (
             <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
+                {this.renderExtra()}
                 <ProjectsNavigation
                     title="Projects"
                     style={styles.flex1}
@@ -373,6 +384,7 @@ export class ReportsCmp extends PaneCmp {
         };
         const pane = (
             <div style={_l(st)} onMouseLeave={this.onMouseLeave}>
+                {this.renderExtra()}
                 <ReportsList
                     title="Reports"
                     style={styles.flex1}
@@ -777,6 +789,10 @@ export class StatusbarCmp extends React.Component {
 export class CalendarCmp extends React.Component {
 
     render() {
-        return (<div></div>);
+        return (
+            <common.CalendarPane
+                {...this.props}
+            />
+        );
     }
 }

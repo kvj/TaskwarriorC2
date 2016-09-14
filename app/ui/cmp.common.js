@@ -6,14 +6,14 @@ class Task extends widget.DnD {
 
     constructor(props) {
         super(props);
-        this.dropTypes.push('tw/tag', 'tw/project', 'tw/task');
+        this.dropTypes.push('tw/tag', 'tw/project', 'tw/task', 'tw/command');
         this.state = {
             dependsVisible: false,
         };
     }
 
-    onDropHandler(type, data) {
-        this.props.onDrop(type, data);
+    onDropHandler(type, data, e) {
+        this.props.onDrop(type, data, e);
     }
 
     toggleDepends() {
@@ -328,7 +328,7 @@ export class TaskPageCmp extends React.Component {
             const dep = uuids.map((u) => u != uuid? u: `-${u}`).join(',')
             onEdit(item, 'modify', `depends:${dep}`, true);
         };
-        const onDrop = (type, data) => {
+        const onDrop = (type, data, e) => {
             if (type == 'tw/tag') { // Drop tag - add tag
                 onEdit(item, 'modify', `+${data}`, true);
             };
@@ -612,3 +612,75 @@ export class ContextsList extends Navigation {
     }
 }
 
+export class CalendarPane extends React.Component {
+    
+    constructor(props) {
+        super(props);
+        this.state = {
+        };
+    }
+
+    render() {
+        const {date, data, onCalendarChange} = this.props;
+        const title = date.toLocaleDateString(undefined, {
+            year: '2-digit',
+            month: 'short'
+        });
+        console.log('Calendar:', data, date);
+        const header = (
+            <widget.Div style={_l(styles.vflex)}>
+                <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>
+                    <widget.Text
+                        style={[styles.flex1]}
+                        onClick={(e) => {
+                            onCalendarChange(0);
+                        }}
+                        title="Jump to current month"
+                    >
+                        {title}
+                    </widget.Text>
+                    <widget.IconBtn
+                        icon="chevron-left"
+                        title="Month before"
+                        onClick={(e) => {
+                            return onCalendarChange(-1, e.meta);
+                        }}
+                    />
+                    <widget.IconBtn
+                        icon="chevron-right"
+                        title="Next month"
+                        onClick={(e) => {
+                            return onCalendarChange(1, e.meta);
+                        }}
+                    />
+                </widget.Div>
+            </widget.Div>
+        );
+        const weeks = data.map((week, widx) => {
+            const days = week.map((day, didx) => {
+                let style = [styles.flex1, styles.calendar_day];
+                if (!day.active) style.push(styles.calendar_passive);
+                if (day.weekend) style.push(styles.calendar_weekend);
+                return (
+                    <widget.CalendarItem
+                        key={didx}
+                        style={style}
+                    >
+                        {day.day}
+                    </widget.CalendarItem>
+                );
+            });
+            return (
+                <widget.Div key={widx} style={_l(styles.hflex, styles.calendar_week)}>
+                    {days}
+                </widget.Div>
+            );
+        });
+        return (
+            <widget.Div>
+                {header}
+                {weeks}
+            </widget.Div>
+        );
+    }
+}
