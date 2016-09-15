@@ -196,7 +196,7 @@ export const init = (config) => {
             alignItems: 'stretch',
         },
         float_space: {
-            backgroundColor: '#88888822',
+            backgroundColor: '#88888810',
         },
         profile_item: {
         },

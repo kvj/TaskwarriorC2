@@ -132,6 +132,13 @@ class PaneCmp extends React.Component {
         this.name = name;
     }
 
+    paneConfig(field) {
+        return {
+            visible: this.props[field] !== 'hidden',
+            compact: this.props[field] === 'compact',
+        }
+    }
+
     renderExtra() {
         return this.props.extra.map((item, idx) => {
             return (
@@ -266,6 +273,7 @@ export class NavigationCmp extends PaneCmp {
                 {this.renderExtra()}
                 <ProjectsNavigation
                     title="Projects"
+                    {...this.paneConfig('projectsMode')}
                     onRefresh={this.props.onRefreshProjects}
                     onClick={this.props.onProjectClick}
                     projects={this.props.projects || []}
@@ -275,7 +283,7 @@ export class NavigationCmp extends PaneCmp {
                 />
                 <TagsNavigation
                     title="Tags"
-                    compact
+                    {...this.paneConfig('tagsMode')}
                     onRefresh={this.props.onRefreshTags}
                     onClick={this.props.onTagClick}
                     tags={this.props.tags || []}
@@ -360,13 +368,14 @@ export class ReportsCmp extends PaneCmp {
                 {this.renderExtra()}
                 <ReportsNavigation
                     title="Reports"
+                    {...this.paneConfig('reportsMode')}
                     reports={reports}
                     onRefresh={onReportsRefresh}
                     onClick={onReportClick}
                 />
                 <ContextsNavigation
                     title="Contexts"
-                    compact
+                    {...this.paneConfig('contextsMode')}
                     contexts={contexts}
                     onRefresh={onContextsRefresh}
                     onClick={onContextClick}

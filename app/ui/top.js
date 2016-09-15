@@ -460,6 +460,8 @@ export class AppPane extends React.Component {
                         onProjectEdit={this.onProjectEdit.bind(this)}
                         ref="navigation"
                         mode={panes.left}
+                        tagsMode={this.paneMode('tags')}
+                        projectsMode={this.paneMode('reports')}
                         onHide={this.hidePane.bind(this)}
                         extra={leftExtra}
                     />
@@ -469,6 +471,8 @@ export class AppPane extends React.Component {
                         onReportClick={this.onReportClick.bind(this)}
                         onContextClick={this.onContextClick.bind(this)}
                         mode={panes.right}
+                        contextsMode={this.paneMode('contexts')}
+                        reportsMode={this.paneMode('reports')}
                         onHide={this.hidePane.bind(this)}
                         extra={rightExtra}
                     />
@@ -478,6 +482,10 @@ export class AppPane extends React.Component {
                 />
             </cmp.AppCmp>
         );
+    }
+
+    paneMode(name) {
+        return this.props.controller.panesConfig[name];
     }
 }
 

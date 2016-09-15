@@ -146,7 +146,7 @@ export class TaskController {
         this.scheduleSync();
         let conf = await this.config('default.command');
         this.defaultCmd = conf['default.command'] || 'next';
-        this.panesConfig = await this.provider.configurePanes(await this.config('ui.pane.', true));
+        this.panesConfig = await this.loadPanesConfig();
         await this.loadUDAs();
         this.multiline = {};
         conf = await this.config('ui.multiline');
@@ -170,6 +170,19 @@ export class TaskController {
         let dt = new Date();
         dt.setDate(1);
         return dt;
+    }
+
+    async loadPanesConfig() {
+        const config = await this.config('ui.pane.', true);
+        let conf = {
+            left: config.left,
+            right: config.right,
+            tags: config.tags || 'scroll',
+            projects: config.projects || 'scroll',
+            reports: config.reports || 'scroll',
+            contexts: config.contexts || 'compact',
+        };
+        return this.provider.configurePanes(conf);
     }
 
     async loadCalendar() {

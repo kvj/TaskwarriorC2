@@ -508,6 +508,9 @@ class Navigation extends React.Component {
     }
 
     render() {
+        if (!this.props.visible) { // Hidden
+            return null;
+        };
         const list = this.state.list;
         if (!list.length) {
             // No items

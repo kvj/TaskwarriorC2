@@ -107,6 +107,13 @@ class PaneCmp extends React.Component {
         this.name = name;
     }
 
+    paneConfig(field) {
+        return {
+            visible: this.props[field] !== 'hidden',
+            compact: this.props[field] === 'compact',
+        }
+    }
+
     onMouseLeave(e) {
         const {mode, onHide} = this.props;
         if (mode == 'float') {
@@ -232,7 +239,7 @@ export class NavigationCmp extends PaneCmp {
                 {this.renderExtra()}
                 <ProjectsNavigation
                     title="Projects"
-                    style={styles.flex1}
+                    {...this.paneConfig('projectsMode')}
                     onRefresh={this.props.onRefreshProjects}
                     onClick={this.props.onProjectClick}
                     onEdit={this.props.onProjectEdit}
@@ -243,7 +250,7 @@ export class NavigationCmp extends PaneCmp {
                 />
                 <TagsNavigation
                     title="Tags"
-                    style={styles.flex1}
+                    {...this.paneConfig('tagsMode')}
                     onRefresh={this.props.onRefreshTags}
                     onClick={this.props.onTagClick}
                     onEdit={this.props.onTagEdit}
@@ -388,13 +395,14 @@ export class ReportsCmp extends PaneCmp {
                 {this.renderExtra()}
                 <ReportsList
                     title="Reports"
+                    {...this.paneConfig('reportsMode')}
                     style={styles.flex1}
                     reports={reports}
                     onRefresh={onReportsRefresh}
                     onClick={onClick}
                 />
                 <ContextsList
-                    compact
+                    {...this.paneConfig('contextsMode')}
                     title="Contexts"
                     style={styles.flex0}
                     contexts={contexts}
