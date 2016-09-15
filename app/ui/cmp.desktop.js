@@ -128,7 +128,7 @@ class PaneCmp extends React.Component {
 class ProjectsNavigation extends common.ProjectsNavigation {
 
     renderList(list) {
-        const {onClick, onEdit} = this.props;
+        const {onClick, onEdit, compact} = this.props;
         const projects = list.map((item, idx) => {
             let prefix = '';
             for (var i = 0; i < item.indent; i++) {
@@ -165,7 +165,7 @@ class ProjectsNavigation extends common.ProjectsNavigation {
             );
         });
         return (
-            <div style={_l(styles.flex1s)}>
+            <div style={_l(compact? styles.flex0: styles.flex1s)}>
                 {projects}
             </div>
         );
@@ -175,7 +175,7 @@ class ProjectsNavigation extends common.ProjectsNavigation {
 class TagsNavigation extends common.TagsNavigation {
 
     renderList(list) {
-        const {onClick, onEdit} = this.props;
+        const {onClick, onEdit, compact} = this.props;
         const tags = list.map((item, idx) => {
             let st = [styles.one_nav, styles.hflex, styles.hbar];
             if (item.hilite) st.push(styles.hilite);
@@ -208,7 +208,7 @@ class TagsNavigation extends common.TagsNavigation {
             );
         });
         return (
-            <div style={_l(styles.flex1s)}>
+            <div style={_l(compact? styles.flex0: styles.flex1s)}>
                 {tags}
             </div>
         );
@@ -269,7 +269,7 @@ export class NavigationCmp extends PaneCmp {
 class ContextsList extends common.ContextsList {
     
     renderList(list) {
-        const {onRefresh, onClick} = this.props;
+        const {onRefresh, onClick, compact} = this.props;
         const items = list.map((item, idx) => {
             const click = () => {
                 onClick(item.context);
@@ -286,7 +286,7 @@ class ContextsList extends common.ContextsList {
             )
         });
         return (
-            <widget.Div style={_l(styles.vflex)}>
+            <widget.Div style={_l(styles.vflex, compact? styles.flex0: styles.flex1s)}>
                 {items}
             </widget.Div>
         );
@@ -327,6 +327,7 @@ class ReportsListItem extends widget.DnD {
 class ReportsList extends common.ReportsList {
 
     renderList(list) {
+        const {compact} = this.props;
         const reports = list.map((item, idx) => {
             const onClick = () => {
                 this.props.onClick(item);
@@ -344,7 +345,7 @@ class ReportsList extends common.ReportsList {
             )
         });
         return (
-            <widget.Div style={_l(styles.flex1s)}>
+            <widget.Div style={_l(compact? styles.flex0: styles.flex1s)}>
                 {reports}
             </widget.Div>
         );
@@ -393,6 +394,7 @@ export class ReportsCmp extends PaneCmp {
                     onClick={onClick}
                 />
                 <ContextsList
+                    compact
                     title="Contexts"
                     style={styles.flex0}
                     contexts={contexts}
@@ -789,9 +791,15 @@ export class StatusbarCmp extends React.Component {
 export class CalendarCmp extends React.Component {
 
     render() {
+        const {date} = this.props;
+        const title = date.toLocaleDateString(undefined, {
+            year: '2-digit',
+            month: 'short'
+        });
         return (
             <common.CalendarPane
                 {...this.props}
+                title={title}
             />
         );
     }

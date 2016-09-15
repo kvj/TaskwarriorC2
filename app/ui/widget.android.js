@@ -300,12 +300,20 @@ export class CalendarItem extends React.Component {
     render() {
         const {style, children, value, onClick} = this.props;
         return (
-            <Text
-                style={style}
-                onClick={onClick}
+            <TouchableOpacity
+                onPress={(evt) => {
+                    onClick({});
+                }}
+                onLongPress={(evt) => {
+                    onClick({meta: true});
+                }}
             >
-                {children}
-            </Text>
+                <Text
+                    style={style}
+                >
+                    {children}
+                </Text>
+            </TouchableOpacity>
         );
     };
 }

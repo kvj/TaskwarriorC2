@@ -513,7 +513,7 @@ class Navigation extends React.Component {
             // No items
             return null;
         }
-        const {title, onRefresh, onExpand, style, expanded} = this.props;
+        const {title, onRefresh, onExpand, compact, expanded} = this.props;
         let expandBtn;
         if (expanded === false || expanded === true) { // Toggle
             expandBtn = (
@@ -525,7 +525,7 @@ class Navigation extends React.Component {
             );
         };
         return (
-            <widget.Div style={_l(styles.vflex, style)}>
+            <widget.Div style={_l(styles.vflex, compact? styles.flex0: styles.flex1)}>
                 <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>
                     <widget.Text style={[styles.flex1]}>{title}</widget.Text>
                     {expandBtn}
@@ -624,11 +624,7 @@ export class CalendarPane extends React.Component {
     }
 
     render() {
-        const {date, data, onChange, onClick, onDrag} = this.props;
-        const title = date.toLocaleDateString(undefined, {
-            year: '2-digit',
-            month: 'short'
-        });
+        const {title, data, onChange, onClick, onDrag} = this.props;
         const header = (
             <widget.Div style={_l(styles.vflex)}>
                 <widget.Div style={_l(styles.flex0, styles.hflex, styles.hbar, styles.paneTitle)}>

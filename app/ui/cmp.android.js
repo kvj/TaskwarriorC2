@@ -173,6 +173,16 @@ const makeNavigation = (sup, renderOne) => {
 
         renderList(list) {
             const {compact} = this.props;
+            if (compact) { // Simple list
+                const list = this.state.list.map((item) => {
+                    return renderOne(item, this.props);
+                });
+                return (
+                    <View>
+                        {list}
+                    </View>
+                );
+            };
             const _renderOne = (item) => {
                 return renderOne(item, this.props);
             };
@@ -256,7 +266,6 @@ export class NavigationCmp extends PaneCmp {
                 {this.renderExtra()}
                 <ProjectsNavigation
                     title="Projects"
-                    style={styles.flex1}
                     onRefresh={this.props.onRefreshProjects}
                     onClick={this.props.onProjectClick}
                     projects={this.props.projects || []}
@@ -266,7 +275,7 @@ export class NavigationCmp extends PaneCmp {
                 />
                 <TagsNavigation
                     title="Tags"
-                    style={styles.flex1}
+                    compact
                     onRefresh={this.props.onRefreshTags}
                     onClick={this.props.onTagClick}
                     tags={this.props.tags || []}
@@ -351,14 +360,13 @@ export class ReportsCmp extends PaneCmp {
                 {this.renderExtra()}
                 <ReportsNavigation
                     title="Reports"
-                    style={styles.flex1}
                     reports={reports}
                     onRefresh={onReportsRefresh}
                     onClick={onReportClick}
                 />
                 <ContextsNavigation
                     title="Contexts"
-                    style={styles.flex1}
+                    compact
                     contexts={contexts}
                     onRefresh={onContextsRefresh}
                     onClick={onContextClick}
@@ -885,9 +893,12 @@ export class StatusbarCmp extends React.Component {
 export class CalendarCmp extends React.Component {
 
     render() {
+        const {date} = this.props;
+        const title = `${date.getFullYear()}/${date.getMonth()+1}`;
         return (
             <common.CalendarPane
                 {...this.props}
+                title={title}
             />
         );
     }
