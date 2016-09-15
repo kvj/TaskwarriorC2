@@ -34,7 +34,7 @@ do
 	echo $dir
 	zip -r ${dir}-$version.zip $dir
 	echo "Uploading to Bitbucket..."
-	curl -s -u kvorobyev -X POST https://api.bitbucket.org/2.0/repositories/kvorobyev/taskwarriorc2/downloads -F files=@${dir}-$version.zip
+	curl -s -u $BB_USER_PASS -X POST https://api.bitbucket.org/2.0/repositories/kvorobyev/taskwarriorc2/downloads -F files=@${dir}-$version.zip
 done
 cd ..
 
