@@ -4,6 +4,7 @@ TaskwarriorC2 is cross platform GUI client for Taskwarrior. Currently works on L
 
 Android version is under development now. 
 
+![tw.png](https://bitbucket.org/repo/zkKpqM/images/2910762113-tw.png)
 
 Want to try current version?
 
