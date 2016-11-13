@@ -471,6 +471,7 @@ export class PopupEditor extends React.Component {
                         multiline={multiline? true: false}
                         numberOfLines={rows}
                         value={this.state.input}
+                        underlineColorAndroid="transparent"
                         onSubmitEditing={() => {
                             if (!multiline) this.finish(true);
                         }}
@@ -634,7 +635,7 @@ class ProfilesDialog extends ModalDialog {
             );
         };
         return super.render(
-            <View>
+            <View style={_l(styles.vflex, styles.flex1)}>
                 <ToolbarAndroid
                     style={_l(styles.flex0, styles.toolbar)}
                     title="Profiles"

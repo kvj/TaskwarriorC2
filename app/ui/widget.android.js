@@ -179,6 +179,7 @@ export class TaskPageInput extends React.Component {
         const line1 = (
             <View style={_l(styles.flex0, styles.hflex, styles.wflex, styles.hbar)}>
                 <TextInput
+                    underlineColorAndroid="transparent"
                     style={_l(styles.inp, styles.flex1)}
                     value={this.state.report}
                     onChangeText={this.onReportChange.bind(this)}
@@ -206,6 +207,7 @@ export class TaskPageInput extends React.Component {
                     onChangeText={this.onFilterChange.bind(this)}
                     onSubmitEditing={onRefresh}
                     placeholder="Filter"
+                    underlineColorAndroid="transparent"
                 />
                 <IconBtn icon={sortIcon} onClick={onToggleSort} />
             </View>
@@ -268,6 +270,7 @@ export class CmdPageInput extends React.Component {
                     onChangeText={this.onChange.bind(this)}
                     onSubmitEditing={onRefresh}
                     placeholder="Taskwarriror command"
+                    underlineColorAndroid="transparent"
                 />
                 <IconBtn icon="refresh" onClick={onRefresh} />
                 <IconBtn icon="close" onClick={onClose} />

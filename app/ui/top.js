@@ -155,7 +155,7 @@ export class AppPane extends React.Component {
 
     onRefreshed(key, info) {
         const page = this.checkActive(key);
-        if (page && !page.pin) { // Refresh navigation
+        if (page && !page.pin && this.refs.navigation) { // Refresh navigation
             this.refs.navigation.hilite(info);
         };
     }
@@ -792,11 +792,17 @@ class NavigationPane extends React.Component {
             tagsExpanded: false,
             projectsExpanded: false,
         }
+        this.mounted = false;
     }
 
     componentDidMount() {
         this.props.controller.events.on('change', this.refresh.bind(this));
         this.refresh();
+        this.mounted = true;
+    }
+
+    componentWillUnmount() {
+        this.mounted = false;
     }
 
     refresh() {
@@ -805,6 +811,7 @@ class NavigationPane extends React.Component {
     }
 
     toggleExpand(prop) {
+        if (!this.mounted) return false;
         let state = {};
         state[prop] = !this.state[prop];
         this.setState(state);
@@ -813,21 +820,23 @@ class NavigationPane extends React.Component {
     async refreshTags() {
         return smooth(async () => {
             const tags = await this.props.controller.tags(this.state.tagsExpanded);
-            if (tags) this.setState({tags});
+            if (tags && this.mounted) this.setState({tags});
         });
     }
 
     async refreshProjects() {
         return smooth(async () => {
             const projects = await this.props.controller.projects(this.state.projectsExpanded);
-            if (projects) this.setState({projects});
+            if (projects && this.mounted) this.setState({projects});
         });
     }
 
     hilite(info) {
+        if (!this.mounted) return false;
         this.setState({
             info: info,
         });
+        return true;
     }
 
     render() {
