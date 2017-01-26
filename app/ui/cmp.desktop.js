@@ -26,6 +26,10 @@ class TaskTag extends DnD {
 }
 */
 
+export const calculateLayout = () => {
+    return {};
+};
+
 export class AppCmp extends React.Component {
 
     render() {

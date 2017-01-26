@@ -13,6 +13,7 @@ export class AppPane extends React.Component {
         this.state = {
             pages: [],
             defaultCmd: controller.defaultCmd,
+            layout: cmp.calculateLayout(),
             panes: {
                 left: controller.panesConfig.left || controller.panesConfig._default,
                 right: controller.panesConfig.right || controller.panesConfig._default,
@@ -161,7 +162,7 @@ export class AppPane extends React.Component {
     }
 
     showPage(page) {
-        let {pages} = this.state;
+        let {pages, layout} = this.state;
         let item = pages.find((item) => {
             return item.type == page.type && item.ref.same(page);
         });
@@ -187,6 +188,7 @@ export class AppPane extends React.Component {
                         {...props}
                         report={page.report}
                         filter={page.filter}
+                        layout={layout}
                         onAdd={this.onAdd.bind(this)}
                         onEdit={this.onEdit.bind(this)}
                         onSync={this.onSync.bind(this)}
@@ -405,11 +407,23 @@ export class AppPane extends React.Component {
         return `${cmd}:${date}`;
     }
 
+    onLayoutChange(l) {
+        const {layout} = this.state;
+        const fields = ['orientation', 'width', 'height', 'wide', 'tall'];
+        for (var f of fields) {
+            if (l[f] !== layout[f]) { // Changed
+                this.setState({layout: l});
+                return true;
+            };
+        };
+        return false;
+    }
+
     render() {
         if (!this.state) return (
             <cmp.AppCmp />
         );
-        const {panes, pages, pins, page, calendarDate} = this.state;
+        const {panes, pages, pins, page, calendarDate, layout} = this.state;
         const {controller} = this.props;
         let leftExtra = [];
         let rightExtra = [];
@@ -421,6 +435,7 @@ export class AppPane extends React.Component {
                     onDrag={this.onCalendarDrag.bind(this)}
                     date={calendarDate}
                     data={controller.calendar(calendarDate)}
+                    layout={layout}
                 />
             );
             if ('left' == controller.calendarConfig.pane) {
@@ -431,7 +446,9 @@ export class AppPane extends React.Component {
             }
         }
         return (
-            <cmp.AppCmp>
+            <cmp.AppCmp
+                onLayoutChange={this.onLayoutChange.bind(this)}
+            >
                 <ToolbarPane
                     onCommand={this.onCommand.bind(this)}
                     onTogglePane={this.togglePane.bind(this)}
@@ -448,6 +465,7 @@ export class AppPane extends React.Component {
                         pages={pages}
                         pins={pins}
                         page={page}
+                        layout={layout}
                         ref="main"
                         onNavigation={this.onNavigation.bind(this)}
                         onInput={this.processInput.bind(this)}
@@ -464,6 +482,7 @@ export class AppPane extends React.Component {
                         projectsMode={this.paneMode('reports')}
                         onHide={this.hidePane.bind(this)}
                         extra={leftExtra}
+                        layout={layout}
                     />
                     <ReportsPane
                         ref="reports"
@@ -475,6 +494,7 @@ export class AppPane extends React.Component {
                         reportsMode={this.paneMode('reports')}
                         onHide={this.hidePane.bind(this)}
                         extra={rightExtra}
+                        layout={layout}
                     />
                 </CenterPane>
                 <StatusbarPane
@@ -711,11 +731,16 @@ class TasksPagePane extends PagePane {
         };
     };
 
+    setLayout(layout) {
+        this.setState({layout});
+    }
+
     render() {
         return (
             <cmp.TaskPageCmp
                 {...this.props}
                 filter={this.state.filter}
+                layout={this.state.layout}
                 ref="cmp"
                 info={this.state.info}
                 selection={this.state.selection}

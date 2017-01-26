@@ -21,15 +21,48 @@ import {
 import * as widget from './widget';
 import * as common from './cmp.common';
 
+export const calculateLayout = (size=Dimensions.get('window')) => {
+    const orientation = size.width > size.height ? 'landscape': 'portrait';
+    let wide = 'normal';
+    if (size.width >= 480) { // Size is big
+        wide = 'wide';
+    };
+    if (size.width < 320) {
+        wide = 'narrow';
+    };
+    let tall = 'normal';
+    if (size.height < 426) { // too short
+        tall = 'short';
+    };
+    if (size.height >= 640) { // tall
+        tall = 'tall';
+    };
+    return {
+        orientation, wide, tall,
+        width: size.width,
+        height: size.height,
+    };
+};
+
 export class AppCmp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
     }
 
+    calcLayoutChange(winSize) {
+        const {onLayoutChange} = this.props;
+        if (onLayoutChange) onLayoutChange(calculateLayout(winSize));
+    }
+
     render() {
         return (
-            <View style={_l([styles.vproxy, styles.max, styles.app])}>
+            <View
+                style={_l([styles.vproxy, styles.max, styles.app])}
+                onLayout={(e) => {
+                    this.calcLayoutChange(e.nativeEvent.layout);
+                }}
+            >
                 {this.props.children}
             </View>
         );
@@ -530,7 +563,6 @@ class ProfilesDialog extends ModalDialog {
         const {dataSource} = this.state;
         smooth(async () => {
             const profiles = await provider.profiles();
-            // console.log('Profiles:', profiles);
             this.setState({
                 dataSource: dataSource.cloneWithRows(profiles),
             });
@@ -696,8 +728,17 @@ export class MainCmp extends React.Component {
         };
     }
 
+    componentWillReceiveProps(props) {
+        const {pages, layout} = props;
+        const pageCmps = pages.forEach((pageCmp, idx) => {
+            if (pageCmp.ref) {
+                pageCmp.ref.setLayout(layout);
+            }
+        });
+    }
+
     render() {
-        const {pages, pins, page, onNavigation, panes} = this.props;
+        const {pages, pins, page, onNavigation, panes, layout} = this.props;
         const {input, dialog} = this.state;
         const {pager} = this.refs;
         const pageCmps = pages.map((pageCmp, idx) => {
@@ -805,9 +846,16 @@ export class TaskPageCmp extends common.TaskPageCmp {
                 onRefresh={this.onPull.bind(this)}
             />
         );
+        const {layout} = this.props;
+        let headerDom;
+        if (layout.tall != 'short') { // Show header
+            headerDom = (
+                <View style={_l(styles.flex0, styles.hflex, styles.wflex)}>{header}</View>
+            );
+        };
         return (
             <View style={_l(styles.vproxy)}>
-                <View style={_l(styles.flex0, styles.hflex, styles.wflex)}>{header}</View>
+                {headerDom}
                 <ListView
                     enableEmptySections={true}
                     style={_l(styles.flex1)}
@@ -903,7 +951,10 @@ export class StatusbarCmp extends React.Component {
 export class CalendarCmp extends React.Component {
 
     render() {
-        const {date} = this.props;
+        const {date, layout} = this.props;
+        if (layout.tall == 'short') { // Do not show in short mode
+            return null;
+        };
         const title = `${date.getFullYear()}/${date.getMonth()+1}`;
         return (
             <common.CalendarPane
