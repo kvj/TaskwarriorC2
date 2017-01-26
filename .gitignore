@@ -42,4 +42,5 @@ android/keystores/debug.keystore
 
 .desktop
 out/
+ios
 

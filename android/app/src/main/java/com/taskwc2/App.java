@@ -4,7 +4,9 @@ package com.taskwc2;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
+import com.facebook.react.flat.FlatUIImplementationProvider;
 import com.facebook.react.shell.MainReactPackage;
+import com.facebook.react.uimanager.UIImplementationProvider;
 import com.taskwc2.controller.data.Controller;
 import com.taskwc2.react.TwModule;
 
@@ -39,8 +41,13 @@ public class App extends org.kvj.bravo7.ng.App<Controller> implements ReactAppli
 
     private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
         @Override
-        protected boolean getUseDeveloperSupport() {
+        public boolean getUseDeveloperSupport() {
             return BuildConfig.DEBUG;
+        }
+
+        @Override
+        protected UIImplementationProvider getUIImplementationProvider() {
+            return new FlatUIImplementationProvider();
         }
 
         @Override
