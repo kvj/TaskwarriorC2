@@ -182,6 +182,7 @@ export const init = (config) => {
             verticalAlign: "middle",
             fontFamily: _fontFamily,
             whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
         },
 
         text_edit: {
