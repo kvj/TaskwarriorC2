@@ -39,6 +39,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -131,7 +132,7 @@ public class AccountController {
     Logger logger = Logger.forInstance(this);
 
     private final LocalServerSocket syncSocket;
-    private final File tasksFolder;
+    private File tasksFolder = null;
 
     public interface StreamConsumer {
         public void eat(String line);
@@ -163,12 +164,14 @@ public class AccountController {
     private StreamConsumer errConsumer = new ToLogConsumer(Logger.LoggerLevel.Warning, "ERR:");
     private StreamConsumer outConsumer = new ToLogConsumer(Logger.LoggerLevel.Info, "STD:");
 
+    private boolean dataLocationSet = true;
+
     public AccountController(Controller controller, String folder) {
         this.controller = controller;
         this.id = folder;
         this.accountName = folder;
-        tasksFolder = initTasksFolder();
         socketName = UUID.randomUUID().toString().toLowerCase();
+        initTasksFolder();
         initLogger();
         syncSocket = openLocalSocket(socketName);
         scheduleSync(TimerType.Periodical); // Schedule on start
@@ -185,8 +188,8 @@ public class AccountController {
 
     private void initLogger() {
         fileLogger = null;
-        Map<String, String> conf = taskSettings(androidConf("debug"));
-        if ("y".equalsIgnoreCase(conf.get("android.debug"))) { // Enabled
+        String conf = taskSetting(androidConf("debug"));
+        if ("y".equalsIgnoreCase(conf)) { // Enabled
             fileLogger = new FileLogger(tasksFolder);
             debug("Profile:", accountName, id, fileLogger.logFile(tasksFolder));
         }
@@ -204,11 +207,11 @@ public class AccountController {
 
             @Override
             protected String doInBackground() {
-                Map<String, String> config = taskSettings(androidConf("sync.notification"));
-                if (config.isEmpty()) {
-                    return "all";
+                String config = taskSetting(androidConf("sync.notification"));
+                if (TextUtils.isEmpty(config)) {
+                    config = "all";
                 }
-                return config.values().iterator().next();
+                return config;
             }
 
             @Override
@@ -441,13 +444,24 @@ public class AccountController {
     }
 
     Pattern linePatthern = Pattern.compile("^([A-Za-z0-9\\._]+)\\s+(\\S.*)$");
+    Pattern defValuePatthern = Pattern.compile("^\\s*Default value\\s+(\\S.*)\\s*$");
 
     private String taskSetting(String name) {
-        return taskSettings(name).get(name);
+        return taskSettings(false, name).get(name);
     }
 
-    private Map<String, String> taskSettings(final String... names) {
+    private String taskSettingDefault(String name) {
+        return taskSettings(true, name).get(name);
+    }
+
+    private static class Value {
+        String value = null;
+    }
+
+    private Map<String, String> taskSettings(boolean wantDef, final String... names) {
         final Map<String, String> result = new LinkedHashMap<>();
+        final Map<String, String> defValues = new HashMap<>();
+        final Value lastKey = new Value();
         callTask(new StreamConsumer() {
             @Override
             public void eat(String line) {
@@ -455,6 +469,7 @@ public class AccountController {
                 if (m.find()) {
                     String keyName = m.group(1).trim();
                     String keyValue = m.group(2).trim();
+                    lastKey.value = keyName;
                     for (String name : names) {
                         if (name.equalsIgnoreCase(keyName)) {
                             result.put(name, keyValue);
@@ -462,12 +477,18 @@ public class AccountController {
                         }
                     }
                 }
+                m = defValuePatthern.matcher(line);
+                if (m.find() && lastKey.value != null) {
+                    defValues.put(lastKey.value, m.group(1).trim());
+                }
             }
 
             @Override
             public void flush() {
             }
         }, errConsumer, "rc.defaultwidth=1000", "show");
+        if (wantDef)
+            return defValues;
         return result;
     }
 
@@ -560,12 +581,15 @@ public class AccountController {
         return thread;
     }
 
-    private File initTasksFolder() {
+    private void initTasksFolder() {
         File folder = new File(controller.context().getExternalFilesDir(null), id);
         if (!folder.exists() || !folder.isDirectory()) {
-            return null;
+            return;
         }
-        return folder;
+        tasksFolder = folder;
+        String location = taskSettingDefault("data.location");
+        if (TextUtils.isEmpty(location))
+            dataLocationSet = false;
     }
 
     public int callTask(StreamConsumer out, StreamConsumer err, boolean question, boolean api, String... arguments) {
@@ -593,7 +617,8 @@ public class AccountController {
             ProcessBuilder pb = new ProcessBuilder(args);
             pb.directory(tasksFolder);
             pb.environment().put("TASKRC", new File(tasksFolder, TASKRC).getAbsolutePath());
-            pb.environment().put("TASKDATA", new File(tasksFolder, DATA_FOLDER).getAbsolutePath());
+            if (!dataLocationSet)
+                pb.environment().put("TASKDATA", new File(tasksFolder, DATA_FOLDER).getAbsolutePath());
             Process p = pb.start();
             Thread outThread = readStream(p.getInputStream(), question? p.getOutputStream(): null, out);
             Thread errThread = readStream(p.getErrorStream(), null, err);
@@ -768,7 +793,7 @@ public class AccountController {
 
     private LocalServerSocket openLocalSocket(String name) {
         try {
-            final Map<String, String> config = taskSettings("taskd.ca", "taskd.certificate", "taskd.key", "taskd.server", "taskd.trust");
+            final Map<String, String> config = taskSettings(false, "taskd.ca", "taskd.certificate", "taskd.key", "taskd.server", "taskd.trust");
             debug("taskd.* config:", config);
             if (!config.containsKey("taskd.server")) {
                 // Not configured
