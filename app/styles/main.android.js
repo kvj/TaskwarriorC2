@@ -122,7 +122,7 @@ export const init = (config) => {
             color: _layers.l2.fg,
             height: 32,
             lineHeight: 32,
-            padding: 3,
+            padding: 5,
             margin: 3,
             alignSelf: 'stretch',
         },

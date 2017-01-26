@@ -29,6 +29,7 @@
                 android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout">
         </activity>
         <activity
+                android:theme="@style/StartWindow"
                 android:name=".MainActivity"
                 android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout"
                 android:label="@string/app_name">

@@ -22,7 +22,6 @@ class taskwc2 extends Component {
         return smooth(async () => {
             const controller = new TaskController();
             if (await controller.init({})) { // OK
-                console.log('Ready to show UI');
                 this.setState({controller});
             }
         });
@@ -43,6 +42,7 @@ class taskwc2 extends Component {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: 'transparent',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
