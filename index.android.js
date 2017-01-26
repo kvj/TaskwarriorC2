@@ -42,7 +42,7 @@ class taskwc2 extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'transparent',
+    backgroundColor: '#fff',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

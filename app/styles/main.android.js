@@ -111,6 +111,7 @@ export const init = (config) => {
         text: {
             fontSize: 16,
             fontFamily: _fontFamily,
+            color: _layers.l1.fg,
         },
         inp: {
             fontSize: 16,
