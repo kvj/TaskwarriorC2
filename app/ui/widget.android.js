@@ -41,7 +41,7 @@ export class IconMenu extends React.Component {
         const {children, dir, style} = this.props;
         const {expanded} = this.state;
         let menu = null;
-        let st = [styles.hflex, styles.menu];
+        let st =  [styles.hflex, styles.menu];
         let wst = [styles.hflex, styles.menu_popup];
         if (style && style.length) { // Copy
             st = st.concat(style);

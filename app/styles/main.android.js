@@ -67,6 +67,14 @@ export const init = (config) => {
             justifyContent: 'center',
             backgroundColor: '#88888822',
         },
+        menu: {
+            position: 'relative',
+        },
+        menu_popup: {
+            position: 'absolute',
+            top: 0,
+            right: 32,
+        },
         modal_small: {
             position: 'absolute',
             left: 7,

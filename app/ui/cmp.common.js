@@ -364,7 +364,7 @@ export class TaskPageCmp extends React.Component {
                 task={item}
                 running={running}
                 style={style}
-                key={idx}
+                key={item.uuid || item.id}
                 cols={cols}
                 onDone={onDone}
                 onClick={onClick}
