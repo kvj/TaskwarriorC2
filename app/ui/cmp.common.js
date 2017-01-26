@@ -194,6 +194,7 @@ class Task extends widget.DnD {
                 marginLeft: task.level * 15,
             });
         };
+        const menuStyles = [styles.task_menu].concat(style);
         return (
             <widget.Div
                 style={_l(taskStyles)}
@@ -223,7 +224,7 @@ class Task extends widget.DnD {
                         {task[`${desc_field}_`]}
                     </widget.Text>
                     {desc_count}
-                    <widget.IconMenu style={style}>
+                    <widget.IconMenu style={menuStyles}>
                         <widget.IconBtn
                             icon="close"
                             onClick={(e) => {

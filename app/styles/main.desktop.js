@@ -209,7 +209,8 @@ export const init = (config) => {
             fontWeight: 'bold',
             // transform: "translateX(15px)",
         },
-
+        task_menu: {
+        },
         one_nav: {
             backgroundColor: _layers.l1.bg,
             color: _layers.l1.fg,
@@ -255,13 +256,13 @@ export const init = (config) => {
         },
 
         menu: {
+            alignSelf: 'flex-start',
         },
 
         menu_wrap: {
             position: "relative",
             width: 0,
         },
-
         menu_popup: {
             position: "absolute",
             top: 0,
