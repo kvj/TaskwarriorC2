@@ -184,7 +184,6 @@ export class AppPane extends React.Component {
             let props = {
                 id: key,
                 key: key,
-                pin: false,
                 ref: (ref) => {
                     item.ref = ref;
                 },
@@ -223,6 +222,7 @@ export class AppPane extends React.Component {
             let item = {
                 key: key,
                 type: page.type,
+                pin: pin || false,
                 cmp: paneCmp,
             };
             if (pin) { // Pinned entry
