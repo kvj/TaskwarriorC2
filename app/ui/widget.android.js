@@ -199,7 +199,11 @@ export class TaskPageInput extends React.Component {
                 <IconBtn icon="close" onClick={this.props.onClose} />
             </View>
         );
-        const sortIcon = sortMode == 'tree'? 'tasks_tree': 'tasks_list';
+        const sortIcon = {
+            tree: 'tasks_tree',
+            tree_back: 'tasks_tree_back',
+            list: 'tasks_list'
+        }[sortMode];
         const expandIcon = expanded? 'compress': 'expand';
         const line2 = (
             <View style={_l(styles.flex0, styles.hflex, styles.wflex, styles.hbar)}>

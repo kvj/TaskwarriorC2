@@ -265,7 +265,7 @@ export const sortTasks = (info, mode) => {
         }
         return 0;
     });
-    if (mode == 'tree') { // Build dependency tree
+    if (mode == 'tree' || mode == 'tree_back') { // Build dependency tree
         let result = [];
         const addAll = (task, level) => {
             task.level = level;
@@ -284,9 +284,14 @@ export const sortTasks = (info, mode) => {
                         return t.uuid == uuid;
                     });
                     if (t) {
-                        t.sub.push(task);
-                        task.child = true;
-                        return true;
+                        if (mode == 'tree') { // Sub-task on bottom
+                            t.sub.push(task);
+                            task.child = true;
+                            return true;
+                        } else { // Sub-task on top
+                            task.sub.push(t);
+                            t.child = true;
+                        };
                     }
                     return false;
                 });

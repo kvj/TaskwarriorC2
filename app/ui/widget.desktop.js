@@ -344,7 +344,11 @@ export class TaskPageInput extends React.Component {
                 <IconBtn icon="close" onClick={this.props.onClose} />
             </div>
         );
-        const sortIcon = sortMode == 'tree'? 'indent': 'list-ul';
+        const sortIcon = {
+            tree: 'indent',
+            tree_back: 'outdent',
+            list: 'list-ul'
+        }[sortMode];
         const expandIcon = expanded? 'compress': 'expand';
         const line2 = (
             <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>

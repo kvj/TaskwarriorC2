@@ -428,6 +428,7 @@ export class TaskController {
         });
         // Calculate sizes
         if (hasDepends) { // Load
+            /* TODO: Don't do that for every task
             for (var i = 0; i < info.tasks.length; i++) {
                 let task = info.tasks[i];
                 if (task.depends && task.depends.length) { // Make export call
@@ -438,6 +439,7 @@ export class TaskController {
                     };
                 };
             };
+            */
         };
         info.cols.forEach((item) => {
             item.visible = false;

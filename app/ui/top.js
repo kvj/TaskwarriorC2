@@ -691,8 +691,9 @@ class TasksPagePane extends PagePane {
 
     toggleSort() {
         const {sortMode} = this.state;
+        const modes = ['list', 'tree', 'tree_back'];
         this.setState({
-            sortMode: sortMode == 'list'? 'tree': 'list',
+            sortMode: modes[(modes.indexOf(sortMode) + 1) % modes.length], // Cycle
         });
         this.refresh();
     }
