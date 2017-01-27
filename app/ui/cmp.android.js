@@ -405,6 +405,8 @@ export class ReportsCmp extends PaneCmp {
                     reports={reports}
                     onRefresh={onReportsRefresh}
                     onClick={onReportClick}
+                    expanded={this.props.reportsExpanded}
+                    onExpand={this.props.onExpandReports}
                 />
                 <ContextsNavigation
                     title="Contexts"

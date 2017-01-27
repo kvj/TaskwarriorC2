@@ -375,6 +375,8 @@ export class ReportsCmp extends PaneCmp {
             reports, 
             onReportsRefresh, 
             onReportClick, 
+            reportsExpanded,
+            onExpandReports,
             mode, 
             contexts, 
             onContextsRefresh, 
@@ -404,6 +406,8 @@ export class ReportsCmp extends PaneCmp {
                     reports={reports}
                     onRefresh={onReportsRefresh}
                     onClick={onClick}
+                    expanded={reportsExpanded}
+                    onExpand={onExpandReports}
                 />
                 <ContextsList
                     {...this.paneConfig('contextsMode')}

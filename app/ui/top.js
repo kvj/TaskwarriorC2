@@ -487,6 +487,7 @@ export class AppPane extends React.Component {
                     <ReportsPane
                         ref="reports"
                         controller={controller}
+                        reportsExpandable={controller.reportsSublist? true: false}
                         onReportClick={this.onReportClick.bind(this)}
                         onContextClick={this.onContextClick.bind(this)}
                         mode={panes.right}
@@ -663,6 +664,7 @@ class TasksPagePane extends PagePane {
         this.state = {
             selection: {},
             filter: props.filter,
+            layout: props.layout,
             sortMode: 'list',
         };
     }
@@ -894,6 +896,7 @@ class ReportsPane extends React.Component {
         super(props);
         this.state = {
             reports: [],
+            reportsExpanded: props.reportsExpandable? false: undefined,
         }
     }
 
@@ -904,7 +907,8 @@ class ReportsPane extends React.Component {
 
     async refreshReports() {
         return smooth(async () => {
-            const reports = await this.props.controller.reports();
+            const {reportsExpanded} = this.state;
+            const reports = await this.props.controller.reports(reportsExpanded);
             this.setState({
                 reports: reports,
             });
@@ -920,6 +924,12 @@ class ReportsPane extends React.Component {
         });
     }
 
+    toggleExpand(prop) {
+        let state = {};
+        state[prop] = !this.state[prop];
+        this.setState(state);
+    }
+
     render() {
         return (
             <cmp.ReportsCmp
@@ -928,6 +938,11 @@ class ReportsPane extends React.Component {
                 contexts={this.state.contexts}
                 onReportsRefresh={this.refreshReports.bind(this)}
                 onContextsRefresh={this.refreshContexts.bind(this)}
+                reportsExpanded={this.state.reportsExpanded}
+                onExpandReports={() => {
+                    this.toggleExpand('reportsExpanded');
+                    this.refreshReports();
+                }}
                 ref="cmp"
             />
         );

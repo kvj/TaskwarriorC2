@@ -159,6 +159,10 @@ export class TaskController {
         styleInit(css);
         stylesInit(css, this);
         this.calendarConfig = await this.loadCalendar();
+        const reportsConf = (await this.config('ui.reports'))['ui.reports'];
+        if (reportsConf) {
+            this.reportsSublist = reportsConf.split(',').map(x => x.trim());
+        };
         return true;
     }
 
@@ -656,11 +660,11 @@ export class TaskController {
         return result;
     }
 
-    async reports() {
+    async reports(expanded) {
         const reg = /^(\S+)\s(.+)$/;
         let result = []; // List
         await this.call(['reports'], {
-            eat(line) {
+            eat: (line) => {
                 const m = line.match(reg);
                 if (m) {
                     const report = m[1].trim();
@@ -672,6 +676,13 @@ export class TaskController {
                 }
             }
         }, this.streamNotify());
+        if (!expanded && this.reportsSublist) { // Need only subset
+            let map = {};
+            result.forEach((item) => {
+                map[item.name] = item;
+            });
+            return this.reportsSublist.map(report => map[report]).filter(report => report);
+        };
         return result.filter((item, idx) => {
             return idx < result.length-1;
         });
