@@ -179,6 +179,7 @@ export class TaskController {
     async loadPanesConfig() {
         const config = await this.config('ui.pane.', true);
         let conf = {
+            expanded: config['tasks.expanded'] == 'off'? false: true,
             left: config.left,
             right: config.right,
             tags: config.tags || 'scroll',

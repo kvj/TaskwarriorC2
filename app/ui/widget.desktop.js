@@ -313,7 +313,11 @@ export class TaskPageInput extends React.Component {
     }
 
     render() {
-        const {onPin, onAdd, onToggleSort, sortMode} = this.props;
+        const {
+            onPin, onAdd, 
+            onToggleSort, sortMode, 
+            expanded, onToggleExpand,
+        } = this.props;
         const line1 = (
             <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
                 <input
@@ -341,6 +345,7 @@ export class TaskPageInput extends React.Component {
             </div>
         );
         const sortIcon = sortMode == 'tree'? 'indent': 'list-ul';
+        const expandIcon = expanded? 'compress': 'expand';
         const line2 = (
             <div style={_l(styles.flex0, styles.hflex, styles.wflex)}>
                 <input
@@ -353,6 +358,7 @@ export class TaskPageInput extends React.Component {
                     placeholder="Filter"
                 />
                 <IconBtn icon={sortIcon} onClick={onToggleSort} />
+                <IconBtn icon={expandIcon} onClick={onToggleExpand} />
             </div>
         );
         return (

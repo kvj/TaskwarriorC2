@@ -163,6 +163,7 @@ export class AppPane extends React.Component {
 
     showPage(page) {
         let {pages, layout} = this.state;
+        const {controller} = this.props;
         let item = pages.find((item) => {
             return item.type == page.type && item.ref.same(page);
         });
@@ -186,6 +187,7 @@ export class AppPane extends React.Component {
                 paneCmp = (
                     <TasksPagePane
                         {...props}
+                        expanded={controller.panesConfig.expanded}
                         report={page.report}
                         filter={page.filter}
                         layout={layout}
@@ -666,6 +668,7 @@ class TasksPagePane extends PagePane {
             filter: props.filter,
             layout: props.layout,
             sortMode: 'list',
+            expanded: props.expanded || false,
         };
     }
 
@@ -675,6 +678,11 @@ class TasksPagePane extends PagePane {
             sortMode: sortMode == 'list'? 'tree': 'list',
         });
         this.refresh();
+    }
+
+    toggleExpand() {
+        const {expanded} = this.state;
+        this.setState({expanded: !expanded});
     }
 
     select(task) {
@@ -748,6 +756,10 @@ class TasksPagePane extends PagePane {
                 selection={this.state.selection}
                 loading={this.state.loading}
                 sortMode={this.state.sortMode}
+                expanded={this.state.expanded}
+                onToggleExpand={() => {
+                    this.toggleExpand();
+                }}
                 onToggleSort={this.toggleSort.bind(this)}
                 onRefresh={() => {
                     this.refresh(true);

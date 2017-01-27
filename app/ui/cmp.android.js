@@ -850,7 +850,7 @@ export class TaskPageCmp extends common.TaskPageCmp {
         );
         const {layout} = this.props;
         let headerDom;
-        if (layout.tall != 'short') { // Show header
+        if (header) { // Show header
             headerDom = (
                 <View style={_l(styles.flex0, styles.hflex, styles.wflex)}>{header}</View>
             );

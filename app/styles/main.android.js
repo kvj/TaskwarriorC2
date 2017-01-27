@@ -8,6 +8,36 @@ import {
 export let styles = {};
 
 export const init = (config) => {
+    const modes = ['normal', 'compact', 'tiny']
+    let mode = modes.includes(config.compact)? config.compact: 'normal'; // normal, compact, tiny
+    const iconSize = () => {
+        return {
+            normal: 32,
+            compact: 28,
+            tiny: 24
+        }[mode];
+    };
+    const fontSize = () => {
+        return {
+            normal: 16,
+            compact: 14,
+            tiny: 12
+        }[mode];
+    };
+    const fontSizeSmall = () => {
+        return {
+            normal: 14,
+            compact: 12,
+            tiny: 10
+        }[mode];
+    };
+    const popupTop = () => {
+        return {
+            normal: 70,
+            compact: 60,
+            tiny: 50
+        }[mode];
+    };
     const [_layers, _colorDefs] = layers();
     const _fontFamily = 'monospace';
     const _styles = {
@@ -46,7 +76,7 @@ export const init = (config) => {
         },
         input_box: {
             position: 'absolute',
-            marginTop: 70,
+            marginTop: popupTop(),
             left: 3,
             right: 3,
             top: 0,
@@ -73,7 +103,7 @@ export const init = (config) => {
         menu_popup: {
             position: 'absolute',
             top: 0,
-            right: 32,
+            right: iconSize(),
         },
         modal_small: {
             position: 'absolute',
@@ -105,24 +135,24 @@ export const init = (config) => {
             margin: 0,
         },
         icon: {
-            width: 32,
-            height: 32,
+            width: iconSize(),
+            height: iconSize(),
         },
         text: {
-            fontSize: 16,
+            fontSize: fontSize(),
             fontFamily: _fontFamily,
             color: _layers.l1.fg,
         },
         inp: {
-            fontSize: 16,
+            fontSize: fontSize(),
             fontFamily: _fontFamily,
             borderLeftWidth: 2,
             borderStyle: 'solid',
             borderColor: _layers.l2.fg,
             backgroundColor: _layers.l2.bg,
             color: _layers.l2.fg,
-            height: 32,
-            lineHeight: 32,
+            height: iconSize(),
+            lineHeight: iconSize(),
             padding: 5,
             margin: 3,
             alignSelf: 'stretch',
@@ -131,10 +161,10 @@ export const init = (config) => {
             alignSelf: 'center',
         },
         textSmall: {
-            fontSize: 14,
+            fontSize: fontSizeSmall(),
         },
         annotation_line: {
-            marginLeft: 26,
+            marginLeft: iconSize(),
         },
         one_task: {
             marginTop: 0,
@@ -192,7 +222,7 @@ export const init = (config) => {
             position: 'absolute',
             left: 0,
             right: 0,
-            top: 100,
+            top: popupTop(),
             alignItems: 'center',
         },
         float_pane: {

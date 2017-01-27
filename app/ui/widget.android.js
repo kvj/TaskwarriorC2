@@ -175,6 +175,8 @@ export class TaskPageInput extends React.Component {
             onAdd,
             onToggleSort,
             sortMode,
+            onToggleExpand,
+            expanded,
         } = this.props;
         const line1 = (
             <View style={_l(styles.flex0, styles.hflex, styles.wflex, styles.hbar)}>
@@ -198,6 +200,7 @@ export class TaskPageInput extends React.Component {
             </View>
         );
         const sortIcon = sortMode == 'tree'? 'tasks_tree': 'tasks_list';
+        const expandIcon = expanded? 'compress': 'expand';
         const line2 = (
             <View style={_l(styles.flex0, styles.hflex, styles.wflex, styles.hbar)}>
                 <TextInput
@@ -210,6 +213,7 @@ export class TaskPageInput extends React.Component {
                     underlineColorAndroid="transparent"
                 />
                 <IconBtn icon={sortIcon} onClick={onToggleSort} />
+                <IconBtn icon={expandIcon} onClick={onToggleExpand} />
             </View>
         );
 

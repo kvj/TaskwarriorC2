@@ -38,6 +38,8 @@ class Task extends widget.DnD {
             onAnnAdd,
             onStartStop,
             onTap,
+            expanded,
+            layout,
         } = this.props;
         const {dragTarget, dependsVisible} = this.state;
         let desc_field = 'description';
@@ -195,6 +197,19 @@ class Task extends widget.DnD {
             });
         };
         const menuStyles = [styles.task_menu].concat(style);
+        let expandedPart;
+        if (expanded) {
+            expandedPart = (
+                <widget.Div>
+                    <widget.Div style={_l(styles.hflex, styles.wflex)}>
+                        {fields}
+                    </widget.Div>
+                    {multiline}
+                    {depends}
+                    {annotations}
+                </widget.Div>
+            );
+        };
         return (
             <widget.Div
                 style={_l(taskStyles)}
@@ -249,12 +264,7 @@ class Task extends widget.DnD {
                         {multilineBtn}
                     </widget.IconMenu>
                 </widget.Div>
-                <widget.Div style={_l(styles.hflex, styles.wflex)}>
-                    {fields}
-                </widget.Div>
-                {multiline}
-                {depends}
-                {annotations}
+                {expandedPart}
             </widget.Div>
         );
     }
@@ -282,6 +292,8 @@ export class TaskPageCmp extends React.Component {
             onEdit,
             onSelect,
             onAdd,
+            layout,
+            expanded,
         } = this.props;
         const findTask = (uuid) => {
             return info.tasks.find((t) => t.uuid == uuid);
@@ -360,12 +372,15 @@ export class TaskPageCmp extends React.Component {
         if (selection[item.uuid]) {
             style.push(styles.task_selected);
         }
+        const key = `${item.uuid || item.id}-${idx}`;
         return (
             <Task
                 task={item}
                 running={running}
                 style={style}
-                key={item.uuid || item.id}
+                layout={layout}
+                expanded={expanded}
+                key={key}
                 cols={cols}
                 onDone={onDone}
                 onClick={onClick}
@@ -393,6 +408,7 @@ export class TaskPageCmp extends React.Component {
             onSelect,
             onAdd,
             loading,
+            expanded,
         } = this.props;
         let body = null;
         if (info) {
@@ -400,24 +416,27 @@ export class TaskPageCmp extends React.Component {
             const cols = info.cols.filter((item) => {
                 return item.visible;
             });
-            const header_items = cols.map((item, idx) => {
-                if (item.multiline) { // Skip
-                    return null;
-                };
-                if (item.field == 'description') {
-                    // Insert spacer
-                    return (<widget.Div key={idx} style={_l(styles.spacer)}></widget.Div>);
-                }
-                return (
-                    <widget.Text
-                        editable={false}
-                        width={item.width}
-                        key={idx}
-                    >
-                        {item.label}
-                    </widget.Text>
-                );
-            });
+            let header_items;
+            if (expanded) {
+                header_items = cols.map((item, idx) => {
+                    if (item.multiline) { // Skip
+                        return null;
+                    };
+                    if (item.field == 'description') {
+                        // Insert spacer
+                        return (<widget.Div key={idx} style={_l(styles.spacer)}></widget.Div>);
+                    }
+                    return (
+                        <widget.Text
+                            editable={false}
+                            width={item.width}
+                            key={idx}
+                        >
+                            {item.label}
+                        </widget.Text>
+                    );
+                });
+            };
             // Render tasks
             body = this.renderBody(header_items, info);
         }
