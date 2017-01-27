@@ -10,6 +10,7 @@ export class AppPane extends React.Component {
     constructor(props) {
         super(props);
         const {controller} = props;
+        this.pageIndex = 0;
         this.state = {
             pages: [],
             defaultCmd: controller.defaultCmd,
@@ -24,11 +25,21 @@ export class AppPane extends React.Component {
     }
 
     componentDidMount() {
-        this.showPage({
-            type: 'list',
-            report: this.state.defaultCmd,
-            filter: '',
-        });
+        const {controller} = this.props;
+        for (let pin of controller.panesConfig.pins) {
+            this.showPage({
+                type: 'list',
+                report: pin.report,
+                filter: pin.filter,
+            }, true); // Open in pinned mode
+        }
+        for (let page of controller.panesConfig.pages) {
+            this.showPage({
+                type: 'list',
+                report: page.report,
+                filter: page.filter,
+            }); // Open in normal mode
+        }
     }
 
     hidePane(pane) {
@@ -161,15 +172,15 @@ export class AppPane extends React.Component {
         };
     }
 
-    showPage(page) {
-        let {pages, layout} = this.state;
+    showPage(page, pin) {
+        let {pages, pins, layout} = this.state;
         const {controller} = this.props;
         let item = pages.find((item) => {
-            return item.type == page.type && item.ref.same(page);
+            return item.type == page.type && item.ref && item.ref.same(page);
         });
-        if (!item) { // Add new
+        if (!item || pin) { // Add new
             let paneCmp = null;
-            const key = Date.now();
+            let key = Date.now() + (++this.pageIndex);
             let props = {
                 id: key,
                 key: key,
@@ -214,9 +225,15 @@ export class AppPane extends React.Component {
                 type: page.type,
                 cmp: paneCmp,
             };
-            pages.push(item);
+            if (pin) { // Pinned entry
+                pins.push(item);
+                key = this.state.page; // No change
+            } else { // Normal page
+                pages.push(item);
+            };
             this.setState({
                 pages: pages,
+                pins: pins,
                 page: key,
             });
         } else {

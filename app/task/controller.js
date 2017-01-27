@@ -182,11 +182,27 @@ export class TaskController {
             expanded: config['tasks.expanded'] == 'off'? false: true,
             left: config.left,
             right: config.right,
+            pins: [],
+            pages: [],
             tags: config.tags || 'scroll',
             projects: config.projects || 'scroll',
             reports: config.reports || 'scroll',
             contexts: config.contexts || 'compact',
         };
+        const pageParser = (item) => {
+            let report = item.trim();
+            let filter = '';
+            const sp = report.indexOf(' ');
+            if (sp != -1) { // Split
+                filter = report.substr(sp).trim();
+                report = report.substr(0, sp).trim();
+            };
+            return {report, filter};
+        };
+        if (config.pin) { // Have pinned panes
+            conf.pins = config.pin.split(',').map(pageParser);
+        };
+        conf.pages = (config['default'] || this.defaultCmd).split(',').map(pageParser);
         return this.provider.configurePanes(conf);
     }
 
