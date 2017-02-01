@@ -65,13 +65,19 @@ export const layers = () => {
     colorDefs = {
         'due': {bg: '#fce4ec'},
         'due.today': {bg: '#f8bbd0'},
+        'blocked': {bg: '#cfd8dc'},
+        'blocking': {bg: '#c8e6c9'},
         'overdue': {bg: '#f48fb1'},
-        'recurring': {bg: '#bbdefb'},
+        'recurring': {bg: '#e3f2fd'},
         'scheduled': {bg: '#b3e5fc'},
         'active': {bg: '#ffe0b2'},
         'completed': {bg: '#a5d6a7'},
         'deleted': {bg: '#e57373'},
         'tag.next': {bg: '#fffde7'},
+        'tagged': {bg: '#b2dfdb'},
+        'uda.priority.h': {bg: '#ce93d8'},
+        'uda.priority.m': {bg: '#e1bee7'},
+        'uda.priority.l': {bg: '#f3e5f5'},
     };
     for (let key in style) {
         if (key.indexOf('color.') == 0) { // Override

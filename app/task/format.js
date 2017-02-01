@@ -319,8 +319,14 @@ const coloring = {
     blocked: (task) => {
         if (task.depends && task.depends_title) return ['blocked'];
     },
-    due: (task) => {
-        if (task.due) return ['due'];
+    due: (task, colors, controller) => {
+        if (task.due_date && controller.dueDays > 0){
+            let now = new Date();
+            now = new Date(now.getFullYear(), now.getMonth(), now.getDate()+controller.dueDays);
+            if (now.getTime() > task.due_date.getTime()) { // Within due days
+                return ['due'];
+            };
+        }
     },
     'due.today': (task) => {
         if (task.due_date) {

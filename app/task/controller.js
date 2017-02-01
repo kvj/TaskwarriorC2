@@ -144,12 +144,12 @@ export class TaskController {
         this.provider = provider;
         await this.setupSync();
         this.scheduleSync();
-        let conf = await this.config('default.command');
+        let conf = await this.config(['default.command', 'due', 'ui.multiple', 'ui.multiline.separator']);
+        this.dueDays = parseInt(conf['due']) || 7;
         this.defaultCmd = conf['default.command'] || 'next';
         this.panesConfig = await this.loadPanesConfig();
         await this.loadUDAs();
         this.multiline = {};
-        conf = await this.config('ui.multiline');
         (conf['ui.multiline'] || '').split(',').map((item) => item.trim()).forEach((item) => {
             if (item) this.multiline[item] = true;
         });
@@ -585,7 +585,12 @@ export class TaskController {
     async config(prefix, strip_prefix) {
         const reg = /^([a-z0-9_\.]+)\s(.+)$/;
         let result = {}; // Hash
-        await this.call(['rc.defaultwidth=1000', 'show', prefix], {
+        let args = ['rc.defaultwidth=1000', 'show', prefix];
+        if (Array.isArray(prefix)) { // Request multiple
+            strip_prefix = false;
+            args = ['rc.defaultwidth=1000', 'show'].concat(prefix);
+        };
+        await this.call(args, {
             eat(line) {
                 if (line) {
                     // Our case
