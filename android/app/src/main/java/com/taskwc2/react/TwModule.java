@@ -2,6 +2,7 @@ package com.taskwc2.react;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 
 import com.facebook.react.ReactPackage;
@@ -130,8 +131,9 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
             return;
         }
         Intent intent = new Intent(Intent.ACTION_EDIT);
-        Uri uri = Uri.parse(String.format("file://%s", acc.taskrc().getAbsolutePath()));
+        Uri uri = FileProvider.getUriForFile(controller.context(), controller.context().getPackageName(), acc.taskrc());
         intent.setDataAndType(uri, "text/plain");
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         try {
             getCurrentActivity().startActivityForResult(intent, App.EDIT_TASKRC_REQUEST);
             promise.resolve(true);
@@ -153,6 +155,31 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
             @Override
             protected void onPostExecute(String s) {
                 promise.resolve(s);
+            }
+        }.exec();
+    }
+
+
+    @ReactMethod
+    public void backup(final Promise promise) {
+        final AccountController acc = accountController();
+        if (null == acc) {
+            promise.reject("no_account", "Not configured");
+            return;
+        }
+        new Tasks.SimpleTask<String>() {
+
+            @Override
+            protected String doInBackground() {
+                return acc.makeBackup();
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                if (s == null)
+                    promise.resolve(s);
+                else
+                    promise.reject("error", s);
             }
         }.exec();
     }

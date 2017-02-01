@@ -59,6 +59,10 @@ export class TaskProvider {
         return app.finish();
     }
 
+    async backup() {
+        return await app.backup();
+    }
+
     configurePanes(conf) {
         conf._modes = {
             "dock": true,

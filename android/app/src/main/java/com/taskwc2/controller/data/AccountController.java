@@ -102,6 +102,10 @@ public class AccountController {
         return new File(tasksFolder, TASKRC);
     }
 
+    protected File dataFolder() {
+        return new File(tasksFolder, DATA_FOLDER);
+    }
+
     public File folder() {
         return tasksFolder;
     }
@@ -164,7 +168,7 @@ public class AccountController {
     private StreamConsumer errConsumer = new ToLogConsumer(Logger.LoggerLevel.Warning, "ERR:");
     private StreamConsumer outConsumer = new ToLogConsumer(Logger.LoggerLevel.Info, "STD:");
 
-    private boolean dataLocationSet = true;
+    boolean dataLocationSet = true;
 
     public AccountController(Controller controller, String folder) {
         this.controller = controller;
@@ -616,9 +620,9 @@ public class AccountController {
             Collections.addAll(args, arguments);
             ProcessBuilder pb = new ProcessBuilder(args);
             pb.directory(tasksFolder);
-            pb.environment().put("TASKRC", new File(tasksFolder, TASKRC).getAbsolutePath());
+            pb.environment().put("TASKRC", taskrc().getAbsolutePath());
             if (!dataLocationSet)
-                pb.environment().put("TASKDATA", new File(tasksFolder, DATA_FOLDER).getAbsolutePath());
+                pb.environment().put("TASKDATA", dataFolder().getAbsolutePath());
             Process p = pb.start();
             Thread outThread = readStream(p.getInputStream(), question? p.getOutputStream(): null, out);
             Thread errThread = readStream(p.getErrorStream(), null, err);
@@ -838,5 +842,39 @@ public class AccountController {
         intent.putExtra(App.KEY_ACCOUNT, id);
         intent.setData(Uri.fromParts("tw", type, id));
         return PendingIntent.getBroadcast(controller.context(), App.SYNC_REQUEST, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+    }
+
+    public String makeBackup() {
+        try {
+            File backup = ProfileArchiver.archiveProfile(this);
+            debug("Backup complete:", backup);
+            if (null != fileLogger)
+                debugLogger().logFile(backup);
+            NotificationCompat.Builder n = controller.newNotification(accountName);
+            String message = String.format("Backup done: %s", backup.getName());
+            n.setContentText(message);
+            n.setTicker(message);
+            n.setAutoCancel(true);
+            n.setContentInfo(backup.getAbsolutePath());
+            n.setSubText(backup.getAbsolutePath());
+            n.setPriority(NotificationCompat.PRIORITY_DEFAULT);
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(backup));
+            shareIntent.setType("application/zip");
+            Intent chooserIntent = Intent.createChooser(shareIntent, "Taskwarrior backup");
+            n.addAction(R.drawable.ic_plus, "Share",
+                        PendingIntent.getActivity(controller.context(), App.SHARE_BACKUP_REQUEST,
+                                                  chooserIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+            Intent intent = new Intent(controller.context(), MainActivity.class);
+            intent.putExtra(App.KEY_ACCOUNT, id);
+            n.setContentIntent(PendingIntent.getActivity(controller.context(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT));
+            controller.notify(Controller.NotificationType.Backup, id(), n);
+
+            return null;
+        } catch (IOException e) {
+            logger.e(e, "Backup failed");
+            return e.getMessage();
+        }
     }
 }

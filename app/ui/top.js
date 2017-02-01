@@ -388,6 +388,11 @@ export class AppPane extends React.Component {
         await controller.editConfig();
     }
 
+    async onMakeBackup() {
+        const {controller} = this.props;
+        await controller.makeBackup();
+    }
+
     onManageProfiles() {
         const {controller} = this.props;
         this.refs.main.showProfiles(controller.provider);
@@ -476,6 +481,7 @@ export class AppPane extends React.Component {
                     onSync={this.onSync.bind(this)}
                     onEditConfig={this.onEditConfig.bind(this)}
                     onManageProfiles={this.onManageProfiles.bind(this)}
+                    onMakeBackup={this.onMakeBackup.bind(this)}
                 />
                 <CenterPane>
                     <MainPane

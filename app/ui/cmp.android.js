@@ -83,6 +83,7 @@ export class ToolbarCmp extends React.Component {
             onUndo,
             onEditConfig,
             onManageProfiles,
+            onMakeBackup,
             info,
         } = this.props;
         let subTitle;
@@ -122,6 +123,12 @@ export class ToolbarCmp extends React.Component {
             show: 'never',
             onAction: () => {
                 onManageProfiles();
+            }
+        }, {
+            title: 'Make profile backup',
+            show: 'never',
+            onAction: () => {
+                onMakeBackup();
             }
         }];
         return (

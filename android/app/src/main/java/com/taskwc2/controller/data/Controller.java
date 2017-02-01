@@ -258,7 +258,8 @@ public class Controller extends org.kvj.bravo7.ng.Controller {
     }
 
     public enum NotificationType {
-        Sync(1);
+        Sync(1),
+        Backup(2);
 
         private final int id;
 

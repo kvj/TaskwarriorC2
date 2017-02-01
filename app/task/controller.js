@@ -787,6 +787,15 @@ export class TaskController {
         }
     }
 
+    async makeBackup() {
+        try {
+            await this.provider.backup();
+        } catch (e) {
+            console.log('Backup error:', e);
+            this.err(e.message);
+        }
+    }
+
     calendar (from) {
         let dt;
         if (!from) { // First day

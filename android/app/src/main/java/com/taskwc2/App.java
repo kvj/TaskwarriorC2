@@ -25,6 +25,8 @@ public class App extends org.kvj.bravo7.ng.App<Controller> implements ReactAppli
     public static final int EDIT_TASKRC_REQUEST = 2;
     public static final int PERMISSION_REQUEST = 3;
     public static final int MAIN_ACTIVITY_REQUEST = 4;
+    public static final int SHARE_BACKUP_REQUEST = 5;
+    public static final String FOLDER_NAME = "TaskwC2";
 
     @Override
     protected Controller create() {
