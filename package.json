@@ -5,10 +5,10 @@
   "private": true,
   "dependencies": {
     "babel-polyfill": "^6.9.0",
-    "electron-prebuilt": "^1.2.4",
-    "react": "~15.4.0-rc.4",
-    "react-dom": "~15.4.0-rc.4",
-    "react-native": "~0.41.0-rc.0"
+    "electron": "^1.6.2",
+    "react": "~15.4.1",
+    "react-dom": "~15.4.1",
+    "react-native": "~0.42.0"
   },
   "devDependencies": {
     "babel-plugin-syntax-async-functions": "^6.8.0",
