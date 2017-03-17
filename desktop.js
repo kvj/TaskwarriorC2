@@ -38,43 +38,37 @@ app.on('ready', () => {
     var template = [{
         label: 'Application',
         submenu: [{
-            label: 'About TaskwC2',
-            selector: 'orderFrontStandardAboutPanel:'
+            role: 'about',
         }, {
             type: 'separator'
         }, {
-            label: 'Quit',
-            accelerator: 'Command+Q',
-            click: function() { app.quit(); }
+            role: 'quit',
         }]
     }, {
         label: 'Edit',
         submenu: [{
-            label: 'Undo',
-            accelerator: 'CmdOrCtrl+Z',
-            selector: 'undo:'
+            role: 'undo',
         }, {
-            label: 'Redo',
-            accelerator: 'Shift+CmdOrCtrl+Z',
-            selector: 'redo:'
+            role: 'redo',
         }, {
-            type: 'separator'
+            type: 'separator',
         }, {
-            label: 'Cut',
-            accelerator: 'CmdOrCtrl+X',
-            selector: 'cut:'
+            role: 'cut',
         }, {
-            label: 'Copy',
-            accelerator: 'CmdOrCtrl+C',
-            selector: 'copy:'
+            role: 'copy',
         }, {
-            label: 'Paste',
-            accelerator: 'CmdOrCtrl+V',
-            selector: 'paste:'
+            role: 'paste',
         }, {
-            label: 'Select All',
-            accelerator: 'CmdOrCtrl+A',
-            selector: 'selectAll:'
+            role: 'selectall',
+        }]
+    }, {
+        label: 'View',
+        submenu: [{
+            role: 'reload',
+        }, {
+            role: 'forcereload'
+        }, {
+            role: 'toggledevtools'
         }]
     }];
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
