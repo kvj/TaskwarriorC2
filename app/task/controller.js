@@ -426,21 +426,32 @@ export class TaskController {
                 hasDepends = true;
             };
         });
-        // Calculate sizes
-        if (hasDepends) { // Load
-            /* TODO: Don't do that for every task
+        if (hasDepends) { // Colled uuids and load depends
+            let all_uuids = {};
             for (var i = 0; i < info.tasks.length; i++) {
                 let task = info.tasks[i];
-                if (task.depends && task.depends.length) { // Make export call
-                    const uuids = task.depends.map((uuid) => `uuid:${uuid}`).join(' or ');
-                    const uuidsTasks = await this.exp([uuids]);
-                    if (uuidsTasks) { // OK
-                        task.dependsTasks = uuidsTasks.filter((t) => t.id > 0);
+                if (task.depends) { // Make export call
+                    task.depends.forEach((uuid) => all_uuids[uuid] = null);
+                };
+            };
+            const uuids = Object.keys(all_uuids)
+                .map((uuid) => `uuid:${uuid.substr(0, 8)}`).join(' or ');
+            if (uuids) { // Have keys => load all
+                const uuidsTasks = await this.exp([uuids]);
+                if (uuidsTasks) { // OK
+                    uuidsTasks.forEach((t) => all_uuids[t.uuid] = t);
+                    for (var i = 0; i < info.tasks.length; i++) {
+                        let task = info.tasks[i];
+                        if (task.depends && task.depends.length) { // Make export call
+                            task.dependsTasks = task.depends
+                                .map((uuid) => all_uuids[uuid])
+                                .filter((t) => t && t.id>0)
+                        };
                     };
                 };
             };
-            */
         };
+        // Calculate sizes
         info.cols.forEach((item) => {
             item.visible = false;
             item.multiline = false;
