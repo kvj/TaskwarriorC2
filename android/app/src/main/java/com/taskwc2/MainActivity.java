@@ -96,15 +96,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void step3(AccountController acc) {
+        finish();
         Intent intent = new Intent(this, AppActivity.class);
         intent.putExtra(App.KEY_ACCOUNT, acc.id());
         startActivityForResult(intent, App.MAIN_ACTIVITY_REQUEST);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == App.MAIN_ACTIVITY_REQUEST) {
-            finish();
-        }
     }
 }
