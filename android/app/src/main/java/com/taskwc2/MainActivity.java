@@ -29,6 +29,10 @@ public class MainActivity extends AppCompatActivity {
     Logger logger = Logger.forInstance(this);
     Controller controller = App.controller();
     FormController form = new FormController(new ViewFinder.ActivityViewFinder(this));
+    final String[] permissions = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,14 +40,19 @@ public class MainActivity extends AppCompatActivity {
         step1();
     }
 
+    private boolean areAllPermissionsGranted() {
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                // Not granted
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void step1() {
-        boolean allGranted =
-                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                        && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        if (!allGranted) {
-            ActivityCompat
-                    .requestPermissions(this, new String[]{
-                            Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, App.PERMISSION_REQUEST);
+        if (!areAllPermissionsGranted()) {
+            ActivityCompat.requestPermissions(this, permissions, App.PERMISSION_REQUEST);
         } else {
             step2();
         }

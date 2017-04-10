@@ -379,7 +379,7 @@ public class AccountController {
         List<String> ssids = configList(extra.optString("ssid"));
         if (null != ssids && net.getType() == ConnectivityManager.TYPE_WIFI) {
             WifiManager wm =
-                (WifiManager) controller.context().getSystemService(Context.WIFI_SERVICE);
+                (WifiManager) controller.context().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             WifiInfo wifiInfo = wm.getConnectionInfo();
             if (null == wifiInfo) {
                 debug("Skip sync: no wifi:", ssids, extra, net);
@@ -462,7 +462,7 @@ public class AccountController {
         String value = null;
     }
 
-    private Map<String, String> taskSettings(boolean wantDef, final String... names) {
+    Map<String, String> taskSettings(boolean wantDef, final String... names) {
         final Map<String, String> result = new LinkedHashMap<>();
         final Map<String, String> defValues = new HashMap<>();
         final Value lastKey = new Value();
@@ -670,7 +670,7 @@ public class AccountController {
         return result == 0;
     }
 
-    private File fileFromConfig(String path) {
+    File fileFromConfig(String path) {
         if (TextUtils.isEmpty(path)) { // Invalid path
             return null;
         }

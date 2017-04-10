@@ -3,6 +3,7 @@ package com.taskwc2.controller.data;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Environment;
+import android.text.TextUtils;
 
 import com.taskwc2.App;
 
@@ -15,9 +16,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -27,6 +34,68 @@ import java.util.zip.ZipOutputStream;
 public class ProfileArchiver {
 
     static SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
+    static Pattern filePattern = Pattern.compile("^([\\da-fA-F\\-]{36})\\.\\d+\\.taskw\\.zip$");
+
+    private static ZipEntry findFile(ZipInputStream zis, String name) throws IOException {
+        do {
+            ZipEntry ze = zis.getNextEntry();
+            if (null == ze) { // Not found
+                return null;
+            }
+            if (name.equals(ze.getName())) { // Found
+                return ze;
+            }
+            zis.closeEntry(); // Go to next
+        } while (true);
+    }
+
+    public static String restoreArchivedProfile(Controller controller, String fileUri) throws IOException {
+        // Check file name correctness
+        File zip = new File(URI.create(fileUri));
+        if (!zip.exists() || !zip.canRead() || !zip.isFile()) { // Invalid
+            throw new IOException("Invalid zip archive");
+        }
+        Matcher m = filePattern.matcher(zip.getName());
+        if (!m.find()) { // Invalid name
+            throw new IOException("Invalid file name");
+        }
+        String id = UUID.fromString(m.group(1)).toString().toLowerCase();
+        // Open as zip
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(zip));
+        // Make folder if not exist
+        AccountController ac = controller.accountController(id, false);
+        if (null == ac) { // Create new
+            String err = controller.createAccount(id);
+            if (null != err) { // Failed
+                zis.close();
+                throw new IOException(err);
+            }
+            ac = controller.accountController(id, true);
+        }
+        // Add files and folders
+        while (true) {
+            ZipEntry ze = zis.getNextEntry();
+            if (ze == null) { // EOF
+                break;
+            }
+            File outp = new File(ac.folder(), ze.getName());
+            if (ze.isDirectory()) { // Make folder
+                if (!outp.exists() && !outp.mkdirs()) { // Failed to make folder
+                    zis.close();
+                    throw new IOException(String.format("Failed to make folder: %s", ze.getName()));
+                }
+            } else {
+                // Copy file
+                FileOutputStream fos = new FileOutputStream(outp);
+                copyStream(zis, fos);
+                fos.close();
+            }
+            zis.closeEntry();
+        }
+        zis.close();
+        // Return ID on success
+        return id;
+    }
 
     public static File archiveProfile(AccountController controller)
         throws IOException {
@@ -70,6 +139,16 @@ public class ProfileArchiver {
             });
             for (File dataFile : dataFiles) {
                 copyFile(dataFile, zos, String.format("%s/%s", "data", dataFile.getName()));
+            }
+            final Map<String, String> config = controller.taskSettings(false, "taskd.ca", "taskd.certificate", "taskd.key");
+            for (String value : config.values()) { // Store any local .pem file
+                if (!TextUtils.isEmpty(value) && !value.startsWith("/") && !value.startsWith("../")) {
+                    // Local file - add to zip
+                    File file = controller.fileFromConfig(value);
+                    if (null != file && file.exists()) { // Accessible
+                        copyFile(file, zos, value);
+                    }
+                }
             }
         }
         zos.close();
