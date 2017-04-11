@@ -32,6 +32,8 @@ const specialReports = [
 
 const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
+const defaultLimit = 100;
+
 class ToArrayEater extends StreamEater {
 
     constructor() {
@@ -155,6 +157,7 @@ export class TaskController {
         });
         this.multilineSep = conf['ui.multiline.separator'] || '\\n';
         this.reportExtra = await this.config('ui.report.extra.', true) || {};
+        this.tasksLimit = this.readLimit(this.reportExtra.limit);
         const css = await this.config('ui.style.', true);
         styleInit(css);
         stylesInit(css, this);
@@ -164,6 +167,13 @@ export class TaskController {
             this.reportsSublist = reportsConf.split(',').map(x => x.trim());
         };
         return true;
+    }
+
+    readLimit(value) {
+        if (value === 'off') { // Reset limit
+            return -1;
+        };
+        return parseInt(value || defaultLimit) || defaultLimit;
     }
 
     providerInfo() {
@@ -497,6 +507,9 @@ export class TaskController {
             };
         });
         info.tasks = sortTasks(info, sortMode);
+        if (this.tasksLimit > 0) { // Limit number of tasks in output
+            info.tasks = info.tasks.slice(0, this.tasksLimit);
+        };
         // console.log('Precedence:', info.precedence);
         info.tasks.forEach((task) => {
             task.styles = calcColorStyles(task, info.precedence, this);
