@@ -209,7 +209,7 @@ export const formatters = {
         if (arr.length) {
             obj.depends_sort = arr.length;
             obj.depends_title = `[${arr.length}]`;
-            if (obj.dependsTasks) { // Join IDs
+            if (obj.dependsTasks && obj.dependsTasks.length <= 2) { // Join IDs
                 obj.dependsList = true;
                 obj.depends_title = obj.dependsTasks.map((t) => t.id).join(' ');
             };
