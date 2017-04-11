@@ -485,10 +485,7 @@ export class CmdPageCmp extends React.Component {
             loading,
         } = this.props;
         let body = null;
-        if (info) {
-            // Render lines
-            body = this.renderBody(info);
-        }
+        body = this.renderBody(info);
         let loadingIndicator;
         if (loading) { // Show it
             loadingIndicator = (<widget.LoadingIndicator />);

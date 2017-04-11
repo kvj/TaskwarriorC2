@@ -900,17 +900,10 @@ export class CmdPageCmp extends common.CmdPageCmp {
             this.setState({
                 dataSource: dataSource.cloneWithRows(info.lines),
             });
-            if (list) { // Scroll
-                list.scrollTo({
-                    x: 0,
-                    y: 0,
-                    animated: false
-                });
-            };
         };
     }
 
-    renderBody(header, info) {
+    renderBody(info) {
         const renderOne = (line, sid, idx) => {
             return (
                 <widget.Text

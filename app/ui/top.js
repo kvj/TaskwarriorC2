@@ -211,6 +211,7 @@ export class AppPane extends React.Component {
                 paneCmp = (
                     <CmdPagePane
                         {...props}
+                        layout={layout}
                         cmd={page.cmd}
                     />
                 );
@@ -590,6 +591,11 @@ class PagePane extends React.Component {
         super(props);
         this.refreshHandler = this.onChanged.bind(this);
     }
+    
+    setLayout(layout) {
+        this.setState({layout});
+    }
+
 
     onClose() {
         this.props.onClose(this.props.id);
@@ -764,10 +770,6 @@ class TasksPagePane extends PagePane {
             return this.props.controller.err('Invalid task');
         };
     };
-
-    setLayout(layout) {
-        this.setState({layout});
-    }
 
     render() {
         return (

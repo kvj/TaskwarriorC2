@@ -661,7 +661,7 @@ export class CmdPageCmp extends common.CmdPageCmp {
     }
 
     renderBody(info) {
-        const lines = info.lines.map((line, idx) => {
+        const lines = (info? info.lines: []).map((line, idx) => {
             return (
                 <widget.Text
                     key={idx}
