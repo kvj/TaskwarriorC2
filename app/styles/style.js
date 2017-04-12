@@ -74,7 +74,7 @@ export const layers = () => {
         'completed': {bg: '#a5d6a7'},
         'deleted': {bg: '#e57373'},
         'tag.next': {bg: '#fffde7'},
-        'tagged': {bg: '#b2dfdb'},
+        'tagged': {bg: '#e0f2f1'},
         'uda.priority.h': {bg: '#ce93d8'},
         'uda.priority.m': {bg: '#e1bee7'},
         'uda.priority.l': {bg: '#f3e5f5'},
