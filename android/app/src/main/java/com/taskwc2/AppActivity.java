@@ -1,5 +1,6 @@
 package com.taskwc2;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.facebook.react.ReactActivity;
@@ -71,5 +72,13 @@ public class AppActivity extends ReactActivity implements Controller.TaskListene
                 }, answers.toArray(new String[0]));
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == App.EDIT_TASKRC_REQUEST && acc != null) {
+            MainActivity.step3(this, acc);
+        }
     }
 }

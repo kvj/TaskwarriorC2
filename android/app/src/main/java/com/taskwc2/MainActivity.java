@@ -1,6 +1,7 @@
 package com.taskwc2;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -99,15 +100,15 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
-            step3(acc);
+            step3(this, acc);
         }
 
     }
 
-    private void step3(AccountController acc) {
-        finish();
-        Intent intent = new Intent(this, AppActivity.class);
+    static void step3(Activity activity, AccountController acc) {
+        activity.finish();
+        Intent intent = new Intent(activity, AppActivity.class);
         intent.putExtra(App.KEY_ACCOUNT, acc.id());
-        startActivityForResult(intent, App.MAIN_ACTIVITY_REQUEST);
+        activity.startActivityForResult(intent, App.MAIN_ACTIVITY_REQUEST);
     }
 }
