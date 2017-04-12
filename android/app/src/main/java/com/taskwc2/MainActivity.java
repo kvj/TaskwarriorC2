@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,13 +15,17 @@ import android.text.TextUtils;
 
 import com.taskwc2.controller.data.AccountController;
 import com.taskwc2.controller.data.Controller;
+import com.taskwc2.controller.data.ProfileArchiver;
 
 import org.kvj.bravo7.form.FormController;
 import org.kvj.bravo7.form.impl.ViewFinder;
 import org.kvj.bravo7.form.impl.bundle.StringBundleAdapter;
 import org.kvj.bravo7.form.impl.widget.TransientAdapter;
 import org.kvj.bravo7.log.Logger;
+import org.kvj.bravo7.util.Tasks;
 import org.kvj.bravo7.widget.Dialogs;
+
+import java.io.IOException;
 
 /**
  * Created by kvorobyev on 6/13/16.
@@ -79,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void step2() {
+        if (handleRestoreBackup(getIntent())) // Handle restore backup intent
+            return;
         form.add(new TransientAdapter<>(new StringBundleAdapter(), controller.defaultAccount()), App.KEY_ACCOUNT);
         form.load(this, null);
         AccountController acc = controller.accountController(form, true);
@@ -100,12 +107,58 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
-            step3(this, acc);
+            step3(acc);
         }
 
     }
 
-    static void step3(Activity activity, AccountController acc) {
+    private boolean handleRestoreBackup(Intent intent) {
+        if (null == intent) return false;
+        Uri backupUri = null;
+        if (Intent.ACTION_SEND.equals(intent.getAction()) && intent.getClipData() != null && intent.getClipData().getItemCount() > 0) {
+            backupUri = intent.getClipData().getItemAt(0).getUri();
+        }
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            backupUri = intent.getData();
+        }
+        if (null == backupUri) return false;
+        final String finalBackupUri = backupUri.toString();
+        Dialogs.questionDialog(this, "Restore Profile from backup?", null, new Dialogs.Callback<Integer>() {
+            @Override
+            public void run(final Integer data) {
+                new Tasks.ActivitySimpleTask<String>(MainActivity.this) {
+
+                    @Override
+                    public void finish(String result) {
+                        MainActivity.this.finish();
+                        if (null == result) return;
+                        Intent intent = new Intent(MainActivity.this, AppActivity.class);
+                        intent.putExtra(App.KEY_ACCOUNT, result);
+                        MainActivity.this.startActivityForResult(intent, App.MAIN_ACTIVITY_REQUEST);
+                    }
+
+                    @Override
+                    protected String doInBackground() {
+                        if (data != 0) return null; // Answered 'No'
+                        try {
+                            return ProfileArchiver.restoreArchivedProfile(controller, finalBackupUri);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            controller.messageLong(e.getMessage());
+                            return null;
+                        }
+                    }
+                }.exec();
+            }
+        });
+        return true;
+    }
+
+    private void step3(AccountController acc) {
+        openForAccount(this, acc, getIntent());
+    }
+
+    static void openForAccount(Activity activity, AccountController acc, Intent original) {
         activity.finish();
         Intent intent = new Intent(activity, AppActivity.class);
         intent.putExtra(App.KEY_ACCOUNT, acc.id());

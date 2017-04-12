@@ -847,7 +847,7 @@ public class AccountController {
     public String makeBackup() {
         try {
             File backup = ProfileArchiver.archiveProfile(this);
-            debug("Backup complete:", backup);
+            debug("Backup complete:", backup, Uri.fromFile(backup));
             if (null != fileLogger)
                 debugLogger().logFile(backup);
             NotificationCompat.Builder n = controller.newNotification(accountName);

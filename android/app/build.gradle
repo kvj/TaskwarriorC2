@@ -91,8 +91,8 @@ android {
         applicationId "com.taskwc2"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 5
-        versionName "0.0.dev.170127"
+        versionCode 6
+        versionName "0.0.dev.170412"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
@@ -102,6 +102,9 @@ android {
         }
     }
     androidSetupSignConfig(signingConfigs.release)
+    lintOptions {
+        abortOnError false
+    }
     splits {
         abi {
             reset()

@@ -78,7 +78,7 @@ public class AppActivity extends ReactActivity implements Controller.TaskListene
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == App.EDIT_TASKRC_REQUEST && acc != null) {
-            MainActivity.step3(this, acc);
+            MainActivity.openForAccount(this, acc, null);
         }
     }
 }
