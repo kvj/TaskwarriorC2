@@ -32,8 +32,6 @@ const specialReports = [
 
 const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
-const defaultLimit = 100;
-
 class ToArrayEater extends StreamEater {
 
     constructor() {
@@ -157,7 +155,6 @@ export class TaskController {
         });
         this.multilineSep = conf['ui.multiline.separator'] || '\\n';
         this.reportExtra = await this.config('ui.report.extra.', true) || {};
-        this.tasksLimit = this.readLimit(this.reportExtra.limit);
         const css = await this.config('ui.style.', true);
         styleInit(css);
         stylesInit(css, this);
@@ -173,7 +170,9 @@ export class TaskController {
         if (value === 'off') { // Reset limit
             return -1;
         };
-        return parseInt(value || defaultLimit) || defaultLimit;
+        if (value && parseInt(value) > 0)
+            return parseInt(value);
+        return 0;
     }
 
     providerInfo() {
@@ -190,6 +189,7 @@ export class TaskController {
         const config = await this.config('ui.pane.', true);
         let conf = {
             expanded: config['tasks.expanded'] == 'off'? false: true,
+            limit: this.readLimit(config['tasks.limit']),
             left: config.left,
             right: config.right,
             pins: [],
@@ -507,8 +507,8 @@ export class TaskController {
             };
         });
         info.tasks = sortTasks(info, sortMode);
-        if (this.tasksLimit > 0) { // Limit number of tasks in output
-            info.tasks = info.tasks.slice(0, this.tasksLimit);
+        if (this.panesConfig.limit > 0) { // Limit number of tasks in output
+            info.tasks = info.tasks.slice(0, this.panesConfig.limit);
         };
         // console.log('Precedence:', info.precedence);
         info.tasks.forEach((task) => {

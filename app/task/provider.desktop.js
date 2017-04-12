@@ -90,6 +90,8 @@ export class TaskProvider {
             "hidden": true,
         };
         conf._default = 'dock';
+        if (conf.limit === 0)
+            conf.limit = 100;
         return conf;
     }
 

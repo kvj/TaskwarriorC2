@@ -73,6 +73,8 @@ export class TaskProvider {
         // TODO: only do that for phones
         conf._default = 'hidden';
         conf._modes.dock = false;
+        if (conf.limit === 0)
+            conf.limit = 25;
         return conf;
     }
 
