@@ -17,6 +17,7 @@ import {
   BackAndroid,
   Dimensions,
   RefreshControl,
+  Linking,
 } from 'react-native';
 import * as widget from './widget';
 import * as common from './cmp.common';
@@ -53,6 +54,15 @@ export class AppCmp extends React.Component {
     calcLayoutChange(winSize) {
         const {onLayoutChange} = this.props;
         if (onLayoutChange) onLayoutChange(calculateLayout(winSize));
+    }
+
+    componentDidMount() {
+        const {onExternalUri} = this.props;
+        Linking.getInitialURL().then((url) => {
+            if (url && onExternalUri) { // Handle
+                onExternalUri(url);
+            };
+        });
     }
 
     render() {
@@ -794,7 +804,7 @@ export class MainCmp extends React.Component {
         const {pager} = this.refs;
         pages.forEach((item, idx) => {
             if (item.key == page) { // Found
-                pager.setPage(idx);
+                pager.setPageWithoutAnimation(idx);
             };
         })
     }

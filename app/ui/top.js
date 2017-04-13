@@ -444,6 +444,29 @@ export class AppPane extends React.Component {
         return false;
     }
 
+    onExternalUri(uri) {
+        const parts = /([a-z\+]+):\/\/([a-f0-9\-]+)\/(.+)/.exec(uri);
+        if (!parts) { // Invalid link
+            return false;
+        };
+        const info = {
+            scheme: parts[1],
+            type: parts[1].substr(3),
+            id: parts[2],
+            path: parts[3],
+            parts: parts[3].split('/').map((part) => decodeURIComponent(part))
+        };
+        console.log('URL:', info);
+        if (info.type == 'tasks') { // Open page
+            this.showPage({
+                report: info.parts[0],
+                filter: info.parts[1] || '',
+                type: 'list',
+                silent: true,
+            });
+        };
+    }
+
     render() {
         if (!this.state) return (
             <cmp.AppCmp />
@@ -472,6 +495,7 @@ export class AppPane extends React.Component {
         }
         return (
             <cmp.AppCmp
+                onExternalUri={this.onExternalUri.bind(this)}
                 onLayoutChange={this.onLayoutChange.bind(this)}
             >
                 <ToolbarPane

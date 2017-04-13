@@ -224,6 +224,7 @@ public class TwModule extends ReactContextBaseJavaModule implements AccountContr
     @ReactMethod
     public void openProfile(String id) {
         Intent intent = new Intent(controller.context(), MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(App.KEY_ACCOUNT, id);
         getCurrentActivity().startActivity(intent);
     }

@@ -45,11 +45,25 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:mimeType="*/*" android:scheme="file" android:pathPattern=".*\\.taskw\\.zip"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tw+tasks" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.facebook.react.devsupport.DevSettingsActivity"
             tools:remove="${excludeSystemAlertWindowPermission}"/>
-
+        <activity
+                android:label="Create shortcut"
+                android:name=".ShortcutActivity"
+                android:theme="@style/Theme.AppCompat.Light.Dialog.Alert">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <receiver
                 android:name=".controller.data.SyncIntentReceiver"
                 android:enabled="true"

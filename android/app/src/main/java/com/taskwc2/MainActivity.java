@@ -86,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
     private void step2() {
         if (handleRestoreBackup(getIntent())) // Handle restore backup intent
             return;
+        if (handleExternalLink(getIntent())) // External link check
+            return;
         form.add(new TransientAdapter<>(new StringBundleAdapter(), controller.defaultAccount()), App.KEY_ACCOUNT);
         form.load(this, null);
         AccountController acc = controller.accountController(form, true);
@@ -112,6 +114,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private boolean handleExternalLink(Intent intent) {
+        if (null == intent || null == intent.getData())
+            return false;
+        if (!intent.getData().getScheme().startsWith("tw+"))
+            return false;
+        AccountController acc = controller.accountController(intent.getData().getAuthority(), false);
+        if (null == acc)
+            return false;
+        step3(acc);
+        return true;
+    }
+
     private boolean handleRestoreBackup(Intent intent) {
         if (null == intent) return false;
         Uri backupUri = null;
@@ -121,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             backupUri = intent.getData();
         }
-        if (null == backupUri) return false;
+        if (null == backupUri || !"file".equals(backupUri.getScheme())) return false;
         final String finalBackupUri = backupUri.toString();
         Dialogs.questionDialog(this, "Restore Profile from backup?", null, new Dialogs.Callback<Integer>() {
             @Override
@@ -133,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
                         MainActivity.this.finish();
                         if (null == result) return;
                         Intent intent = new Intent(MainActivity.this, AppActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra(App.KEY_ACCOUNT, result);
                         MainActivity.this.startActivityForResult(intent, App.MAIN_ACTIVITY_REQUEST);
                     }
@@ -161,7 +176,10 @@ public class MainActivity extends AppCompatActivity {
     static void openForAccount(Activity activity, AccountController acc, Intent original) {
         activity.finish();
         Intent intent = new Intent(activity, AppActivity.class);
+        intent.setAction(Intent.ACTION_VIEW);
         intent.putExtra(App.KEY_ACCOUNT, acc.id());
+        if (null != original && null != original.getData())
+            intent.setData(original.getData());
         activity.startActivityForResult(intent, App.MAIN_ACTIVITY_REQUEST);
     }
 }
