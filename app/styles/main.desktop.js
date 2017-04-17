@@ -229,7 +229,7 @@ export const init = (config) => {
         },
 
         annotation_line: {
-            marginLeft: 15,
+            marginLeft: 20,
             alignSelf: 'center',
         },
 

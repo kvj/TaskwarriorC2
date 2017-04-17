@@ -9,6 +9,7 @@ class Task extends widget.DnD {
         this.dropTypes.push('tw/tag', 'tw/project', 'tw/task', 'tw/date');
         this.state = {
             dependsVisible: false,
+            collapsed: true,
         };
     }
 
@@ -19,6 +20,12 @@ class Task extends widget.DnD {
     toggleDepends() {
         this.setState({
             dependsVisible: !this.state.dependsVisible,
+        });
+    }
+
+    toggleExpand() {
+        this.setState({
+            collapsed: !this.state.collapsed,
         });
     }
 
@@ -41,10 +48,9 @@ class Task extends widget.DnD {
             expanded,
             layout,
         } = this.props;
-        const {dragTarget, dependsVisible} = this.state;
+        const {dragTarget, dependsVisible, collapsed} = this.state;
         let desc_field = 'description';
         let multiline = [];
-        let multilineBtn = [];
         const fields = cols.map((item, idx) => {
             if (item.field == 'description') { // Separator
                 desc_field = item.full;
@@ -52,18 +58,19 @@ class Task extends widget.DnD {
             }
             if (item.multiline) { // Render as multiline field
                 const lines = task[`${item.full}_lines`];
-                multilineBtn.push(
-                    <widget.IconBtn
-                        icon="pencil"
-                        key={`${item.full}-btn`}
-                        onClick={(e) => {
-                            onMultiEdit(item.field, task[item.field], e);
-                        }}
-                        title={item.label}
-                    />
-                );
                 const _lines = lines.map((l, lidx) => {
-                    let editBtn = null;
+                    let editBtn;
+                    if (lidx == lines.length-1) { // Show on last button
+                        editBtn = (
+                            <widget.IconBtn
+                                icon="pencil"
+                                onClick={(e) => {
+                                    onMultiEdit(item.field, task[item.field], e);
+                                }}
+                                title={item.label}
+                            />
+                        );
+                    };
                     return (
                         <widget.Div
                             style={_l(styles.hflex, styles.annotation_line)}
@@ -75,6 +82,7 @@ class Task extends widget.DnD {
                             >
                                 {l}
                             </widget.Text>
+                            {editBtn}
                         </widget.Div>
                     );
                 });
@@ -143,8 +151,33 @@ class Task extends widget.DnD {
             });
         };
         let annotations = null;
-        if (task.description_ann) { // Have list
+        let collapseBtn;
+        if (task.description_ann && expanded) { // Have list
+            let linesTotal = 0;
+            task.description_ann.forEach((item) => {
+                const text = item.text || '';
+                const lines = text.split('\n');
+                linesTotal += lines.length;
+            });
+            const collapsable = linesTotal > 3;
+            if (collapsable) { // Render button
+                const icon = collapsed? 'expand': 'compress';
+                collapseBtn = (
+                    <widget.IconBtn
+                        icon={icon}
+                        onClick={(e) => {
+                            this.toggleExpand();
+                        }}
+                        title="Toggle annotations collapse/expand"
+                    />
+                );
+            };
             annotations = task.description_ann.map((item, idx) => {
+                let text = item.text || '';
+                const lines = text.split('\n');
+                if (collapsable && collapsed && lines.length>1) { // Show only top line
+                    text = lines[0]+'...';
+                };
                 return (
                     <widget.Div
                         style={_l(styles.hflex, styles.annotation_line)}
@@ -158,7 +191,7 @@ class Task extends widget.DnD {
                                 onAnnModify(item.origin, e);
                             }}
                         >
-                            {item.text}
+                            {text}
                         </widget.Text>
                         <widget.IconMenu style={style}>
                             <widget.IconBtn
@@ -267,8 +300,8 @@ class Task extends widget.DnD {
                             }}
                             title={running? "Stop task": "Start task"}
                         />
-                        {multilineBtn}
                     </widget.IconMenu>
+                    {collapseBtn}
                 </widget.Div>
                 {expandedPart}
             </widget.Div>
