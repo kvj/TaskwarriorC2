@@ -412,7 +412,7 @@ export class CalendarItem extends DnD {
             <Text
                 style={style}
                 onDrag={(e) => {
-                    return ['tw/date', onDrag(value, e.meta), value];
+                    return ['tw/date', onDrag(value, e.meta), onDrag(value, e.meta)];
                 }}
                 onDragEnter={this.onDragStart}
                 onDragLeave={this.onDragFinish}
