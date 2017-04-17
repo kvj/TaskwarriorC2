@@ -232,6 +232,12 @@ class Task extends widget.DnD {
                         onDrag={(e) => {
                             return ['tw/task', task.uuid, task.description];
                         }}
+                        onClick={(e) => {
+                            if (e.meta) { // Start annotation add
+                                e.stop();
+                                onAnnAdd(e);
+                            };
+                        }}
                         onEdit={(e) => {
                             onClick(e, task.description);
                         }}
@@ -308,7 +314,7 @@ export class TaskPageCmp extends React.Component {
             this.props.onDone(item);
         };
         const onAnnAdd = (e) => {
-            onEdit(item, 'annotate', '');
+            onEdit(item, 'annotate', '', false, true);
         };
         const onDelete = (e) => {
             onEdit(item, 'delete', '', true);
@@ -317,7 +323,7 @@ export class TaskPageCmp extends React.Component {
             onEdit(item, 'denotate', text, true);
         };
         const onAnnModify = (text, e) => {
-            onEdit(item, 'reannotate', text);
+            onEdit(item, 'reannotate', text, false, true);
         };
         const onClick = (e, data, cmd='modify') => {
             if (e.meta) {

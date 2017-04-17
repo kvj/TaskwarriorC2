@@ -127,8 +127,7 @@ export class AppPane extends React.Component {
             cmd = 'annotate';
         };
         if (ctx.multiline) { // Multiline mode
-            input = `"${cmd}${input.split('\n').join(this.props.controller.multilineSep)}"`;
-            cmd = 'modify';
+            input = input.split('\n').join(this.props.controller.multilineSep);
         };
         return smooth(async () => {
             return await this.props.controller.cmd(cmd, input, ctx.tasks);
