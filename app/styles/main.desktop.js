@@ -79,7 +79,8 @@ export const init = (config) => {
             backgroundColor: _layers.l2.bg,
             color: _layers.l2.fg,
             fontFamily: _fontFamily,
-            minWidth: 150,
+            minWidth: 130,
+            width: 130,
             borderLeft: `4px solid ${_layers.l2.br}`,
         },
         multiline: {
