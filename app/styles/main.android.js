@@ -9,7 +9,7 @@ export let styles = {};
 
 export const init = (config) => {
     const modes = ['normal', 'compact', 'tiny']
-    let mode = modes.includes(config.compact)? config.compact: 'normal'; // normal, compact, tiny
+    let mode = modes.includes(config.compact)? config.compact: 'compact'; // normal, compact, tiny
     const iconSize = () => {
         return {
             normal: 32,

@@ -313,6 +313,8 @@ export class CalendarItem extends React.Component {
         return (
             <Text
                 style={style}
+                numberOfLines="1"
+                ellipsizeMode="clip"
                 onClick={onClick}
             >
                 {children}
