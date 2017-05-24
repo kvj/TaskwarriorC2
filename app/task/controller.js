@@ -144,7 +144,7 @@ export class TaskController {
         this.provider = provider;
         await this.setupSync();
         this.scheduleSync();
-        let conf = await this.config(['default.command', 'due', 'ui.multiple', 'ui.multiline.separator']);
+        let conf = await this.config(['default.command', 'due', 'ui.multiline', 'ui.multiline.separator']);
         this.dueDays = parseInt(conf['due']) || 7;
         this.defaultCmd = conf['default.command'] || 'next';
         this.panesConfig = await this.loadPanesConfig();
@@ -158,6 +158,7 @@ export class TaskController {
         const css = await this.config('ui.style.', true);
         styleInit(css);
         stylesInit(css, this);
+        this.cssConfig = css;
         this.calendarConfig = await this.loadCalendar();
         const reportsConf = (await this.config('ui.reports'))['ui.reports'];
         if (reportsConf) {
@@ -198,6 +199,16 @@ export class TaskController {
             projects: config.projects || 'scroll',
             reports: config.reports || 'scroll',
             contexts: config.contexts || 'compact',
+            popup: {
+                enabled: config.popup == 'on',
+                active: config['popup.active'],
+                x: config['popup.x'],
+                y: config['popup.y'],
+                width: config['popup.w'],
+                height: config['popup.h'],
+                corner: config['popup.corner'],
+                screen: config['popup.screen'],
+            },
         };
         const pageParser = (item) => {
             let report = item.trim();
@@ -404,6 +415,27 @@ export class TaskController {
             return undefined;
         }
         return result;
+    }
+
+    async filterSimple(report) {
+        const info = await this.reportInfo(report);
+        if (!info) {
+            this.err('Invalid input');
+            return undefined;
+        }
+        let cmd = [];
+        if (info.context) {
+            cmd.push(`(${info.context})`)
+        }
+        if (info.filter) {
+            cmd.push(`(${info.filter})`);
+        }
+        const expResult = await this.exp(cmd);
+        if (!expResult) {
+            return undefined;
+        };
+        info.tasks = expResult;
+        return info.tasks;
     }
 
     async filter(report, filter, info, sortMode='list') {
@@ -856,5 +888,16 @@ export class TaskController {
             result.push(week);
         } while (dt.getMonth() == m);
         return result;
+    }
+
+    popupEnabled() {
+        return this.panesConfig.popup.enabled || false;
+    }
+
+    async makePopupData() {
+        const active = await this.filterSimple(this.panesConfig.popup.active || 'active');
+        return {
+            active: active.length > 0,
+        }
     }
 }

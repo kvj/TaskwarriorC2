@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="./desktop/vendor/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet" href="./desktop/style.css" />
   </head>
-  <body id="main-body">
+  <body id="popup-body">
     <div id="app">
       <div class="loading">
         <img src="./desktop/res/icon.png"/>
@@ -12,7 +12,8 @@
     </div>
   </body>
   <script>
-    var index = require('./.desktop/index');
-    index.start();
+    var app = require('./.desktop/popup');
+    app.start();
   </script>
 </html>
+

@@ -3,6 +3,8 @@ import {styles, _l} from '../styles/main';
 import * as widget from './widget';
 import * as common from './cmp.common';
 
+const {ipcRenderer} = require('electron');
+
 /*
 class TaskTag extends DnD {
 
@@ -556,6 +558,14 @@ export class MainCmp extends React.Component {
         this.setState({
             input: undefined,
         });
+    }
+
+    showPopup(css, data, config) {
+        ipcRenderer.send('popup-open', css, data, config);
+    }
+
+    updatePopup(data) {
+        ipcRenderer.send('popup-update', data);
     }
 
     async onInputDone(input, e) {

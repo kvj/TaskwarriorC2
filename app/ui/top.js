@@ -509,6 +509,7 @@ export class AppPane extends React.Component {
                 />
                 <CenterPane>
                     <MainPane
+                        controller={controller}
                         navigation={panes.navigation}
                         panes={panes}
                         pages={pages}
@@ -856,6 +857,25 @@ class MainPane extends React.Component {
 
     showProfiles(...args) {
         return this.refs.cmp.showProfiles.apply(this.refs.cmp, args);
+    }
+
+    async loadActive() {
+        const {controller} = this.props;
+        return await controller.makePopupData();
+    }
+
+    componentDidMount() {
+        const {controller} = this.props;
+        const {cmp} = this.refs;
+        if (!cmp.showPopup || !controller.popupEnabled()) return; // No popup on this platform
+        controller.events.on('change', () => {
+            smooth(async () => {
+                cmp.updatePopup(await this.loadActive());
+            });
+        });
+        smooth(async () => {
+            cmp.showPopup(controller.cssConfig, await this.loadActive(), controller.panesConfig.popup);
+        });
     }
 
     render() {

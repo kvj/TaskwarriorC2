@@ -313,7 +313,19 @@ export const init = (config) => {
             backgroundColor: _layers.l2.bg,
             color: _layers.l2.fg,
         },
-
+        popup: {
+            width: "100%",
+            position: "relative",
+        },
+        popup_move: {
+            width: 20,
+            height: 20,
+            bottom: 0,
+            right: 0,
+            position: "absolute",
+            WebkitAppRegion: "drag",
+            cursor: "move",
+        },
     };
     makeCommon(styles);
     for (var key in _styles) {
